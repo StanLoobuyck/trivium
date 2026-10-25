@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Ollama for Lecture Transcriber's term fix suggestions (termfix.py). Like be.lecture.models: a LaunchDaemon
+     so it starts at boot without a login, running as the user (models stay in ~/.ollama). Replaces brew's
+     LaunchAgent (`brew services stop ollama` first: two servers can't share port 11434). Install: mac/README.md. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>be.lecture.ollama</string>
+  <key>UserName</key>
+  <string>__USER__</string>
+  <key>GroupName</key>
+  <string>staff</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/opt/ollama/bin/ollama</string>
+    <string>serve</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>__HOME__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>__HOME__</string>
+    <!-- localhost only: the laptop reaches it through the model server (token) -->
+    <key>OLLAMA_HOST</key>
+    <string>127.0.0.1:11434</string>
+    <!-- same as brew's agent -->
+    <key>OLLAMA_FLASH_ATTENTION</key>
+    <string>1</string>
+    <key>OLLAMA_KV_CACHE_TYPE</key>
+    <string>q8_0</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+  <key>StandardOutPath</key>
+  <string>__HOME__/lecture-transcriber/logs/ollama.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/lecture-transcriber/logs/ollama.log</string>
+</dict>
+</plist>

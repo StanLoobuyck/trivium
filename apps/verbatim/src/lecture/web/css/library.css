@@ -1,0 +1,49 @@
+/* Library (home): header with totals + tools, in-progress rows, the lecture table. */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.mono { font-family: var(--mono); font-size: 13px; }
+.nowrap { white-space: nowrap; }
+h1 { font-size: 28px; font-weight: 600; letter-spacing: -.02em; }
+.sec-title { font-size: 15px; font-weight: 600; margin: 0 0 12px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+
+.lib-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.lib-head p { margin-top: 4px; }
+.lib-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lib-tools input[type=search] { width: 280px; max-width: 100%; height: 40px; border-color: var(--border-strong); }
+.lib-tools select { width: auto; height: 40px; }
+.lib-tools .btn { height: 40px; }
+
+/* in progress */
+.prog-row { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.prog-row + .prog-row { border-top: 1px solid var(--border-soft); }
+.prog-top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 20px; }
+.prog-what { flex: 1 1 240px; min-width: 0; }
+.prog-title { font-weight: 500; }
+.prog-sub { color: var(--muted); font-size: 13px; }
+.prog-state { text-align: right; font-size: 13px; }
+.prog-actions { display: flex; gap: 6px; align-items: center; }
+.prog-bar { height: 4px; border-radius: 2px; background: var(--surface-2); overflow: hidden; }
+.prog-bar > span { display: block; height: 4px; background: var(--accent); border-radius: 2px; transition: width .4s; }
+.prog-bar > span.indet { width: 30%; animation: slide 1.4s ease-in-out infinite; }
+.prog-steps { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; color: var(--muted); }
+.prog-steps .done { color: var(--text); }
+.prog-steps .now { color: var(--text); font-weight: 600; }
+.prog-steps .skip { text-decoration: line-through; }
+
+/* lecture table */
+.table-wrap { overflow-x: auto; }
+table.lectures { width: 100%; min-width: 640px; border-collapse: collapse; }
+table.lectures th { text-align: left; font-weight: 500; font-size: 13px; color: var(--muted); padding: 12px 20px; border-bottom: 1px solid var(--border); }
+table.lectures td { padding: 14px 20px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+table.lectures tbody tr:last-child td { border-bottom: 0; }
+table.lectures tbody tr { cursor: pointer; }
+table.lectures tbody tr:hover { background: var(--surface-2); }
+table.lectures tr.dragging { opacity: .5; }
+.row-title { color: var(--text); font-weight: 500; }
+.row-title:hover { color: var(--accent-text); }
+.row-sub { color: var(--muted); font-size: 13px; }
+td.mono { padding-top: 15px; }
+td.row-menu { position: relative; width: 44px; padding: 8px 12px 8px 0; text-align: right; }
+td.row-menu .menu { top: 40px; }
+.menu.pop { position: fixed; top: 0; left: 0; right: auto; z-index: 50; text-align: left; }
+.menu.pop .block-title, .menu.pop p { text-align: left; }

@@ -1,0 +1,15 @@
+[project]
+name = "lecture-models"
+version = "0.1.0"
+description = "Model server for Lecture Transcriber on the Mac at home (mlx-whisper); see PLAN.md section 4b"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "mlx-whisper",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "httpx",
+]
+
+[tool.uv]
+package = false

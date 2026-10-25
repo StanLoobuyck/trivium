@@ -1,0 +1,194 @@
+# Lecture Transcriber — default configuration.
+#
+# Model names and free-tier limits change often. They are NOT facts:
+# run `lecture doctor` and update the values here when it reports differences.
+#
+# Personal overrides go in ~/.config/lecture-transcriber/config.yaml; that file is
+# deep-merged on top of this one, so it only needs the keys you want to change.
+
+paths:
+  jobs_dir: ~/Lectures/jobs
+  inbox_dir: ~/Lectures/inbox
+
+stt:
+  # Provider chain: the first one that works is used for a run. "mac" (the model server at home,
+  # PLAN.md 4b) is skipped when it doesn't answer; "local" when faster-whisper/CUDA isn't available.
+  providers: [mac, local, groq]
+  # Model server on the Mac at home (mac/server.py); token LECTURE_MAC_TOKEN in .env
+  mac:
+    url: http://my-mac:7862   # Tailscale MagicDNS name of the Mac
+    model: large-v3                     # or large-v3-turbo (2× faster, more errors on the 60 s test)
+    health_timeout_s: 3
+    timeout_s: 900
+    give_up_after_s: 120                # Mac drops out mid-lecture: retry ~2 min, then finish on the next provider
+  # Groq (cloud)
+  model: whisper-large-v3            # most accurate; preferred over -turbo
+  fallback_model: whisper-large-v3-turbo
+  # Local faster-whisper on the GPU (needs: uv sync --extra local)
+  local:
+    model: large-v3
+    skip_on_battery: true            # on battery: Mac/Groq first, the laptop GPU only if nothing else works
+    device: cuda
+    compute_types: [float16, int8_float16]   # tried in order (int8_float16 if VRAM is short)
+    beam_size: 5
+    temperatures: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]   # retried when a window looks like a hallucination
+    condition_on_previous_text: false  # the fix for Whisper getting stuck and copying '***' forward
+    vad_filter: false                  # Silero VAD; measured once: fixed some terms but dropped small words
+
+llm:
+  # Ordered fallback chain per task: "<provider>:<model>". Providers: claude (Claude Code `claude -p` on the
+  # Pro subscription), gemini, groq, openrouter. Pin explicit models: aliases can silently switch models.
+  tasks:
+    notes: ["claude:claude-sonnet-5-5", "gemini:gemini-3.8-flash", "groq:openai/gpt-oss-120b"]
+  # Offered in the app's Setup panel; the chosen one goes first in tasks.notes, the rest stay fallbacks.
+  # Tested 2026-10-17 on DEP les 3: Sonnet accurate; Haiku more detailed but copied a garbled slide formula.
+  notes_choices: ["claude:claude-sonnet-5-5", "claude:claude-haiku-5-5", "gemini:gemini-3.8-flash"]
+  openrouter_enabled: false
+
+notes:
+  # Notes, summary and transcript are always made; these extras are optional (Setup panel).
+  outputs:
+    exam_hints: false
+    quiz: false
+    flashcards: false
+    glossary: false
+  # When note jobs may use Claude (shared with your own Claude use): "always", or windows like "22:00-08:00".
+  schedule: always
+  tonight: "22:00-08:00"          # what "notes: tonight" in the queue/UI means
+  max_claude_calls_per_day: 10    # safety cap; jobs wait in "notes pending" when reached
+  study_pack: true                # always write outputs/study_pack.md (for manual use in a Claude Project)
+  timeout_s: 1200                 # per LLM call (a 2 h lecture is one call of several minutes)
+  max_input_tokens_per_call: 60000   # larger lectures are split into batches of whole sections
+  ts_tolerance_s: 30              # a bullet's timestamp may lie this far outside its section
+  # Phrases that mark exam hints; the notes must keep every match (the LLM may add hints, not drop them)
+  exam_hint_patterns:
+    # "je/jullie" + moet(en) + kunnen/kennen/weten in either word order; without the subject it matched
+    # technical sentences ("een processor die moet kunnen schuiven")
+    nl: ["(je|jullie) (\\w+ ){0,3}(moet|moeten) (kunnen|kennen|weten)",
+         "(moet|moeten) (je|jullie) (\\w+ ){0,3}(kunnen|kennen|weten)", "komt (zeker |zeer waarschijnlijk )?op (het|jullie) examen",
+         "examenvraag", "op het examen", "belangrijk", "let op", "onthoud (dat|dit|goed)", "typische fout", "vergeet (dat|dit) niet"]
+    en: ["on the exam", "exam question", "you (need|have) to know", "important", "remember", "watch out",
+         "common mistake", "don't forget"]
+
+limits:
+  # Groq free plan, per organization. Check console.groq.com → Settings → Limits.
+  groq_stt:
+    requests_per_minute: 20
+    requests_per_day: 2000
+    audio_seconds_per_hour: 7200
+    audio_seconds_per_day: 28800
+    max_file_mb: 25
+    min_billed_seconds: 10
+  groq_llm:
+    requests_per_day: 1000
+    tokens_per_minute: 8000
+    tokens_per_day: 200000
+  # Gemini free-tier limits are not published in a table. Read them once at
+  # https://aistudio.google.com/rate-limit and fill them in. The values below
+  # are a deliberately pessimistic assumption until then.
+  gemini:
+    requests_per_minute: 10
+    requests_per_day: 20
+
+audio:
+  # ffmpeg -af chain for the audio sent to Whisper ("" = none). Keep it gentle: no noise
+  # reduction; loudnorm is off on purpose (it lifts room noise and breaks silence detection).
+  filters: "highpass=f=80"
+  # Silence detection runs on the UNFILTERED audio with a threshold relative to the noise floor:
+  # threshold = clamp(percentile(frame level, floor_percentile) + margin_db, min_threshold_db, max_threshold_db)
+  silence:
+    frame_s: 0.05
+    min_silence_s: 0.4
+    floor_percentile: 10
+    margin_db: 8.0
+    min_threshold_db: -50.0
+    max_threshold_db: -30.0
+
+chunking:
+  target_s: 600              # Phase 2 experiment decides the default (600 vs ~150)
+  search_window_s: 30        # look for the longest silence within ± this of each target cut
+  skip_silence_over_s: 15    # silences longer than this are not sent to Whisper
+  skip_padding_s: 0.5        # audio kept on each side of a skipped silence
+  min_chunk_s: 20
+  min_region_s: 1.0          # speech islands shorter than this (between long silences) are dropped
+  hard_cut_overlap_s: 2.0    # total overlap when no silence is found near a cut
+  max_chunk_mb: 24
+  keep_chunk_audio: false    # chunk files are re-creatable from audio/full.flac
+
+slides:
+  # A line on >= this fraction of a lesson's pages (sidebar, footer) is left out of the per-slide text;
+  # it still counts once for the term list. "Lesson" = a PDF outline section ("Les 4"), else the file.
+  boilerplate_fraction: 0.4
+  boilerplate_min_pages: 4
+
+terms:
+  # Deterministic term list from the slides → Whisper prompt ("Dit is een les van …, over NAND, …").
+  max_terms: 40              # incl. course extra_terms and the lecturer
+  rare_zipf: 3.0             # wordfreq Zipf scale: rarer than this in the lecture language = candidate
+  prompt_max_tokens: 120     # term sentence budget; the previous chunk's tail fills the rest (223 max)
+
+sections:
+  # Slide ↔ transcript alignment: ~30 s windows vs slide groups (char n-gram TF-IDF), then the cheapest
+  # path. Costs are in units of (1 − relative similarity) per window.
+  window_s: 30
+  next_cost: 0.15            # moving to the next slide
+  skip_cost: 0.12            # extra per skipped slide (grows sublinearly)
+  back_cost: 1.0             # going back: needs ~1 min of evidence (a 30 s mention stays put)
+  low_confidence: 0.03       # mean margin over the runner-up below this → "slide onzeker" + review.md
+  no_slides_min_s: 300       # without slides: a section every 5–8 min, cut at the longest pause
+  no_slides_max_s: 480
+
+transcribe:
+  temperature: 0.0
+  # 2 lectures side by side: measured 2026-10-20 on the Mac ≈ 1.5× throughput (3+ is slower); the laptop GPU
+  # and Groq still take one lecture at a time (pipeline._EXCLUSIVE)
+  parallel_lectures: 2
+  previous_tail_words: 40    # words of the previous chunk passed as Whisper prompt (0 = off)
+  max_attempts: 6            # per chunk, for 5xx/network errors (exponential backoff)
+  fallback_after_attempts: 3 # switch to stt.fallback_model after this many failed attempts
+  max_wait_s: 5400           # longer waits for quota count as "daily limit reached" → stop cleanly
+  # Repair pass: Whisper sometimes gets stuck outputting only "***" for minutes of real speech
+  # (and the next windows copy it). Such stretches are re-transcribed alone in short pieces.
+  repair_piece_s: 60
+  repair_padding_s: 1.0      # audio added on each side of a repaired stretch (ownership stays exact)
+  masked_max_no_speech: 0.5  # only repair segments Whisper thinks contain speech
+  retry_below_logprob: -1.0  # garbled segments (very low confidence) are retried; kept only if better
+  gap_min_s: 5.0             # uncovered time ≥ this with speech in the silence map is retried
+
+stitch:
+  # Whole-segment matches (normalized) are removed as Whisper phantom phrases.
+  phantom_exact:
+    - "Bedankt voor het kijken"
+    - "Bedankt voor het kijken!"
+    - "Thanks for watching"
+    - "Thank you for watching"
+    - "Please subscribe"
+  # Segments starting with these are removed.
+  phantom_prefix:
+    - "Ondertiteld door de Amara.org gemeenschap"
+    - "Ondertiteling door"
+    - "Ondertiteld door"
+    - "Abonneer op"
+    - "TV GELDERLAND"
+    - "Subtitles by the Amara.org community"
+  no_speech_prob: 0.6        # flag when no_speech_prob > this AND avg_logprob < no_speech_logprob
+  no_speech_logprob: -1.0
+  compression_ratio: 2.4     # above this: collapse repetition loops and flag
+  low_confidence_logprob: -0.8
+  prompt_echo_ratio: 90      # rapidfuzz partial_ratio vs the prompt; above this → prompt echo, removed
+
+subtitles:
+  max_line_chars: 42
+  max_lines: 2
+  max_cue_s: 7.0
+  min_cue_s: 1.0
+
+termfix:
+  # After transcription the worker asks a local LLM on the Mac (Ollama via the model server, same address
+  # and token as stt.mac) for term fix suggestions; the user accepts them in the lecture's Suggestions tab.
+  # Mac or Ollama away → skipped. `lecture suggest JOB` makes them by hand.
+  enabled: true
+  model: qwen3.8:27b         # gemma4:12b: a bit fewer terms, ~2.5 instead of ~6 min per lecture hour
+  window_s: 300
+  keep_alive: 2m
+  timeout_s: 900

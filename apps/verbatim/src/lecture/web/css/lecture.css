@@ -1,0 +1,67 @@
+/* Lecture page: video + parts on the left (sticky), one document panel with tabs on the right.
+   No colored side bars: the current part / line gets a soft accent tint. */
+body[data-page="lecture"] { --topbar: 52px; }
+.bar-title { opacity: 1; pointer-events: auto; color: var(--text); font-weight: 500; }
+.bar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.bar-actions .btn { height: 34px; font-weight: 500; }
+
+.lecture-layout { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px; }
+.stage { gap: 20px; top: calc(var(--topbar) + 24px); max-height: calc(100vh - var(--topbar) - 48px); }
+.lec-head h1 { font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.25; }
+.lec-head .muted { margin-top: 6px; }
+.lec-head .made-with { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.player { border-radius: var(--radius-lg); border: 0; }
+
+.chapters { padding: 0; background: none; border: 0; }
+.chapters-head { padding: 0 10px 8px; }
+.chapters-head h4 { font-size: 15px; font-weight: 600; color: var(--text); }
+.chapter { grid-template-columns: 52px 1fr; gap: 12px; padding: 8px 10px; border-radius: 6px; color: var(--muted); font-size: 14px; }
+.chapter .t { font-family: var(--mono); font-size: 12px; padding-top: 1px; }
+.chapter:hover { background: var(--surface-2); color: var(--text); }
+.chapter.now { background: var(--accent-soft); box-shadow: none; color: var(--text); font-weight: 500; }
+.chapter.now .t { color: var(--accent-text); }
+
+.lec-doc { min-width: 0; }
+.lec-doc .tabs { top: var(--topbar); padding: 0 24px; margin: 0; height: 48px; background: var(--surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.lec-doc .tabs button { padding: 0 12px; height: 48px; font-weight: 500; }
+.lec-doc .tabs button.on { border-color: var(--text); }
+#tab-body { padding: 32px 40px 48px; }
+#tab-body > * { max-width: 720px; }
+
+/* notes as a document */
+.lec-doc .summary, .lec-doc .part { padding: 0; margin: 0 0 32px; border: 0; background: none; font-size: 15px; line-height: 1.7; }
+.doc-label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+.lec-doc .part { scroll-margin-top: calc(var(--topbar) + 60px); }
+.part-meta { font-family: var(--mono); font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; white-space: normal; }
+.part-meta .ts { margin: 0; padding: 0; background: none; font-size: 12px; }
+.part-title { font-size: 20px; font-weight: 600; letter-spacing: -.01em; line-height: 1.35; margin: 2px 0 10px; }
+.part.now .part-title { color: var(--accent-text); }
+.on-slide { padding: 0; background: none; color: var(--text-2); font-size: 15px; margin-bottom: 10px; }
+.on-slide b { color: var(--text); font-weight: 500; }
+.block-label { margin: 16px 0 4px; font-size: 13px; font-weight: 500; }
+.bullets li { margin: 6px 0; }
+.ts { background: none; padding: 0 2px; font-size: 12px; color: var(--accent-text); }
+.ts:hover { text-decoration: underline; }
+.defs div { padding-left: 0; border-left: 0; }
+.hint { border-left: 0; background: var(--hint-soft); }
+.uncertain { font-family: var(--font); }
+
+/* transcript */
+.tr-part h3 { top: calc(var(--topbar) + 48px); background: var(--surface); font-size: 15px; }
+.tr-line { grid-template-columns: 64px 1fr; padding: 3px 8px; }
+.tr-line.now { background: var(--accent-soft); box-shadow: none; }
+
+@media (max-width: 1000px) {
+  .lecture-layout { grid-template-columns: 1fr; }
+  .stage { position: static; max-height: none; }
+  #tab-body { padding: 24px 20px 40px; }
+}
+
+/* select a word in the transcript → correct it for the course (screens/lecture.js bindWordFix) */
+.word-fix { width: 340px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.word-fix .block-title { padding: 0; }
+.word-fix-row { display: grid; grid-template-columns: auto auto 1fr; gap: 8px; align-items: center; }
+.word-fix .from { text-decoration: line-through; color: var(--muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.word-fix .row-end { display: flex; justify-content: flex-end; gap: 6px; }
+.tr-hint { margin: -6px 0 12px; }
+.tr-line span::selection { background: var(--accent-soft); }

@@ -1,0 +1,60 @@
+/* Design tokens: the only place for colors, fonts, radii. A restyle = edit this file.
+   Look (approved 2026-10-20, design canvas in PLAN.md 9c): calm study app, warm off-white, near-black text,
+   one warm orange accent (DMS ember-mono, user 2026-10-26), Geist + Geist Mono. Light + dark (system, or the toggle via html[data-theme]). */
+@font-face { font-family: "Geist"; src: url("/static/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("/static/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+
+:root {
+  --font: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --sidebar: 264px;
+
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --surface-2: #f3f2ef;
+  --nav-on: #efeeea;
+  --border: #e8e7e3;
+  --border-soft: #f0efeb;
+  --border-strong: #dcdbd6;
+  --text: #1f1f1d;
+  --text-2: #4a4945;
+  --muted: #6b6a66;
+  --primary: #1f1f1d;        /* main buttons: near-black, not the accent */
+  --primary-ink: #fafaf8;
+  --accent: #a85a2e;         /* links, current item, progress */
+  --accent-ink: #ffffff;
+  --accent-text: #9e5229;
+  --accent-soft: #f8ede4;
+  --logo-accent: #b96a3d;    /* only the bars in the Verbatim mark (DMS orange; #ea9a5d in dark) */
+  --ok: #2e7d4f;
+  --ok-soft: #e7f2eb;
+  --warn: #7a6400;           /* yellow, kept apart from the orange accent */
+  --warn-soft: #f7f0d2;
+  --bad: #b42318;
+  --bad-soft: #fbeae8;
+  --hint-soft: #f7f0d2;
+  --shadow: none;
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, .10);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --surface: #1d1d1b; --surface-2: #262624; --nav-on: #2a2a27; --border: #2e2e2b;
+    --border-soft: #252523; --border-strong: #3a3a37; --text: #ecebe7; --text-2: #c9c8c3; --muted: #a3a29d;
+    --primary: #ecebe7; --primary-ink: #161615; --accent: #ea9a5d; --accent-ink: #2a1405; --accent-text: #ea9a5d;
+    --accent-soft: #33241a; --logo-accent: #ea9a5d; --ok: #5dbb85; --ok-soft: #17271d; --warn: #e8c547; --warn-soft: #2a2611;
+    --bad: #f0786d; --bad-soft: #321b19; --hint-soft: #2a2611; --shadow-lg: 0 12px 32px rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161615; --surface: #1d1d1b; --surface-2: #262624; --nav-on: #2a2a27; --border: #2e2e2b;
+  --border-soft: #252523; --border-strong: #3a3a37; --text: #ecebe7; --text-2: #c9c8c3; --muted: #a3a29d;
+  --primary: #ecebe7; --primary-ink: #161615; --accent: #ea9a5d; --accent-ink: #2a1405; --accent-text: #ea9a5d;
+  --accent-soft: #33241a; --logo-accent: #ea9a5d; --ok: #5dbb85; --ok-soft: #17271d; --warn: #e8c547; --warn-soft: #2a2611;
+  --bad: #f0786d; --bad-soft: #321b19; --hint-soft: #2a2611; --shadow-lg: 0 12px 32px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}

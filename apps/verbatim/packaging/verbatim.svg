@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Launcher icon (DMS / app menu): the Verbatim mark on a dark rounded tile. -->
+  <rect width="48" height="48" rx="11" fill="#161615"/>
+  <g transform="translate(7.5 7.5) scale(0.6875)">
+    <rect x="7" y="7" width="34" height="34" rx="10" fill="none" stroke="#ecebe7" stroke-width="4"/>
+    <path d="M15 21V27M21 16V32M27 18V30M33 22V26" fill="none" stroke="#ea9a5d" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
