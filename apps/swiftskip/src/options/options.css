@@ -1,98 +1,16 @@
-body {
-  background: var(--bg);
-  font-size: 15px;
+/* Settings page: sidebar and grouped lists from packages/design, the same as Inhaal's settings. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--space-5);
 }
 
-.page {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 32px 16px 64px;
-}
-
-.section-nav {
-  display: none;
-}
-
-/* Wide: a fixed list of sections beside the settings, like Inhaal's sidebar. */
-@media (min-width: 900px) {
-  .page {
-    max-width: 960px;
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    column-gap: 32px;
-    align-items: start;
-  }
-
-  .page-header {
-    grid-column: 1 / -1;
-  }
-
-  .section-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    position: sticky;
-    top: 16px;
-    grid-row: 2 / span 6;
-    padding: 8px;
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-  }
-
-  .section-nav a {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0 12px;
-    border-radius: var(--radius);
-    color: var(--text);
-    text-decoration: none;
-  }
-
-  .section-nav a:hover {
-    background: var(--bg);
-  }
-
-  .page > .card {
-    grid-column: 2;
-  }
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 34px;
-  font-weight: 600;
-}
-
-h2 {
-  margin: 0 0 8px;
-  font-size: 17px;
-  font-weight: 600;
-}
-
+h2,
 h3 {
-  margin: 20px 0 4px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.subtle {
-  margin: 0;
-  color: var(--muted);
+  font-weight: var(--weight-regular);
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: none;
 }
 
@@ -100,182 +18,146 @@ a:hover {
   text-decoration: underline;
 }
 
-.card {
-  margin-bottom: 16px;
-  padding: 20px 22px;
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow);
+.sidebar a:hover {
+  text-decoration: none;
 }
 
-.card-head {
+.page {
+  padding-top: var(--space-6);
+}
+
+.row .label {
+  white-space: normal;
+}
+
+.row-text {
+  font-size: var(--text-sub);
+}
+
+.row .segmented,
+.row .btn {
+  flex: none;
+}
+
+.section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
-.card-intro {
-  margin-top: 2px;
-  line-height: 1.6;
+.section-head .group-title {
+  padding-bottom: 0;
 }
 
-.card-intro kbd {
-  vertical-align: 1px;
+.section-intro {
+  padding: 0 var(--space-4) var(--space-2);
 }
 
-.btn-small {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 13px;
-  font-weight: 500;
+.notice {
+  margin-bottom: var(--space-3);
 }
 
-/* ─── Settings rows ─────────────────────────────────────────────────────── */
-
-.setting {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 14px 0;
-  border-top: 1px solid var(--border);
-}
-
-h2 + .setting {
-  margin-top: 10px;
-}
-
-.setting-label {
-  font-weight: 500;
-}
-
-.setting-desc {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.setting-desc .link {
-  margin-left: 4px;
-  font-size: 13px;
+#shortcut-groups .group-title {
+  padding-top: var(--space-4);
 }
 
 /* ─── Shortcuts ─────────────────────────────────────────────────────────── */
 
-.notice {
-  margin: 14px 0 0;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  font-size: 13px;
-}
-
 .shortcut {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  min-height: 42px;
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-4);
+  min-height: var(--row-min);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-4);
+  font-size: var(--text-sub);
 }
 
-.shortcut:last-child {
-  border-bottom: 0;
+.shortcut + .shortcut::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto var(--space-4);
+  border-top: var(--hairline) solid var(--separator);
 }
 
 .shortcut-keys {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1);
 }
 
 .binding {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  height: 30px;
-  padding: 0 6px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
+  gap: 2px;
+  min-height: 32px;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-row);
+  background: none;
   cursor: pointer;
 }
 
 .binding:hover {
-  border-color: var(--border);
-  background: var(--surface);
+  background: var(--fill);
 }
 
 .binding .plus {
-  color: var(--faint);
-  font-size: 11px;
+  color: var(--text-2);
+  font-size: var(--text-micro);
 }
 
 .binding.is-recording {
   min-width: 108px;
   justify-content: center;
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
+  background: var(--accent-tint);
+  color: var(--accent-text);
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
 }
 
 .binding-empty {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.add-binding {
-  width: 26px;
-  height: 26px;
-}
-
-details.jump {
-  margin-top: 4px;
+  color: var(--text-2);
+  font-size: var(--text-label);
 }
 
 details.jump summary {
-  padding: 10px 0;
-  color: var(--muted);
-  font-size: 13px;
+  min-height: var(--row-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-row);
+  background: var(--card);
+  color: var(--text);
+  font-size: var(--text-sub);
   cursor: pointer;
 }
 
-details.jump summary:hover {
-  color: var(--text);
+details.jump[open] summary {
+  margin-bottom: var(--space-2);
 }
 
-/* ─── Sites ─────────────────────────────────────────────────────────────── */
+/* ─── Sites + about ─────────────────────────────────────────────────────── */
 
-.site-list {
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.site-list li {
-  display: flex;
-  align-items: center;
+.site {
   justify-content: space-between;
-  min-height: 42px;
-  border-top: 1px solid var(--border);
+  font-size: var(--text-sub);
 }
 
-.site-list .builtin {
-  color: var(--muted);
-  font-size: 13px;
+.site .builtin {
+  color: var(--text-2);
+  font-size: var(--text-label);
 }
 
-/* ─── About ─────────────────────────────────────────────────────────────── */
-
-.about .subtle {
-  line-height: 1.6;
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .links {
   display: flex;
-  gap: 18px;
-  margin: 12px 0 0;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--text-sub);
 }

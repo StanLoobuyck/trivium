@@ -11,7 +11,7 @@ import { setCourseArchived } from "../shared/actions.js";
 let moveMedia = true;
 
 export async function renderArchive() {
-  view.innerHTML = `<div><h1>${t("arch_title")}</h1><p class="muted" style="margin-top:4px">${t("arch_sub")}</p></div>
+  view.innerHTML = `<div><h1 class="large-title">${t("arch_title")}</h1><p class="muted" style="margin-top:4px">${t("arch_sub")}</p></div>
     <section id="arch-progress"></section><section id="arch-body"></section>
     <p class="muted small">${t("arch_originals")}</p>`;
   await refresh();
@@ -31,12 +31,12 @@ function drawProgress(p) {
   let html = "";
   if (p.running) {
     const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
-    html = `<div class="panel arch-prog"><div>${esc(t(p.action === "move" ? "arch_moving" : "arch_restoring", { done: p.done, total: p.total, label: p.label }))}</div>
+    html = `<div class="card flat arch-prog"><div>${esc(t(p.action === "move" ? "arch_moving" : "arch_restoring", { done: p.done, total: p.total, label: p.label }))}</div>
       <div class="prog-bar"><span style="width:${pct}%"></span></div></div>`;
   } else if (p.error) {
     html = `<div class="job-error">${esc(t("arch_error", { error: p.error }))}</div>`;
   } else if (p.finished) {
-    html = `<div class="panel arch-prog">${esc(p.action === "move" ? t("arch_done", { size: fmtSize(p.bytes || 0) }) : t("arch_restored"))}</div>`;
+    html = `<div class="card flat arch-prog">${esc(p.action === "move" ? t("arch_done", { size: fmtSize(p.bytes || 0) }) : t("arch_restored"))}</div>`;
   }
   paint($("#arch-progress"), html);
 }
@@ -44,9 +44,9 @@ function drawProgress(p) {
 function mediaLine(lectures) {
   const local = lectures.reduce((a, l) => a + l.local_bytes, 0);
   const onMac = lectures.some((l) => l.on_mac);
-  if (onMac && !local) return `<span class="dot off"></span>${t("arch_media_mac")}`;
-  if (local) return `<span class="dot"></span>${t("arch_media_local", { size: fmtSize(local) })}`;
-  return `<span class="dot off"></span>${t("arch_media_none")}`;
+  if (onMac && !local) return `<span class="status-dot off"></span>${t("arch_media_mac")}`;
+  if (local) return `<span class="status-dot"></span>${t("arch_media_local", { size: fmtSize(local) })}`;
+  return `<span class="status-dot off"></span>${t("arch_media_none")}`;
 }
 
 function courseHtml(c, busy) {
@@ -59,9 +59,9 @@ function courseHtml(c, busy) {
           · ${c.archived ? t("archived") : t("arch_in_list")}</div></div>
       <div class="arch-media muted small">${mediaLine(c.lectures)}</div>
       <div class="arch-actions">
-        <button class="btn small" data-arch="${esc(c.id)}" data-to="${c.archived ? "0" : "1"}" ${busy ? "disabled" : ""}>${c.archived ? t("arch_course_back") : t("arch_course")}</button>
-        ${local ? `<button class="btn small" data-move="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_move_media")}</button>` : ""}
-        ${onMac ? `<button class="btn small" data-restore="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_restore")}</button>` : ""}
+        <button class="btn btn-small" data-arch="${esc(c.id)}" data-to="${c.archived ? "0" : "1"}" ${busy ? "disabled" : ""}>${c.archived ? t("arch_course_back") : t("arch_course")}</button>
+        ${local ? `<button class="btn btn-small" data-move="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_move_media")}</button>` : ""}
+        ${onMac ? `<button class="btn btn-small" data-restore="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_restore")}</button>` : ""}
       </div>
     </div>
     ${c.lectures.length ? `<ul class="arch-lectures">${c.lectures.sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((l) => `
@@ -81,11 +81,11 @@ function drawBody(sem, busy) {
         <h2>${esc(fmtSem(s.name))}${s.current ? ` <span class="muted" style="font-weight:400">· ${t("arch_current")}</span>` : ""}</h2>
         <div class="arch-actions">
           ${active.length ? `<label class="arch-cb"><input type="checkbox" data-media-cb ${moveMedia ? "checked" : ""}> ${t("arch_move_media_cb")}</label>
-            <button class="btn small" data-arch-sem="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_sem")}</button>` : ""}
-          ${archived.length ? `<button class="btn small ghost" data-back="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_back")}</button>` : ""}
+            <button class="btn btn-small" data-arch-sem="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_sem")}</button>` : ""}
+          ${archived.length ? `<button class="btn btn-small btn-plain" data-back="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_back")}</button>` : ""}
         </div>
       </div>
-      <div class="panel">${s.courses.map((c) => courseHtml(c, busy)).join("")}</div>
+      <div class="card flat">${s.courses.map((c) => courseHtml(c, busy)).join("")}</div>
     </section>`;
   }).join("") : `<div class="empty-line">${t("arch_empty")}</div>`;
   if (!paint($("#arch-body"), html)) return;

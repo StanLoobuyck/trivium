@@ -10,8 +10,9 @@ export const S = {
 };
 export const isArchived = (courseId) => !!S.sem?.courses[courseId]?.archived;
 
-const COLORS = ["#3b82f6", "#14b8a6", "#e11d48", "#a3a3a3", "#8b5cf6", "#22c55e", "#eab308", "#06b6d4"];  // no orange: that is the accent
-export const courseColor = (id) => COLORS[Math.max(0, S.courses.findIndex((c) => c.id === id)) % COLORS.length];
+// The palette of packages/design, in the order Inhaal hands colours out: data-course="<key>" colours the .dot.
+const PALETTE = ["blue", "orange", "green", "purple", "pink", "indigo", "yellow", "red"];
+export const courseKey = (id) => PALETTE[Math.max(0, S.courses.findIndex((c) => c.id === id)) % PALETTE.length];
 export const reason = (code) => t("r_" + code, { plan: S.setup?.claude_plan || "" }).replace("  ", " ");
 export const courseName = (id) => (S.courses.find((c) => c.id === id) || {}).name || id;
 export const courseLang = (id) => (S.courses.find((c) => c.id === id) || {}).language || "nl";

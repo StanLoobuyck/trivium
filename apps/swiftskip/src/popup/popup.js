@@ -10,6 +10,7 @@ import { isBuiltInSite, originPattern, patternHost } from "../shared/sites.js";
 import { loadSettings, saveSettings } from "../shared/storage.js";
 import { errorText, localizePage, phaseLabel, setLanguage, t } from "../shared/i18n.js";
 import { radioGroup } from "../shared/radio-group.js";
+import { getInhaalLink } from "../background/inhaal.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -69,6 +70,7 @@ function renderLecture() {
     $("lecture-hint").textContent = t("noLectureHint");
   }
   $("lecture-hint").hidden = available;
+  $("site-off").closest("section").hidden = siteActive && !SUPPORTS_DOWNLOAD;
 
   const phase = state.phase;
   const active = Boolean(state.active);
@@ -172,6 +174,19 @@ function renderSkip() {
   );
 }
 
+// ─── Links with the other apps ────────────────────────────────────────────────
+
+async function renderLinks() {
+  const link = await getInhaalLink().catch(() => null);
+  const parts = [
+    link ? t("popupLinkedInhaal") : "",
+    settings.downloadsToVerbatim ? t("popupToVerbatim") : "",
+  ];
+  const line = parts.filter(Boolean).join(" · ");
+  $("link-line").textContent = line;
+  $("link-line").hidden = !line;
+}
+
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
 function openSettings(hash = "") {
@@ -202,6 +217,7 @@ $("open-shortcuts").addEventListener("click", () => openSettings("#shortcuts"));
   renderSkip();
   renderSpeed(null);
   renderLecture();
+  renderLinks();
 
   const [state, playback] = await Promise.all([
     askBackground({ action: "getLectureDownloadState" }),

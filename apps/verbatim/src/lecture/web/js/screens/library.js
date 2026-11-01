@@ -1,10 +1,11 @@
 // The lecture list on the home page: header (Library / a course / a folder + totals, search, sort), rows with
 // date, length and notes status; row menu (rename, move to folder, delete); rows drag onto sidebar folders.
+import { icon } from "/static/design/icons.js";
 import { api, post } from "../core/api.js";
 import { $, $$ } from "../core/dom.js";
 import { esc, fmtDate, fmtHm, fmtLong } from "../core/format.js";
 import { ICON } from "../core/icons.js";
-import { S, courseName, isArchived } from "../core/state.js";
+import { S, courseKey, courseName, isArchived } from "../core/state.js";
 import { drawSidebar } from "../core/sidebar.js";
 import { closeMenus, inlineEdit, paint, toast } from "../core/ui.js";
 import { deleteLecture, renameLecture, setCourseArchived } from "../shared/actions.js";
@@ -44,17 +45,21 @@ function drawHead() {
   const total = list.reduce((a, l) => a + (l.duration_s || 0), 0);
   const kind = libSel.slice(0, 1);
   if (!paint(head, `<div class="lib-head">
-      <div><h1 id="lib-title">${esc(name)}</h1>
+      <div><h1 class="large-title" id="lib-title">${esc(name)}</h1>
         <p class="muted">${list.length === 1 ? t("lib_summary_1", { dur: fmtLong(total) }) : t("lib_summary", { n: list.length, dur: fmtLong(total) })}</p></div>
       <div class="lib-tools">
-        <label class="sr" for="lib-q">${t("search")}</label>
+        <label class="sr-only" for="lib-q">${t("search")}</label>
         <input type="search" id="lib-q" placeholder="${t("search")}" value="${esc(libQ)}">
-        <label class="sr" for="lib-sort">Sort</label>
+        <label class="sr-only" for="lib-sort">Sort</label>
         <select id="lib-sort">${["new", "old", "title"].map((v) => `<option value="${v}" ${libSort === v ? "selected" : ""}>${t("sort_" + v)}</option>`).join("")}</select>
-        ${libSel ? `<button class="btn" id="rename-sel">${t("rename")}</button>` : ""}
-        ${kind === "c" ? `<button class="btn" id="archive-sel">${isArchived(libSel.slice(2)) ? t("arch_course_back") : t("arch_course")}</button>` : ""}
-        ${kind === "f" ? `<button class="btn ghost danger" id="del-folder">${t("delete_folder")}</button>` : ""}
-      </div></div>`)) return;
+        ${libSel ? `<button class="btn btn-small" id="rename-sel">${t("rename")}</button>` : ""}
+        ${kind === "c" ? `<button class="btn btn-small" id="archive-sel">${isArchived(libSel.slice(2)) ? t("arch_course_back") : t("arch_course")}</button>` : ""}
+        ${kind === "f" ? `<button class="btn btn-small btn-plain btn-danger" id="del-folder">${t("delete_folder")}</button>` : ""}
+      </div></div>
+      ${S.courses.length ? `<nav class="chips narrow-only" aria-label="${t("nav_courses")}">
+        <a class="chip" href="#/" ${libSel ? "" : 'aria-current="page"'}>${t("nav_library")}</a>
+        ${S.courses.filter((c) => !isArchived(c.id)).map((c) => `<a class="chip" href="#/c/${encodeURIComponent(c.id)}" ${libSel === `c:${c.id}` ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}
+      </nav>` : ""}`)) return;
   $("#lib-q").addEventListener("input", (e) => { libQ = e.target.value; drawRows(); });
   $("#lib-sort").addEventListener("change", (e) => { libSort = e.target.value; drawRows(); });
   $("#rename-sel")?.addEventListener("click", () => {
@@ -89,7 +94,7 @@ function drawRows() {
   const done = S.lectures.filter((l) => l.id);
   if (!done.length) {
     paint(wrap, `<div class="empty">${ICON.inbox}<h2>${t("no_lectures")}</h2><p>${t("no_lectures_hint")}</p>
-      <a class="btn primary" href="#/add" style="margin-top:12px">${t("nav_add")}</a></div>`);
+      <a class="btn btn-primary" href="#/add" style="margin-top:12px">${t("nav_add")}</a></div>`);
     return;
   }
   const q = libQ.trim().toLowerCase();
@@ -101,22 +106,21 @@ function drawRows() {
     return;
   }
   const rows = shown.map((l) => {
+    const data = `data-course="${courseKey(l.course)}"`;
     const folder = S.folders.folders.find((f) => f.id === S.folders.assign[l.id]);
     const sub = [libSel.startsWith("c:") ? "" : l.course_name, folder && !libSel.startsWith("f:") ? folder.name : "",
       isArchived(l.course) ? t("archived") : ""].filter(Boolean).join(" · ");
-    return `<tr draggable="true" data-id="${esc(l.id)}">
-      <td><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>${sub ? `<div class="row-sub">${esc(sub)}</div>` : ""}</td>
-      <td class="nowrap muted">${esc(fmtDate(l.date))}</td>
-      <td class="mono muted">${esc(fmtHm(l.duration_s))}</td>
-      <td>${notesCell(l)}</td>
-      <td class="row-menu"><button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${ICON.dots}</button></td>
-    </tr>`;
+    return `<li class="lecture" draggable="true" data-id="${esc(l.id)}"><div class="row" ${data}>
+      <span class="dot"></span>
+      <span class="row-main"><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>${sub ? `<span class="label">${esc(sub)}</span>` : ""}</span>
+      <span class="lecture-col lecture-date">${esc(fmtDate(l.date))}</span>
+      <span class="lecture-col lecture-len">${esc(fmtHm(l.duration_s))}</span>
+      <span class="lecture-col lecture-notes">${notesCell(l)}</span>
+      <button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${icon("more")}</button>
+    </div></li>`;
   }).join("");
-  if (!paint(wrap, `${libSel ? "" : `<h2 class="sec-title">${t("lectures")}</h2>`}<div class="panel table-wrap"><table class="lectures">
-      <thead><tr><th scope="col">${t("col_lecture")}</th><th scope="col">${t("col_date")}</th><th scope="col">${t("col_length")}</th>
-        <th scope="col">${t("col_notes")}</th><th scope="col"><span class="sr">…</span></th></tr></thead>
-      <tbody>${rows}</tbody></table></div>`)) return;
-  $$("tbody tr", wrap).forEach((r) => {
+  if (!paint(wrap, `${libSel ? "" : `<h2 class="group-title">${t("lectures")}</h2>`}<ul class="list lectures">${rows}</ul>`)) return;
+  $$(".lecture", wrap).forEach((r) => {
     r.addEventListener("click", (e) => { if (!e.target.closest("button, a, input")) location.hash = `#/lecture/${encodeURIComponent(r.dataset.id)}`; });
     r.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/lecture", r.dataset.id); r.classList.add("dragging"); });
     r.addEventListener("dragend", () => r.classList.remove("dragging"));
@@ -159,7 +163,7 @@ function openRowMenu(btn) {
   $("[data-rename]", m).addEventListener("click", (e) => {
     e.stopPropagation();
     closeMenus();
-    const title = btn.closest("tr").querySelector(".row-title");
+    const title = btn.closest(".lecture").querySelector(".row-title");
     inlineEdit(title, title.textContent, (name) => renameLecture(id, name), "", () => { $("#lib-wrap")._html = null; drawLibrary(); });
   });
   $("[data-delete]", m).addEventListener("click", async (e) => {

@@ -1,6 +1,6 @@
 // Hash routes → screens. A new screen = one module in screens/ + one line here.
-import { closeMenus, setBarTitle, stopPoll } from "./ui.js";
-import { ensureSideData } from "./sidebar.js";
+import { closeMenus, scroller, setBarTitle, stopPoll } from "./ui.js";
+import { drawChrome, ensureSideData } from "./sidebar.js";
 import { renderAdd } from "../screens/add.js";
 import { renderArchive } from "../screens/archive.js";
 import { renderDashboard } from "../screens/dashboard.js";
@@ -11,9 +11,10 @@ export async function route() {
   stopPoll();
   closeMenus();
   const [, page, arg, tab] = location.hash.split("/");
-  window.scrollTo(0, 0);
   document.body.dataset.page = page || "home";
-  setBarTitle("");
+  scroller().scrollTop = 0;
+  drawChrome();
+  setBarTitle();
   document.getElementById("bar-actions").innerHTML = "";
   if (page === "lecture" && arg) return renderLecture(decodeURIComponent(arg), tab);
   if (page === "setup") { ensureSideData(); return renderSetup(); }

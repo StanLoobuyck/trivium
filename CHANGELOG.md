@@ -2,12 +2,22 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
-2. **Klaar:** fase 0 t/m 5 gebouwd en live, SwiftSkip 4.3.0. Getest door de eigenaar: reboot, koppeling in Zen op Toledo, keten
-   naar Verbatim. Door Claude: 87+27 SwiftSkip, 231 Verbatim, 16 hub, 120 unit, 134 schermtests, screenshots licht en donker.
-3. **Niet getest:** look op de echte Kaltura-speler, badges in de Inhaal-app zelf, klik op Instellingen in het `?`-venster, Safari.
-4. **Volgende:** vraag de eigenaar naar de testresultaten van fase 5, kies dan de slides-stroom (aanbevolen) of fase 6.
-5. **Wacht op de eigenaar:** oordeel over de look, notitiemodel in Verbatim (nu Gemini), namen voor fase 6, LaTeX-skill verfijnen.
-6. **Open:** Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
+2. **Klaar:** fase 0 t/m 5 gebouwd. Fase 5 is herdaan: Verbatim en SwiftSkip laden nu echt `packages/design`. Verbatim is live na herladen.
+3. **Wacht op de eigenaar:** SwiftSkip-popup in Zen beoordelen (tijdelijk laden via `about:debugging`: `apps/swiftskip/dist/firefox/manifest.json`), daarna akkoord
+   voor release 4.4.0. Oordeel over de look, notitiemodel in Verbatim (nu Gemini), namen voor fase 6, LaTeX-skill verfijnen.
+4. **Niet getest:** ronde hoeken van het echte Zen-venster (headless heeft die niet), look op de echte Kaltura-speler, badges in de Inhaal-app zelf, Safari.
+5. **Volgende:** na het oordeel release 4.4.0, dan de slides-stroom (aanbevolen) of fase 6.
+6. **Open:** vakkleuren in Verbatim volgen de lijstvolgorde, niet de kleur uit Inhaal; Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
+
+## 2026-11-01 — één look, echt: Verbatim en SwiftSkip op packages/design
+- Eigenaarstest: het leek op Inhaal, maar was het niet. Oorzaak: beide apps hadden eigen kopieën van de waarden en eigen componenten.
+- Verbatim: `tokens.css`, `app.css` en `css/` weg (ruim 640 regels), nu `design/` (exacte kopie) plus `verbatim.css` met alleen eigen schermen. Zelfde zijbalk,
+  tabbalk, rijen, toast en scrollgedrag als Inhaal. Taal en thema staan in Instellingen. De tabel werd een gegroepeerde lijst, het lesscherm volgt de mock-up.
+- SwiftSkip: popup, instellingen en welkomstpagina laden dezelfde CSS met Inter. Overlay: Inhaals kaart, sheet en toast, Download nu rechtsboven.
+- Hoeken in Zen: Zen tekent het venster in `#1F1F1F` achter onze pikzwarte pagina. In donker staat de popup nu op `--card` (`#1C1C1E`), zoals Inhaals sheets.
+- Gemeten op 1440 px: 140 van 142 stijlwaarden van de zijbalk gelijk tussen Inhaal en Verbatim; de 2 verschillen zijn meetruis (tweecijferige teller, `auto`/`0px`).
+- Inhaal-instellingen: losse teksten staan nu in een kaart. Grotere layoutwijzigingen niet gedaan.
+- Tests: 128 unit, 134 schermtests (13 overgeslagen), 88 + 27 SwiftSkip, 232 Verbatim, webextensie-lint 0 fouten. Nieuw: test die drift tussen de apps tegenhoudt.
 
 ## 2026-11-01 — fase 5: één look
 - Keuze: richting A (blauw zoals Inhaal), met het modellenblok uit C en het app-icoon uit B. Canvas: privé, in de sessie gelinkt.

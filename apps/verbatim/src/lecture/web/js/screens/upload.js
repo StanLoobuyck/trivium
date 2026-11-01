@@ -41,7 +41,7 @@ function drawRecent() {
   const pickedPaths = new Set(picked.map((p) => p.path));
   const vids = suggestions.videos;
   box.innerHTML = `<h4>${t("recent")}</h4>` + (vids.length
-    ? `<div class="chips">${vids.map((v, i) => `<button type="button" class="chip ${pickedPaths.has(v.path) ? "on" : ""}" data-vi="${i}" title="${esc(v.path)}">${pickedPaths.has(v.path) ? "✓ " : ""}${esc(v.title)} · ${esc(fmtDate(v.date))} · ${fmtSize(v.size)}</button>`).join("")}</div>`
+    ? `<div class="chips chips-wrap">${vids.map((v, i) => `<button type="button" class="chip" aria-pressed="${pickedPaths.has(v.path)}" data-vi="${i}" title="${esc(v.path)}">${pickedPaths.has(v.path) ? "✓ " : ""}${esc(v.title)} · ${esc(fmtDate(v.date))} · ${fmtSize(v.size)}</button>`).join("")}</div>`
     : `<p class="muted small">${t("recent_none")}</p>`);
   $$("[data-vi]", box).forEach((b) => b.addEventListener("click", () => {
     const v = vids[b.dataset.vi];
@@ -90,10 +90,10 @@ function drawPending() {
     <div class="add-rows">${picked.map((p, i) => `
       <div class="add-row">
         <span class="file" title="${esc(p.path)}">${esc(p.name)}</span>
-        <label class="field">${t("title")}<input type="text" data-f="title" data-i="${i}" value="${esc(p.title)}" placeholder="${t("title_ph")}"></label>
-        <label class="field">${t("date")}<input type="date" data-f="date" data-i="${i}" value="${esc(p.date)}"></label>
-        <label class="field">${t("course")}<select data-f="course" data-i="${i}">${courseOpts(p.course)}</select></label>
-        <label class="field" title="${t("spoken_hint")}">${t("spoken")}<select data-f="language" data-i="${i}">
+        <label class="form-field">${t("title")}<input type="text" data-f="title" data-i="${i}" value="${esc(p.title)}" placeholder="${t("title_ph")}"></label>
+        <label class="form-field">${t("date")}<input type="date" data-f="date" data-i="${i}" value="${esc(p.date)}"></label>
+        <label class="form-field">${t("course")}<select data-f="course" data-i="${i}">${courseOpts(p.course)}</select></label>
+        <label class="form-field" title="${t("spoken_hint")}">${t("spoken")}<select data-f="language" data-i="${i}">
           <option value="nl" ${p.language !== "en" ? "selected" : ""}>Nederlands</option>
           <option value="en" ${p.language === "en" ? "selected" : ""}>English</option></select></label>
         <button type="button" class="icon-btn" data-unpick="${i}" aria-label="${t("remove")}">${ICON.x}</button>
@@ -103,12 +103,12 @@ function drawPending() {
         <div class="block-title">${t("slides")}</div>
         <p class="muted small" style="margin:4px 0 10px">${t("slides_hint")}</p>
         <input type="search" id="slide-q" placeholder="${t("slides_search")}" style="margin-bottom:10px">
-        <div class="chips" id="slide-chips"></div>
+        <div class="chips chips-wrap" id="slide-chips"></div>
       </div>
       <div>
         <div class="block-title">${t("notes_when")}</div>
         <div class="segmented" id="policy" style="margin:10px 0 8px">
-          ${["now", "tonight", "never"].map((v) => `<button type="button" data-v="${v}" class="${notesPolicy === v ? "on" : ""}">${t("notes_" + v)}</button>`).join("")}
+          ${["now", "tonight", "never"].map((v) => `<button type="button" data-v="${v}" aria-pressed="${notesPolicy === v}">${t("notes_" + v)}</button>`).join("")}
         </div>
         <p class="muted small" id="policy-hint">${t("notes_" + notesPolicy + "_hint")}</p>
       </div>
@@ -116,7 +116,7 @@ function drawPending() {
     <div class="add-foot">
       <span class="error" id="add-error"></span>
       <button type="button" class="btn" id="add-cancel">${t("cancel")}</button>
-      <button type="button" class="btn primary" id="add-go">${picked.length > 1 ? t("add_n", { n: picked.length }) : t("add_1")}</button>
+      <button type="button" class="btn btn-primary" id="add-go">${picked.length > 1 ? t("add_n", { n: picked.length }) : t("add_1")}</button>
     </div>`;
   $$("[data-f]", box).forEach((el) => el.addEventListener("input", () => {
     if (el.value === "__new") {  // make a course right here instead of a trip to Setup
@@ -143,7 +143,7 @@ function drawPending() {
   $$("[data-unpick]", box).forEach((b) => b.addEventListener("click", () => { picked.splice(Number(b.dataset.unpick), 1); drawRecent(); drawPending(); }));
   $$("#policy button", box).forEach((b) => b.addEventListener("click", () => {
     notesPolicy = b.dataset.v;
-    $$("#policy button", box).forEach((x) => x.classList.toggle("on", x === b));
+    $$("#policy button", box).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     $("#policy-hint").textContent = t("notes_" + notesPolicy + "_hint");
   }));
   $("#slide-q").addEventListener("input", drawSlideChips);
@@ -163,7 +163,7 @@ function drawSlideChips() {
   const rest = all.filter((s) => !chosen.has(s.path) && (!q || s.name.toLowerCase().includes(q)))
     .sort((a, b) => (b.course === course) - (a.course === course) || (b.course != null) - (a.course != null) || b.mtime - a.mtime);
   box.innerHTML = [...sel, ...rest.slice(0, q ? 30 : 6)].map((s) => `
-    <button type="button" class="chip ${chosen.has(s.path) ? "on" : ""}" data-slide="${esc(s.path)}" title="${esc(s.path)}">${chosen.has(s.path) ? "✓ " : ""}${esc(s.name)}${s.course && !chosen.has(s.path) ? ` · ${t("used_before")}` : ""}</button>`).join("")
+    <button type="button" class="chip" aria-pressed="${chosen.has(s.path)}" data-slide="${esc(s.path)}" title="${esc(s.path)}">${chosen.has(s.path) ? "✓ " : ""}${esc(s.name)}${s.course && !chosen.has(s.path) ? ` · ${t("used_before")}` : ""}</button>`).join("")
     + (q && !rest.length ? `<span class="muted small">${t("no_match")}</span>` : "");
   $$("[data-slide]", box).forEach((c) => c.addEventListener("click", () => {
     const p = c.dataset.slide;

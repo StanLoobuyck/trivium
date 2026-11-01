@@ -110,6 +110,9 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Verbatim draait op de laptop als geïnstalleerde tool: Python-wijzigingen vragen `apps/verbatim/scripts/install.sh` en een herstart van de
   worker (vraag eerst). Statische webbestanden gelden na herladen. Persoonlijke instellingen staan in `~/.config/lecture-transcriber/`.
 - Vóór code in deze publieke repo komt: scannen op Mac-naam, IP, thuispaden, plaatsen, privémail en Claude-vermeldingen.
+- Eén look: `packages/design` is de enige bron. Na een wijziging daar: `node scripts/sync-design.mjs` (kopie voor Verbatim; een test faalt anders).
+  SwiftSkip kopieert bij het bouwen. De speler-overlay heeft de donkere waarden letterlijk in `style.css`; ook die bewaakt een test. Geen eigen tokens of knoppen in een app.
+- Popup testen in echte Zen kan zonder venster: `--headless --marionette -remote-allow-system-access` met een eigen profiel, `Addon:Install` en `browserActionFor(ext).openPopup`.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
 - SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
   daar lokaal. De oude repo StanLoobuyck/SwiftSkip niet verwijderen of archiveren zonder overleg: oude installaties lezen er.

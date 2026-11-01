@@ -168,10 +168,14 @@ function renderShortcuts() {
         Boolean(recording && recording.actionId.startsWith("seek_")) ||
         container.querySelector("details.jump")?.open;
       details.append(el("summary", null, t("jumpSummary")));
-      actions.forEach((a) => details.append(shortcutRow(a)));
-      nodes.push(el("h3", null, groupLabel(group)), details);
+      const list = el("div", "list");
+      list.append(...actions.map(shortcutRow));
+      details.append(list);
+      nodes.push(el("h3", "group-title", groupLabel(group)), details);
     } else {
-      nodes.push(el("h3", null, groupLabel(group)), ...actions.map(shortcutRow));
+      const list = el("div", "list");
+      list.append(...actions.map(shortcutRow));
+      nodes.push(el("h3", "group-title", groupLabel(group)), list);
     }
   }
   container.replaceChildren(...nodes);
@@ -264,12 +268,12 @@ $("reset-shortcuts").addEventListener("click", () => {
 
 async function renderSites() {
   const list = $("site-list");
-  const builtIn = el("li");
+  const builtIn = el("li", "row site");
   builtIn.append(el("span", null, t("sitesBuiltIn")), el("span", "builtin", t("alwaysOn")));
   const rows = [builtIn];
   for (const pattern of await enabledSites()) {
-    const row = el("li");
-    const remove = el("button", "btn btn-secondary btn-small", t("remove"));
+    const row = el("li", "row site");
+    const remove = el("button", "btn btn-small btn-plain", t("remove"));
     remove.type = "button";
     remove.setAttribute("aria-label", t("removeSite", { site: patternHost(pattern) }));
     // Takes effect for new page loads; the background unregisters the script.
@@ -329,6 +333,7 @@ function render() {
   setLanguage(settings.language);
   localizePage();
   document.title = t("settingsPageTitle");
+  watchSections();
   $("version-line").textContent = t("settingsVersion", { version: ext.runtime.getManifest().version });
   renderGeneral();
   renderShortcuts();
@@ -349,3 +354,23 @@ watchSettings((next) => {
   settings = next;
   render();
 });
+
+// The sidebar marks the section you are reading, like the current page in Inhaal's.
+function watchSections() {
+  const links = [...document.querySelectorAll(".section-nav a")];
+  const mark = (id) => {
+    for (const a of links) {
+      if (a.hash === `#${id}`) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    }
+  };
+  mark("general");
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const seen = entries.find((entry) => entry.isIntersecting);
+      if (seen) mark(seen.target.id);
+    },
+    { rootMargin: "-10% 0px -80% 0px" },
+  );
+  for (const a of links) observer.observe(document.getElementById(a.hash.slice(1)));
+}

@@ -30,7 +30,7 @@ const syncSection = () => (sync.available ? `<section>
 // SwiftSkip bestaat niet op de gsm.
 const swiftskipSection = () => `<section class="only-wide">
       <h2 class="group-title">SwiftSkip</h2>
-      ${swiftskip.linked ? `<p class="sub">${esc(t("swiftskipLinked"))}</p>` : `<ul class="list">
+      ${swiftskip.linked ? `<div class="card"><p class="sub">${esc(t("swiftskipLinked"))}</p></div>` : `<ul class="list">
         <li><a class="row" href="${esc(linkAddress())}" target="_blank" rel="noopener"><span class="row-main"><span>${esc(t("swiftskipLink"))}</span></span>${icon("chevron")}</a></li>
       </ul>
       <p class="sub">${esc(t("swiftskipLinkBody"))}</p>`}
@@ -84,7 +84,7 @@ export function renderSettings(root) {
     ${swiftskipSection()}
     <section class="only-wide">
       <h2 class="group-title">${esc(t("shortcuts"))}</h2>
-      <p class="sub">${esc(t("shortcutsBody"))}</p>
+      <div class="card"><p class="sub">${esc(t("shortcutsBody"))}</p></div>
     </section>
     <section>
       <h2 class="group-title">${esc(t("language"))}</h2>

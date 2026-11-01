@@ -3,8 +3,9 @@ import { api, post } from "../core/api.js";
 import { $, $$, view } from "../core/dom.js";
 import { esc, fmtSem } from "../core/format.js";
 import { ICON } from "../core/icons.js";
-import { S, courseColor, reason } from "../core/state.js";
-import { toast } from "../core/ui.js";
+import { S, courseKey, reason } from "../core/state.js";
+import { scroller, setTheme, themeChoice, toast } from "../core/ui.js";
+import { route } from "../core/router.js";
 import { startWorker } from "../shared/actions.js";
 import { bindModels, notesSectionHtml, sttSectionHtml } from "./setup-models.js";
 
@@ -28,7 +29,7 @@ function semesterChoices(own) {
 // refresh = true after a change on this page: fetch first, then swap the content in one go and keep the scroll
 // position (showing "Loading…" first collapsed the page, so every change jumped to the top and faded in again)
 export async function renderSetup(refresh = false) {
-  const y = window.scrollY;
+  const y = scroller().scrollTop;
   if (!refresh) view.innerHTML = `<div class="loading">${t("loading")}</div>`;
   let status;
   try {
@@ -41,75 +42,91 @@ export async function renderSetup(refresh = false) {
       <span class="option-top">${esc(title)}<span class="pill ${on && ok ? "ok" : ok ? "" : "bad"}">${statusTxt}</span></span>
       <p>${esc(desc)}</p></button>`;
   view.innerHTML = `
-    <div><h1>${t("setup_title")}</h1><p class="muted" style="margin-top:4px">${t("setup_sub")}</p></div>
-    <div class="setup ${refresh ? "" : "fade-in"}">
+    <h1 class="large-title">${t("setup_title")}</h1>
+    <div class="settings-grid setup ${refresh ? "" : "page-enter"}">
       ${sttSectionHtml(s)}
 
-      <section class="card setup-section">
+      <section class="setup-section">
         <h2>${t("s_mac")}</h2><p class="muted small">${t("s_mac_sub")}</p>
-        <div class="key-row">
+        <div class="list"><div class="key-row">
           <span><b>${t("mac_url")}</b></span>
           <input type="text" id="mac-url" value="${esc(s.mac.url || "")}" placeholder="http://macbook-pro:7862" autocomplete="off" spellcheck="false">
-          <span style="display:flex;gap:6px"><button class="btn small" id="mac-save">${t("c_save")}</button>
-            <button class="btn small ghost" id="mac-test">${t("mac_test")}</button></span>
+          <span style="display:flex;gap:6px"><button class="btn btn-small" id="mac-save">${t("c_save")}</button>
+            <button class="btn btn-small btn-plain" id="mac-test">${t("mac_test")}</button></span>
         </div>
         <div class="key-row">
           <span><b>${t("mac_token")}</b> <span class="pill ${s.mac.token ? "ok" : ""}">${s.mac.token ? t("k_set") : t("k_missing")}</span></span>
           <input type="password" data-key="mac" placeholder="${t("mac_token_ph")}" autocomplete="off">
-          <span><button class="btn small" data-savekey="mac">${t("c_save")}</button></span>
-        </div>
+          <span><button class="btn btn-small" data-savekey="mac">${t("c_save")}</button></span>
+        </div></div>
         <p class="muted small" id="mac-result" aria-live="polite"></p>
       </section>
 
-      <section class="card setup-section">
+      <section class="setup-section">
         <h2>${t("s_hub")}</h2><p class="muted small">${t("s_hub_sub")}</p>
-        <div class="key-row">
+        <div class="list"><div class="key-row">
           <span><b>${t("mac_url")}</b></span>
           <input type="text" id="hub-url" value="${esc(s.hub.url || "")}" autocomplete="off" spellcheck="false">
-          <span><button class="btn small" id="hub-save">${t("c_save")}</button></span>
+          <span><button class="btn btn-small" id="hub-save">${t("c_save")}</button></span>
         </div>
         <div class="key-row">
           <span><b>${t("hub_code")}</b> <span class="pill ${s.hub.code ? "ok" : ""}">${s.hub.code ? t("k_set") : t("k_missing")}</span></span>
           <input type="password" data-key="hub" autocomplete="off">
-          <span><button class="btn small" data-savekey="hub">${t("c_save")}</button></span>
-        </div>
-        <div><button class="btn small" id="hub-import" ${s.hub.url && s.hub.code ? "" : "disabled"}>${t("hub_import")}</button></div>
+          <span><button class="btn btn-small" data-savekey="hub">${t("c_save")}</button></span>
+        </div></div>
+        <div><button class="btn btn-small" id="hub-import" ${s.hub.url && s.hub.code ? "" : "disabled"}>${t("hub_import")}</button></div>
         <p class="muted small" id="hub-result" aria-live="polite"></p>
       </section>
 
       ${notesSectionHtml(s)}
 
-      <section class="card setup-section">
+      <section class="setup-section">
         <h2>${t("s_outputs")}</h2><p class="muted small">${t("s_outputs_sub")}</p>
-        <div>${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
-          <label class="toggle-row"><span><b>${t("o_" + k)}</b><span class="muted small">${t("o_" + k + "_d")}</span></span>
+        <div class="list">${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
+          <label class="row toggle-row"><span class="row-text"><b>${t("o_" + k)}</b><span class="label">${t("o_" + k + "_d")}</span></span>
             <input type="checkbox" class="switch" data-out="${k}" ${s.outputs[k] ? "checked" : ""}></label>`).join("")}</div>
       </section>
 
-      <section class="card setup-section" id="courses-section">
+      <section class="setup-section" id="courses-section">
         <h2>${t("s_courses")}</h2><p class="muted small">${t("s_courses_sub")}</p>
-        <div id="course-list"></div>
+        <div class="list" id="course-list"></div>
       </section>
 
-      <section class="card setup-section">
+      <section class="setup-section">
         <h2>${t("s_keys")}</h2><p class="muted small">${t("s_keys_sub")}</p>
-        ${[["groq", "Groq", "https://console.groq.com/keys"], ["gemini", "Gemini", "https://aistudio.google.com/apikey"]].map(([k, label, url]) => `
+        <div class="list">${[["groq", "Groq", "https://console.groq.com/keys"], ["gemini", "Gemini", "https://aistudio.google.com/apikey"]].map(([k, label, url]) => `
           <div class="key-row">
             <span><b>${label}</b> <span class="pill ${s.keys[k] ? "ok" : ""}">${s.keys[k] ? t("k_set") : t("k_missing")}</span></span>
             <input type="password" data-key="${k}" placeholder="${t("k_paste")}" autocomplete="off">
-            <span style="display:flex;gap:6px"><button class="btn small" data-savekey="${k}">${t("k_save")}</button>
-              <a class="btn small ghost" href="${url}" target="_blank" rel="noopener">${t("k_get")}</a></span>
-          </div>`).join("")}
+            <span style="display:flex;gap:6px"><button class="btn btn-small" data-savekey="${k}">${t("k_save")}</button>
+              <a class="btn btn-small btn-plain" href="${url}" target="_blank" rel="noopener">${t("k_get")}</a></span>
+          </div>`).join("")}</div>
       </section>
 
-      <section class="card setup-section">
+      <section class="setup-section">
         <h2>${t("s_worker")}</h2><p class="muted small">${t("s_worker_sub")}</p>
-        <div style="display:flex;gap:12px;align-items:center"><span class="pill ${s.worker ? "ok" : "bad"}">${s.worker ? t("worker_on") : t("worker_off")}</span>
-          ${s.worker ? "" : `<button class="btn small primary" id="setup-start">${t("worker_start")}</button>`}</div>
-        <div class="block-title" style="margin-top:8px">${t("s_usage")}</div>
-        <div class="meters">${Object.entries(status.quotas).map(([name, windows]) => Object.entries(windows).filter(([w]) => /day/.test(w)).map(([w, [used, limit]]) => `
+        <div class="card flat-row"><span class="pill ${s.worker ? "ok" : "bad"}">${s.worker ? t("worker_on") : t("worker_off")}</span>
+          ${s.worker ? "" : `<button class="btn btn-small btn-primary" id="setup-start">${t("worker_start")}</button>`}</div>
+        <h3 class="group-title">${t("s_usage")}</h3>
+        <div class="card meters">${Object.entries(status.quotas).map(([name, windows]) => Object.entries(windows).filter(([w]) => /day/.test(w)).map(([w, [used, limit]]) => `
           <div class="meter"><span>${esc(name)}</span><span class="muted">${Math.round(used)} / ${Math.round(limit)}</span>
             <div class="progress"><span style="width:${Math.min(100, (used / (limit || 1)) * 100)}%"></span></div><span class="muted small">${esc(w)}</span></div>`).join("")).join("")}</div>
+      </section>
+
+      <section class="setup-section">
+        <h2>${t("s_look")}</h2>
+        <div class="segmented" role="group" aria-label="${t("s_look")}">
+          ${[["system", t("theme_system")], ["light", t("theme_light")], ["dark", t("theme_dark")]].map(([key, label]) =>
+            `<button type="button" aria-pressed="${themeChoice() === key}" data-theme-choice="${key}">${esc(label)}</button>`).join("")}
+        </div>
+      </section>
+
+      <section class="setup-section">
+        <h2>${t("s_language")}</h2>
+        <div class="segmented" role="group" aria-label="${t("s_language")}">
+          ${[["nl", "Nederlands"], ["en", "English"]].map(([key, label]) =>
+            `<button type="button" aria-pressed="${LANG === key}" data-lang="${key}">${label}</button>`).join("")}
+        </div>
       </section>
     </div>`;
   const rerender = () => renderSetup(true);
@@ -118,6 +135,8 @@ export async function renderSetup(refresh = false) {
     rerender();
   };
   bindModels(s, rerender);
+  $$("[data-theme-choice]").forEach((b) => b.addEventListener("click", () => { setTheme(b.dataset.themeChoice); rerender(); }));
+  $$("[data-lang]").forEach((b) => b.addEventListener("click", () => { setLang(b.dataset.lang); route(); }));
   $$("[data-model]").forEach((b) => b.addEventListener("click", () => apply("/api/setup/notes-model", { value: b.dataset.model })));
   $$("[data-out]").forEach((c) => c.addEventListener("change", () => apply("/api/setup/outputs", { [c.dataset.out]: c.checked })));
   $$("[data-savekey]").forEach((b) => b.addEventListener("click", () => {
@@ -149,7 +168,7 @@ export async function renderSetup(refresh = false) {
     e.currentTarget.disabled = false;
   });
   drawCourses();
-  if (refresh) window.scrollTo(0, y);
+  if (refresh) scroller().scrollTop = y;
 }
 
 function drawCourses() {
@@ -157,26 +176,26 @@ function drawCourses() {
   if (!box) return;
   const form = (c) => `
     <div class="course-form">
-      <label class="field">${t("c_name")}<input type="text" id="cf-name" value="${esc(c.name || "")}"></label>
-      <label class="field">${t("c_lang")}<select id="cf-lang">
+      <label class="form-field">${t("c_name")}<input type="text" id="cf-name" value="${esc(c.name || "")}"></label>
+      <label class="form-field">${t("c_lang")}<select id="cf-lang">
         <option value="nl" ${c.language !== "en" ? "selected" : ""}>Nederlands</option>
         <option value="en" ${c.language === "en" ? "selected" : ""}>English</option></select></label>
-      <label class="field">${t("c_lecturer")}<input type="text" id="cf-lecturer" value="${esc(c.lecturer || "")}"></label>
-      <label class="field">${t("c_semester")}<select id="cf-sem">
+      <label class="form-field">${t("c_lecturer")}<input type="text" id="cf-lecturer" value="${esc(c.lecturer || "")}"></label>
+      <label class="form-field">${t("c_semester")}<select id="cf-sem">
         <option value="">${esc(t("c_sem_auto", { sem: S.sem?.courses[c.id] && !c.semester ? fmtSem(S.sem.courses[c.id].semester) : "…" }))}</option>
         ${semesterChoices(c.semester).map((x) => `<option value="${x}" ${x === c.semester ? "selected" : ""}>${esc(fmtSem(x))}</option>`).join("")}
       </select></label>
-      <label class="field wide">${t("c_terms")}<input type="text" id="cf-terms" value="${esc((c.extra_terms || []).join(", "))}"></label>
-      <label class="field wide">${t("c_fixes")}<textarea id="cf-fixes" rows="3" placeholder="nent = NAND">${esc(Object.entries(c.corrections || {}).map(([a, b]) => `${a} = ${b}`).join("\n"))}</textarea></label>
-      <div class="row-end"><button class="btn small" id="cf-cancel">${t("cancel")}</button><button class="btn small primary" id="cf-save">${t("c_save")}</button></div>
+      <label class="form-field wide">${t("c_terms")}<input type="text" id="cf-terms" value="${esc((c.extra_terms || []).join(", "))}"></label>
+      <label class="form-field wide">${t("c_fixes")}<textarea id="cf-fixes" rows="3" placeholder="nent = NAND">${esc(Object.entries(c.corrections || {}).map(([a, b]) => `${a} = ${b}`).join("\n"))}</textarea></label>
+      <div class="row-end"><button class="btn btn-small" id="cf-cancel">${t("cancel")}</button><button class="btn btn-small btn-primary" id="cf-save">${t("c_save")}</button></div>
     </div>`;
   box.innerHTML = S.courses.map((c) => editingCourse === c.id ? form(c) : `
-    <div class="course-row">
-      <span class="course-tag"><i style="background:${courseColor(c.id)}"></i></span>
-      <span class="grow"><b>${esc(c.name)}</b><div class="muted small">${c.language === "en" ? "English" : "Nederlands"}${c.lecturer ? ` · ${esc(c.lecturer)}` : ""}${c.extra_terms?.length ? ` · ${esc(c.extra_terms.join(", "))}` : ""}${Object.keys(c.corrections || {}).length ? ` · ${t("c_fixes_n", { n: Object.keys(c.corrections).length })}` : ""}</div></span>
-      <button class="btn small ghost" data-edit="${esc(c.id)}">${t("c_edit")}</button>
+    <div class="row course-row" data-course="${courseKey(c.id)}">
+      <span class="dot"></span>
+      <span class="row-text"><b>${esc(c.name)}</b><span class="label">${c.language === "en" ? "English" : "Nederlands"}${c.lecturer ? ` · ${esc(c.lecturer)}` : ""}${c.extra_terms?.length ? ` · ${esc(c.extra_terms.join(", "))}` : ""}${Object.keys(c.corrections || {}).length ? ` · ${t("c_fixes_n", { n: Object.keys(c.corrections).length })}` : ""}</span></span>
+      <button class="btn btn-small btn-plain" data-edit="${esc(c.id)}">${t("c_edit")}</button>
       <button class="icon-btn" data-del="${esc(c.id)}" title="${t("c_delete")}">${ICON.trash}</button>
-    </div>`).join("") + (editingCourse === "new" ? form({}) : `<div style="margin-top:10px"><button class="btn small" id="c-add">${t("c_add")}</button></div>`);
+    </div>`).join("") + (editingCourse === "new" ? form({}) : `<div class="row"><button class="btn btn-small" id="c-add">${t("c_add")}</button></div>`);
   $("#c-add")?.addEventListener("click", () => { editingCourse = "new"; drawCourses(); });
   $$("[data-edit]", box).forEach((b) => b.addEventListener("click", () => { editingCourse = b.dataset.edit; drawCourses(); }));
   $$("[data-del]", box).forEach((b) => b.addEventListener("click", async () => {

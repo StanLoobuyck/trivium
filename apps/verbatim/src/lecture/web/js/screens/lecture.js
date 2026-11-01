@@ -4,7 +4,7 @@ import { $, $$, view } from "../core/dom.js";
 import { esc, fmtDate, fmtLong, fmtTs, parseTs } from "../core/format.js";
 import { ICON } from "../core/icons.js";
 import { S } from "../core/state.js";
-import { closeMenus, inlineEdit, poll, setBarTitle, toast } from "../core/ui.js";
+import { closeMenus, inlineEdit, poll, scroller, setBarTitle, toast } from "../core/ui.js";
 import { deleteLecture, renameLecture } from "../shared/actions.js";
 
 let lec = null, lecTab = "notes", follow = true;
@@ -19,36 +19,33 @@ export async function renderLecture(id, tab) {
   const canNotes = ["transcribed", "done", "failed", "notes_pending"].includes(lec.status);
   // actions + path live in the slim top bar (index.html .pagebar); the router clears them on every page change
   $("#bar-actions").innerHTML = `
-    ${canNotes ? `<button class="btn ${lec.notes ? "" : "primary"}" id="make-notes">${lec.notes ? t("remake_notes") : t("make_notes")}</button>` : ""}
-    ${lec.files.includes("flashcards_anki.csv") ? `<a class="btn" href="/api/lectures/${encodeURIComponent(lec.id)}/files/flashcards_anki.csv">${t("anki")}</a>` : ""}
-    <button class="btn" id="open-folder">${t("files")}</button>
-    <button class="btn ghost danger" id="delete-lecture">${t("delete")}</button>`;
-  setBarTitle(`${lec.course_name} / ${lec.title}`, true);
+    ${canNotes ? `<button class="btn btn-small ${lec.notes ? "" : "btn-primary"}" id="make-notes">${lec.notes ? t("remake_notes") : t("make_notes")}</button>` : ""}
+    ${lec.files.includes("flashcards_anki.csv") ? `<a class="btn btn-small" href="/api/lectures/${encodeURIComponent(lec.id)}/files/flashcards_anki.csv">${t("anki")}</a>` : ""}
+    <button class="btn btn-small" id="open-folder">${t("files")}</button>
+    <button class="btn btn-small btn-plain btn-danger" id="delete-lecture">${t("delete")}</button>`;
+  const barSub = [lec.course_name, ...meta].join(" · ");
+  setBarTitle(lec.title, barSub);
   view.innerHTML = `
     <div class="lecture-layout fade-in">
       <aside class="stage">
-        <div class="lec-head">
-          <h1 class="editable" id="lec-title" title="${t("rename")}">${esc(lec.title)}</h1>
-          <p class="muted">${meta.map(esc).join(" · ")}</p>
-          <p class="made-with">${[lec.models.stt ? `${t("transcript_by")}: ${esc(lec.models.stt)}` : "",
-            lec.models.notes ? `${t("notes_by")}: ${esc(lec.models.notes)}` : ""].filter(Boolean).join(" · ")}</p>
-        </div>
         ${lec.media_available ? `<div class="player"><video id="player" controls preload="auto" src="/api/lectures/${encodeURIComponent(lec.id)}/media"></video></div>`
-          : lec.media_on_mac ? `<div class="panel on-mac"><p>${t("lec_on_mac")}</p><button class="btn" id="restore-media">${t("lec_restore")}</button></div>`
-          : `<div class="panel" style="padding:16px"><p class="muted small">${t("no_video")}</p></div>`}
-        <div class="chapters" id="chapters"></div>
+          : lec.media_on_mac ? `<div class="card flat on-mac"><p>${t("lec_on_mac")}</p><button class="btn" id="restore-media">${t("lec_restore")}</button></div>`
+          : `<div class="card flat" style="padding:16px"><p class="muted small">${t("no_video")}</p></div>`}
+        <div class="chapters card flat" id="chapters"></div>
+        <p class="made-with">${[lec.models.stt ? `${t("transcript_by")}: ${esc(lec.models.stt)}` : "",
+          lec.models.notes ? `${t("notes_by")}: ${esc(lec.models.notes)}` : ""].filter(Boolean).join(" · ")}</p>
       </aside>
-      <article class="panel lec-doc">
-        <div class="tabs" id="tabs" role="tablist"></div>
+      <article class="card flat lec-doc">
+        <div class="lec-tabs"><div class="segmented" id="tabs"></div></div>
         <div id="tab-body"></div>
       </article>
     </div>`;
   $("#open-folder").addEventListener("click", () => post(`/api/lectures/${encodeURIComponent(lec.id)}/open-folder`).catch((e) => toast(e.message, true)));
-  $("#lec-title").addEventListener("click", (e) => inlineEdit(e.currentTarget, lec.title, async (title) => {
+  const bindRename = () => $("#lec-title").addEventListener("click", (e) => inlineEdit(e.currentTarget, lec.title, async (title) => {
     await renameLecture(lec.id, title);
     lec.title = title;
-    e.target.textContent = title;
-  }, "", () => setBarTitle(`${lec.course_name} / ${lec.title}`, true)));
+  }, "", () => { setBarTitle(lec.title, barSub); bindRename(); }));
+  bindRename();
   $("#delete-lecture").addEventListener("click", async () => { if (await deleteLecture(lec.id, lec.title)) location.hash = "#/"; });
   $("#make-notes")?.addEventListener("click", async () => {
     try {
@@ -176,7 +173,7 @@ function drawTabs() {
   if (lec.termfix || lec.segments.length) tabs.push(["suggest", "tab_suggest", (lec.termfix?.suggestions || []).filter((x) => x.status === "open").length]);
   tabs.push(["review", "tab_review", null]);
   if (!tabs.some(([id]) => id === lecTab)) lecTab = "notes";
-  $("#tabs").innerHTML = tabs.map(([id, key, count]) => `<button data-tab="${id}" class="${lecTab === id ? "on" : ""}">${t(key)}${count ? `<span class="count">${count}</span>` : ""}</button>`).join("");
+  $("#tabs").innerHTML = tabs.map(([id, key, count]) => `<button data-tab="${id}" aria-pressed="${lecTab === id}">${t(key)}${count ? `<span class="count">${count}</span>` : ""}</button>`).join("");
   $$("#tabs button").forEach((b) => b.addEventListener("click", () => {
     lecTab = b.dataset.tab;
     history.replaceState(null, "", `#/lecture/${encodeURIComponent(lec.id)}/${lecTab}`);
@@ -196,7 +193,7 @@ function noNotes(body) {
   const coming = ["transcribed", "notes", "notes_pending"].includes(lec.status);
   body.innerHTML = `<div class="empty"><h2>${coming ? t("notes_coming") : t("no_notes")}</h2>
     <p>${coming ? t("notes_coming_hint") : t("no_notes_hint")}</p>
-    ${lec.files.includes("study_pack.md") && !coming ? `<a class="btn" href="/api/lectures/${encodeURIComponent(lec.id)}/files/study_pack.md">${t("study_pack")}</a>` : ""}</div>`;
+    ${lec.files.includes("study_pack.md") && !coming ? `<a class="btn btn-small" href="/api/lectures/${encodeURIComponent(lec.id)}/files/study_pack.md">${t("study_pack")}</a>` : ""}</div>`;
 }
 function partMeta(index) {  // "Part 2 · slide 57 · 3:07–4:14" above each part's heading
   const d = lec.sections_detail.find((x) => x.index === index);
@@ -254,7 +251,7 @@ function drawQuiz(body) {
     <div class="card quiz-item">
       <div class="q"><span class="num">${i + 1}.</span><span>${esc(q.q)} ${tsBtn(q.ts)}</span></div>
       ${q.options.length ? `<ol type="a">${q.options.map((o) => `<li>${esc(o)}</li>`).join("")}</ol>` : ""}
-      <button class="btn small" data-reveal="${i}">${t("show_answer")}</button>
+      <button class="btn btn-small" data-reveal="${i}">${t("show_answer")}</button>
       <div class="answer" id="ans-${i}" hidden>${esc(q.a)}</div>
     </div>`).join("");
   $$("[data-reveal]", body).forEach((b) => b.addEventListener("click", () => {
@@ -293,7 +290,7 @@ function drawTerms(body) {
     <div class="fix-list">${Object.entries(lec.corrections).map(([a, b]) => `<div class="fix"><span class="from">${esc(a)}</span> → <b>${esc(b)}</b>
       <button class="icon-btn" data-unfix="${esc(a)}" title="${t("remove")}">${ICON.x}</button></div>`).join("")}</div>
     <div class="fix-add"><input type="text" id="fix-from" placeholder="${t("fix_from_ph")}"><span>→</span>
-      <input type="text" id="fix-to" placeholder="${t("fix_to_ph")}"><button class="btn small" id="fix-add">${t("fix_add")}</button></div>`;
+      <input type="text" id="fix-to" placeholder="${t("fix_to_ph")}"><button class="btn btn-small" id="fix-add">${t("fix_add")}</button></div>`;
   const save = saveCorrections;
   $("#fix-add").addEventListener("click", () => {
     const a = $("#fix-from").value.trim(), b = $("#fix-to").value.trim();
@@ -311,7 +308,7 @@ function drawTerms(body) {
 async function saveCorrections(corrections) {
   const c = S.courses.find((x) => x.id === lec.course);
   if (!c) return toast(t("not_found"), true);
-  const y = window.scrollY;
+  const y = scroller().scrollTop;
   try {
     await post("/api/courses", { ...c, corrections });
     S.courses = await api("/api/courses");
@@ -320,7 +317,7 @@ async function saveCorrections(corrections) {
     lec = await api(`/api/lectures/${encodeURIComponent(lec.id)}`);
     drawChapters();
     drawTabs();
-    window.scrollTo(0, y);
+    scroller().scrollTop = y;
   } catch (e) { toast(e.message, true); }
 }
 
@@ -342,10 +339,10 @@ function openWordFix(text, rect) {
   m.className = "menu pop word-fix";
   m.innerHTML = `<div class="block-title">${t("fixw_title")}</div>
     <div class="word-fix-row"><span class="from">${esc(text)}</span><span>→</span>
-      <input name="to" value="${esc(text)}" aria-label="${t("fixw_title")}" autocomplete="off"></div>
+      <input type="text" name="to" value="${esc(text)}" aria-label="${t("fixw_title")}" autocomplete="off"></div>
     <p class="muted small">${t("fixw_hint", { course: esc(lec.course_name) })}</p>
-    <div class="row-end"><button type="button" class="btn small ghost" data-x>${t("cancel")}</button>
-      <button type="submit" class="btn small primary">${t("fixw_apply")}</button></div>`;
+    <div class="row-end"><button type="button" class="btn btn-small btn-plain" data-x>${t("cancel")}</button>
+      <button type="submit" class="btn btn-small btn-primary">${t("fixw_apply")}</button></div>`;
   document.body.append(m);
   m.style.left = `${Math.min(window.innerWidth - m.offsetWidth - 8, Math.max(8, rect.left))}px`;
   m.style.top = window.innerHeight - rect.bottom > m.offsetHeight + 12 ? `${rect.bottom + 6}px` : `${Math.max(8, rect.top - m.offsetHeight - 6)}px`;
@@ -365,7 +362,7 @@ function openWordFix(text, rect) {
 // (OR/NOR depends on the spot), "whole course" = the course fix list. Re-stitches at once, keeps the scroll.
 function drawSuggest(body) {
   const tf = lec.termfix, id = encodeURIComponent(lec.id);
-  const again = (label) => `<button class="btn small" id="tf-run">${label}</button>`;
+  const again = (label) => `<button class="btn btn-small" id="tf-run">${label}</button>`;
   if (!tf || ["skipped", "failed"].includes(tf.status) || tf.status === "running") {
     const running = tf?.status === "running";
     body.innerHTML = `<div class="empty"><h2>${t(running ? "tf_running" : tf ? "tf_" + tf.status : "tf_none")}</h2>
@@ -384,11 +381,11 @@ function drawSuggest(body) {
           <span class="muted small">${x.count}×</span></div>
         <div class="tf-ctx muted small">${ctx(x)}</div>
         <div class="tf-act">${x.status === "open"
-          ? `<button class="btn small primary" data-tf="${x.id}" data-to="accepted">${t("tf_accept")}</button>
-             <button class="btn small" data-tf="${x.id}" data-to="course">${t("tf_course")}</button>
-             <button class="btn small ghost" data-tf="${x.id}" data-to="rejected">${t("tf_reject")}</button>`
+          ? `<button class="btn btn-small btn-primary" data-tf="${x.id}" data-to="accepted">${t("tf_accept")}</button>
+             <button class="btn btn-small" data-tf="${x.id}" data-to="course">${t("tf_course")}</button>
+             <button class="btn btn-small btn-plain" data-tf="${x.id}" data-to="rejected">${t("tf_reject")}</button>`
           : `<span class="tf-state">${t("tf_st_" + x.status)}</span>
-             <button class="btn small ghost" data-tf="${x.id}" data-to="open">${t("tf_undo")}</button>`}</div></div>`).join("")}</div>`
+             <button class="btn btn-small btn-plain" data-tf="${x.id}" data-to="open">${t("tf_undo")}</button>`}</div></div>`).join("")}</div>`
         : `<p class="muted">${t("tf_empty")}</p>`}
       <p style="margin-top:16px">${again(t("tf_remake"))}</p>`;
   }
@@ -398,7 +395,7 @@ function drawSuggest(body) {
     drawTabs();
   });
   $$("[data-tf]", body).forEach((b) => b.addEventListener("click", async () => {
-    const y = window.scrollY;
+    const y = scroller().scrollTop;
     $$("[data-tf]", body).forEach((x) => { x.disabled = true; });
     try {
       await post(`/api/lectures/${id}/termfix/${b.dataset.tf}`, { status: b.dataset.to });
@@ -406,7 +403,7 @@ function drawSuggest(body) {
       if (b.dataset.to === "course") S.courses = await api("/api/courses");
       drawChapters();
       drawTabs();
-      window.scrollTo(0, y);
+      scroller().scrollTop = y;
     } catch (e) { toast(e.message, true); drawTabs(); }
   }));
 }

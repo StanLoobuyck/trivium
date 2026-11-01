@@ -270,6 +270,7 @@ import { createDownloadControl } from "./download-control.js";
     const rect = getPlayerRect();
     if (!rect) {
       el.style.left = "";
+      el.style.right = "";
       el.style.top = "";
       return;
     }
@@ -281,8 +282,9 @@ import { createDownloadControl } from "./download-control.js";
       el.style.left = `${rect.left + rect.width / 2}px`;
       el.style.top = `${rect.bottom - 72}px`;
     } else {
-      el.style.left = `${rect.left + 18}px`;
-      el.style.top = `${rect.top + 18}px`;
+      // Anchored on the right: the pill changes width with its text.
+      el.style.right = `${document.documentElement.clientWidth - rect.right + 16}px`;
+      el.style.top = `${rect.top + 16}px`;
     }
   }
 
@@ -291,7 +293,7 @@ import { createDownloadControl } from "./download-control.js";
     if (positionFrame) return;
     positionFrame = requestAnimationFrame(() => {
       positionFrame = null;
-      if (downloadWrapEl && downloadWrapEl.isConnected) positionOverPlayer(downloadWrapEl, "top-left");
+      if (downloadWrapEl && downloadWrapEl.isConnected) positionOverPlayer(downloadWrapEl, "top-right");
       if (osdEl && osdEl.isConnected && osdEl.style.display !== "none") positionOverPlayer(osdEl, "center");
       placeSheetIfOpen((el) => positionOverPlayer(el, "center"));
       placeToastIfOpen((el) => positionOverPlayer(el, "bottom"));
@@ -318,7 +320,7 @@ import { createDownloadControl } from "./download-control.js";
       playerResizeObserver.observe(player);
       observedPlayer = player;
     }
-    positionOverPlayer(downloadWrapEl, "top-left");
+    positionOverPlayer(downloadWrapEl, "top-right");
   }
 
   // Progress for this tab's download, from the background (or local events).

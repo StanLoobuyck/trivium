@@ -19,6 +19,13 @@ import { buildManifest } from "./manifest.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "src");
+// The look is shared with Inhaal and Verbatim: these files are the single source, copied into every build.
+const DESIGN = join(ROOT, "..", "..", "packages", "design");
+const EXTENSION_ORIGIN = {
+  firefox: "moz-extension://__MSG_@@extension_id__",
+  chrome: "chrome-extension://__MSG_@@extension_id__",
+  safari: "safari-web-extension://__MSG_@@extension_id__",
+};
 export const TARGETS = ["firefox", "chrome", "safari"];
 
 const args = process.argv.slice(2);
@@ -84,13 +91,22 @@ async function buildTarget(target) {
     ["welcome/welcome.html", "welcome.html"],
     ["welcome/welcome.css", "welcome.css"],
     ["_locales", "_locales"],
-    ["content/style.css", "style.css"],
     ["icons", "icons"],
   ];
   if (target === "chrome") statics.push(["offscreen/offscreen.html", "offscreen.html"]);
   for (const [from, to] of statics) {
     await cp(join(SRC, from), join(out, to), { recursive: true });
   }
+
+  for (const file of ["tokens.css", "components.css", "fonts/Inter.woff2", "fonts/OFL.txt"]) {
+    await cp(join(DESIGN, file), join(out, file), { recursive: true });
+  }
+  // A content script's stylesheet can't use relative urls: it would load the font from the page.
+  const playerCss = await readFile(join(SRC, "content/style.css"), "utf8");
+  await writeFile(
+    join(out, "style.css"),
+    playerCss.replaceAll("__EXTENSION_ORIGIN__", EXTENSION_ORIGIN[target]),
+  );
 
   const manifest = buildManifest(target, { version: pkg.version, dev });
   await writeFile(join(out, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");

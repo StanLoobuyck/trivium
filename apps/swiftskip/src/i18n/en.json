@@ -71,7 +71,7 @@
   "actionShowShortcuts": "Show shortcuts",
   "actionJump": "Jump to {percent}%",
   "settingsPageTitle": "SwiftSkip settings",
-  "settingsVersion": "Settings · version {version}",
+  "settingsVersion": "Version {version}",
   "general": "General",
   "enabledDesc": "Turn off to use the player without SwiftSkip's shortcuts and extras.",
   "language": "Language",
@@ -136,5 +136,7 @@
   "inhaalDenied": "Not linked: the browser didn't get permission.",
   "downloadsToVerbatim": "Downloads to Verbatim",
   "downloadsToVerbatimDesc": "Saves recordings in Downloads/Verbatim/<course code>/, where Verbatim picks them up. Without a course code, a download stays in Downloads.",
+  "popupLinkedInhaal": "Linked with Inhaal",
+  "popupToVerbatim": "downloads go to Verbatim",
   "linksTitle": "Links"
 }

@@ -53,6 +53,7 @@ export function buildManifest(target, { version, dev }) {
       return {
         manifest_version: 2,
         ...base,
+        web_accessible_resources: ["fonts/Inter.woff2"],
         browser_specific_settings: {
           gecko: {
             id: "swiftskip@stanloobuyck.github.io",
@@ -82,6 +83,7 @@ export function buildManifest(target, { version, dev }) {
         host_permissions: hosts,
         optional_host_permissions: OPTIONAL_HOSTS,
         background: { service_worker: "background.js" },
+        web_accessible_resources: [{ resources: ["fonts/Inter.woff2"], matches: hosts }],
         action: ACTION,
       };
 
@@ -93,6 +95,7 @@ export function buildManifest(target, { version, dev }) {
         host_permissions: hosts,
         optional_host_permissions: OPTIONAL_HOSTS,
         background: { scripts: ["background.js"], persistent: false },
+        web_accessible_resources: [{ resources: ["fonts/Inter.woff2"], matches: hosts }],
         action: ACTION,
       };
 

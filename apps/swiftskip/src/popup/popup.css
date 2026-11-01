@@ -1,43 +1,44 @@
+/* The popup is a phone screen in small: grey page, one white grouped list, as in Inhaal. */
+html {
+  background: var(--bg);
+}
+
 body {
-  width: 300px;
+  width: 340px;
+  min-height: 0;
+  overscroll-behavior: none;
 }
 
 .popup {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
 }
 
-/* ─── Header ────────────────────────────────────────────────────────────── */
-
-.bar {
+.pop-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-2);
+  padding-inline: var(--space-1);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: auto;
-  font-size: 15px;
-  font-weight: 600;
+.side-brand {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font-size: var(--text-body);
 }
 
-.bar-settings {
-  margin-right: 8px;
+.pop-head .switch {
+  margin-left: var(--space-1);
 }
-
-/* ─── Body ──────────────────────────────────────────────────────────────── */
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 14px;
-  transition: opacity 0.18s ease;
+  gap: var(--space-3);
+  transition: opacity var(--dur-fast) var(--ease-out);
 }
 
 .popup.is-off .body {
@@ -45,45 +46,37 @@ body {
   pointer-events: none;
 }
 
-.lecture p {
-  margin: 0;
-}
-
-.lecture-course {
-  color: var(--muted);
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.lecture {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-inline: var(--space-1);
 }
 
 .lecture-title {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.35;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
+.lecture-course,
 .lecture-hint {
-  margin-top: 4px !important;
-  color: var(--muted);
-  font-size: 12px;
+  color: var(--text-2);
+  font-size: var(--text-label);
 }
 
-.download {
-  margin-top: 12px;
+.lecture-course {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.site-off {
-  margin-top: 12px;
-}
-
-.site-enable {
-  width: 100%;
-  gap: 0.3em; /* the space between "Enable on" and the site */
+.download:not(:has(> :not([hidden]))),
+.site-off[hidden] {
+  display: none;
 }
 
 .site-enable span {
@@ -92,72 +85,47 @@ body {
   white-space: nowrap;
 }
 
+.site-enable {
+  gap: 0.3em;
+}
+
 .site-note {
-  margin-top: 6px !important;
-  color: var(--muted);
-  font-size: 12px;
+  margin-top: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--text-label);
   text-align: center;
 }
 
-.download:empty,
-.download:not(:has(> :not([hidden]))) {
-  display: none;
+.dl-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-row);
+  background: var(--card);
 }
-
-.download-btn {
-  width: 100%;
-}
-
-/* Progress */
 
 .progress-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.progress-phase {
-  font-weight: 600;
-}
-
-.progress-head .icon-btn {
-  width: 24px;
-  height: 24px;
-  margin-right: -4px;
-}
-
-.progress-track {
-  height: 4px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--surface);
-}
-
-.progress-fill {
-  width: 0%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent);
-  transition: width 0.25s ease-out;
+  gap: var(--space-2);
+  min-height: 24px;
+  font-size: var(--text-sub);
+  font-weight: var(--weight-medium);
 }
 
 .progress-meta {
-  margin-top: 6px !important;
-  color: var(--muted);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  font-size: var(--text-label);
 }
 
 .status {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.status-done {
-  color: var(--success);
+  gap: var(--space-2);
+  padding-inline: var(--space-1);
+  font-size: var(--text-label);
 }
 
 .status-done span {
@@ -165,83 +133,52 @@ body {
 }
 
 .status-error {
-  margin-top: 8px !important;
   color: var(--danger);
-  line-height: 1.4;
 }
 
-/* ─── Controls ──────────────────────────────────────────────────────────── */
-
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 30px;
+.controls .row {
+  font-size: var(--text-sub);
 }
 
 .row-label {
-  color: var(--muted);
+  flex: 1;
 }
 
 .stepper {
   display: inline-flex;
   align-items: center;
-  padding: 2px;
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+  border-radius: var(--radius-row);
+  background: var(--fill);
 }
 
-.stepper .icon-btn {
-  width: 26px;
-  height: 26px;
-}
-
-.stepper .icon-btn .icon {
-  width: 14px;
-  height: 14px;
+.stepper .icon {
+  width: 16px;
+  height: 16px;
 }
 
 .stepper-value {
-  min-width: 52px;
+  min-width: 48px;
+  font-weight: var(--weight-semibold);
   text-align: center;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
 }
 
-/* ─── Footer ────────────────────────────────────────────────────────────── */
-
-.footer {
-  display: flex;
-  border-top: 1px solid var(--border);
+.pop-foot {
+  padding-inline: var(--space-1);
+  color: var(--text-2);
+  font-size: var(--text-micro);
 }
 
-.footer-link {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  height: 40px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font-weight: 500;
-  cursor: pointer;
-}
+/* Dark: the same raised surface as Inhaal's sheets. The browser draws the popup's rounded panel in its own grey
+   (Zen: #1F1F1F) behind this page; on pure black that grey showed up as odd corners, on --card it doesn't. */
+@media (prefers-color-scheme: dark) {
+  html,
+  body {
+    background: var(--card);
+  }
 
-.footer-link + .footer-link {
-  border-left: 1px solid var(--border);
-}
-
-.footer-link:hover {
-  background: var(--surface);
-  color: var(--text);
+  .list,
+  .dl-progress {
+    background: var(--fill);
+    box-shadow: none;
+  }
 }

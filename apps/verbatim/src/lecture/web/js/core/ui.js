@@ -1,15 +1,23 @@
 // Small UI building blocks shared by the screens: toasts, flicker-free repaint, polling, the top-bar title,
 // inline rename fields and the card menu.
 import { $, $$ } from "./dom.js";
+import { esc } from "./format.js";
 import { S } from "./state.js";
 import { drawLibrary } from "../screens/library.js";
 
+let toastTimer = null;
 export function toast(msg, bad = false) {
-  const el = document.createElement("div");
-  el.className = "toast" + (bad ? " bad" : "");
+  const el = $("#toast");
   el.textContent = msg;
-  $("#toasts").append(el);
-  setTimeout(() => el.remove(), bad ? 7000 : 3500);
+  el.classList.add("is-open");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("is-open"), bad ? 7000 : 3500);
+}
+
+// Laptop: the page scrolls inside #scroller (as in Inhaal). Narrow: the document itself scrolls.
+export function scroller() {
+  const el = $("#scroller");
+  return getComputedStyle(el).overflowY === "auto" ? el : document.scrollingElement;
 }
 
 // Polled parts are only rebuilt when their HTML changed: rebuilding unchanged DOM every few seconds made the
@@ -21,11 +29,18 @@ export function paint(el, html) {
   return true;
 }
 
-export function setBarTitle(text, show = false) {
-  const el = $("#bar-title");
-  el.textContent = text;
-  el.classList.toggle("show", !!text && show);
-  el.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+// Lecture page: title + one line under it in the bar above the page.
+export function setBarTitle(title = "", sub = "") {
+  $("#bar-title").innerHTML = title ? `<h1 class="editable" id="lec-title" title="${t("rename")}">${esc(title)}</h1><p class="label">${esc(sub)}</p>` : "";
+}
+
+// Same three choices as Inhaal; "system" removes the override so the OS decides.
+export const themeChoice = () => document.documentElement.dataset.theme || "system";
+export function setTheme(choice) {
+  if (choice === "system") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = choice;
+  try { if (choice === "system") localStorage.removeItem("lt-theme"); else localStorage.setItem("lt-theme", choice); }
+  catch { /* private window: just not remembered */ }
 }
 
 let pollTimer = null;
