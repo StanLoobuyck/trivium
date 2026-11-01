@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Verbatim
+GenericName=Lecture transcriber
+Comment=Queue lecture recordings; get slide-aligned transcripts and study notes
+Exec=@LECTURE@ ui
+Icon=verbatim
+Terminal=false
+Categories=Education;
+Keywords=lecture;transcriber;transcript;notes;whisper;college;
+StartupNotify=false

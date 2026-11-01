@@ -1,0 +1,48 @@
+/* App shell: sidebar (library, add, settings) + page. On the lecture page the sidebar gives way to a slim
+   bar with "← Library" so video and notes get the width. */
+.shell { display: flex; min-height: 100vh; }
+.side { flex: none; width: var(--sidebar); position: sticky; top: 0; height: 100vh; overflow-y: auto; box-sizing: border-box;
+  padding: 22px 14px 16px; border-right: 1px solid var(--border); background: var(--bg); display: flex; flex-direction: column; gap: 24px; }
+.page { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+main { max-width: 1100px; width: 100%; margin: 0 auto; padding: 40px 48px 72px; box-sizing: border-box; gap: 36px; }
+
+.side-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; color: var(--text); font-weight: 600; font-size: 15px; }
+.side-mark { width: 24px; height: 24px; flex: none; fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
+.side-mark path { stroke: var(--logo-accent); }
+.side-add { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: var(--radius); background: var(--primary);
+  color: var(--primary-ink); font-weight: 500; }
+.side-add:hover { filter: brightness(1.15); }
+.side-group { display: flex; flex-direction: column; gap: 2px; }
+.side-label { padding: 0 10px 6px; color: var(--muted); font-size: 13px; }
+.side-link { display: flex; justify-content: space-between; gap: 12px; padding: 7px 10px; border-radius: 6px; color: var(--text); line-height: 1.4; }
+.side-link:hover { background: var(--surface-2); color: var(--text); }
+.side-link.on { background: var(--nav-on); font-weight: 500; }
+.side-link .n { color: var(--muted); font-weight: 400; flex: none; }
+.side-link.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.side-new { border: 0; background: none; text-align: left; cursor: pointer; color: var(--muted); font: inherit; }
+.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
+#side-status { display: flex; flex-direction: column; gap: 6px; padding: 0 10px; font-size: 13px; color: var(--muted); }
+#side-status a { color: var(--muted); display: flex; align-items: center; gap: 8px; }
+#side-status a:hover { color: var(--text); }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--ok); }
+.dot.bad { background: var(--bad); }
+.dot.wait { background: var(--warn); }
+.dot.off { background: transparent; border: 1.5px solid var(--muted); box-sizing: border-box; }
+.side-prefs { display: flex; align-items: center; justify-content: space-between; padding: 0 6px; }
+
+.pagebar { display: none; position: sticky; top: 0; z-index: 20; align-items: center; gap: 20px; height: 52px; padding: 0 32px;
+  background: var(--bg); border-bottom: 1px solid var(--border); }
+.pagebar-back { color: var(--muted); white-space: nowrap; }
+.pagebar-back:hover { color: var(--text); }
+body[data-page="lecture"] .side { display: none; }
+body[data-page="lecture"] .pagebar { display: flex; }
+body[data-page="lecture"] main { max-width: 1680px; padding-top: 24px; }
+
+@media (max-width: 860px) {
+  .shell { flex-direction: column; }
+  .side { position: static; width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+  main { padding: 24px 16px 56px; }
+  .pagebar { padding: 0 16px; }
+}
+#side-nav { display: flex; flex-direction: column; gap: 24px; }
+main > section:empty { display: none; }

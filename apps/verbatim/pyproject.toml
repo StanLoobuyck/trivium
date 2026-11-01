@@ -1,0 +1,54 @@
+[project]
+name = "lecture-transcriber"
+version = "0.1.0"
+description = "Slide-aligned lecture transcripts and study notes from free cloud AI services"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "typer>=0.12",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "httpx>=0.27",
+    "openai>=1.40",
+    "google-genai>=1.20",
+    "tenacity>=8.2",
+    "tiktoken>=0.7",
+    "rapidfuzz>=3.9",
+    "jiwer>=3.0",
+    "jinja2>=3.1",
+    "pymupdf>=1.24",
+    "python-pptx>=1.0",
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "python-multipart>=0.0.9",
+    "wordfreq>=3.1.1",
+]
+
+[project.optional-dependencies]
+# Local Whisper on an NVIDIA GPU (Phase 1b). CUDA runtime libraries come as wheels, so no system CUDA is needed.
+local = [
+    "faster-whisper>=1.1",
+    "nvidia-cublas-cu12",
+    "nvidia-cudnn-cu12>=9,<10",
+]
+
+[project.scripts]
+lecture = "lecture.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lecture"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: calls real APIs (needs keys, uses free quota)"]
+addopts = "-m 'not live'"

@@ -1,0 +1,21 @@
+# Lecture Transcriber worker: processes the queue (`lecture queue add`, or the UI) in the background.
+# Installed by scripts/install.sh into ~/.config/systemd/user/; enable with:
+#   systemctl --user enable --now lecture-worker.service
+[Unit]
+Description=Lecture Transcriber worker (transcription + notes queue)
+After=default.target
+
+[Service]
+Type=simple
+# the systemd user PATH has no ~/.local/bin: `lecture` and `claude` (notes) live there
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.local/bin/lecture worker
+Restart=on-failure
+RestartSec=30
+# a lecture in progress resumes on the next start; give the current chunk a moment to finish
+TimeoutStopSec=20
+Nice=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- Verbatim mark, drawn on the 16 px grid (3 bars; the 48-unit mark has 4). Colours follow the system theme. -->
+  <style>
+    .ink { stroke: #1f1f1d; } .acc { stroke: #b96a3d; }
+    @media (prefers-color-scheme: dark) { .ink { stroke: #ecebe7; } .acc { stroke: #ea9a5d; } }
+  </style>
+  <rect class="ink" x="2" y="2" width="12" height="12" rx="3.5" fill="none" stroke-width="2"/>
+  <path class="acc" d="M5 7V9M8 5V11M11 7.5V8.5" fill="none" stroke-width="2" stroke-linecap="round"/>
+</svg>

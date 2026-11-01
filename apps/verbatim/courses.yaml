@@ -1,0 +1,29 @@
+# One entry per course. The UI shows these in a dropdown.
+# Override/extend in ~/.config/lecture-transcriber/courses.yaml (replaces this list if present).
+courses:
+  - id: algemene-economie
+    name: "Algemene Economie"
+    language: nl                 # language spoken in the lecture (nl | en)
+    lecturer: "Prof. Janssens"   # helps Whisper spell the name
+    extra_terms: ["elasticiteit", "IS-LM", "Keynesiaans"]
+    notes_language: nl
+
+  - id: data-science
+    name: "Introduction to Data Science"
+    language: en
+    extra_terms: ["scikit-learn", "overfitting"]
+    notes_language: en
+
+  - id: digitale-elektronica
+    name: "Digitale elektronica en processoren"
+    language: nl
+    lecturer: "Ada Example"
+    extra_terms: []              # slide terms are found automatically (Stage 2); add what the slides miss
+    notes_language: nl
+
+  - id: elektrische-energie
+    name: "Elektrische energie en aandrijvingen"
+    language: nl
+    lecturer: "Jan Example"    # guest lecturers come from the title slide's terms
+    extra_terms: []
+    notes_language: nl
