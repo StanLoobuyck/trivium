@@ -16,7 +16,7 @@ const ACTION = {
 };
 
 // Firefox/Zen check this for new versions (updated by `npm run release`).
-export const UPDATE_URL = "https://raw.githubusercontent.com/StanLoobuyck/SwiftSkip/main/updates.json";
+export const UPDATE_URL = "https://stanloobuyck.github.io/studie-ecosysteem/swiftskip/updates.json";
 
 // Dev builds also run on the local test pages (npm run dev:*).
 const DEV_HOSTS = ["http://localhost/*", "http://127.0.0.1/*"];

@@ -56,7 +56,7 @@ test("release Firefox builds point to the self-hosted update manifest; dev build
   const release = buildManifest("firefox", opts).browser_specific_settings.gecko;
   assert.equal(
     release.update_url,
-    "https://raw.githubusercontent.com/StanLoobuyck/SwiftSkip/main/updates.json",
+    "https://stanloobuyck.github.io/studie-ecosysteem/swiftskip/updates.json",
   );
   assert.equal(
     buildManifest("firefox", { ...opts, dev: true }).browser_specific_settings.gecko.update_url,

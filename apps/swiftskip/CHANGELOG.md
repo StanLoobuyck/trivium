@@ -3,6 +3,11 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.0.2
+
+**Changed**
+- Firefox / Zen: updates now come from a new address, so future versions keep arriving by themselves
+
 ## 4.0.1
 
 **Fixed**
