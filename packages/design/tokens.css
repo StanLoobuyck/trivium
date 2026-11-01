@@ -61,6 +61,7 @@
   --fill-strong: rgba(120, 120, 128, 0.2);
   --separator: rgba(0, 0, 0, 0.12);
   --segment-on: #FFFFFF;
+  --knob: #FFFFFF;
   --bar: rgba(242, 242, 247, 0.8);
   --scrim: rgba(0, 0, 0, 0.3);
   --text: #000000;
@@ -109,6 +110,7 @@
     --fill-strong: rgba(120, 120, 128, 0.36);
     --separator: rgba(255, 255, 255, 0.14);
     --segment-on: #636366;
+    --knob: #FFFFFF;
     --bar: rgba(22, 22, 24, 0.8);
     --scrim: rgba(0, 0, 0, 0.55);
     --text: #FFFFFF;
@@ -153,6 +155,7 @@
   --fill-strong: rgba(120, 120, 128, 0.36);
   --separator: rgba(255, 255, 255, 0.14);
   --segment-on: #636366;
+  --knob: #FFFFFF;
   --bar: rgba(22, 22, 24, 0.8);
   --scrim: rgba(0, 0, 0, 0.55);
   --text: #FFFFFF;

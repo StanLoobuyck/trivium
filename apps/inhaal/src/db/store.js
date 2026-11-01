@@ -1,0 +1,189 @@
+// De toestand van de app: laden, wijzigen en bij elke wijziging de schermen verwittigen.
+import { findCourseByCode, proposeCourses } from "../domain/courses.js";
+import { mergeRooster } from "../domain/merge.js";
+import { db, getMeta, requestPersistence, setMeta, stamp } from "./index.js";
+
+export const state = { semester: null, semesters: [], courses: [], sessions: [], meta: {} };
+const nowIso = () => new Date().toISOString();
+
+export async function load() {
+  state.semesters = await db.semesters.toArray();
+  state.semester = state.semesters.find((s) => s.isActive && !s.deletedAt) ?? null;
+  const id = state.semester?.id;
+  state.courses = id ? (await db.courses.where({ semesterId: id }).toArray()).filter((c) => !c.deletedAt).sort((a, b) => a.order - b.order) : [];
+  const ids = state.courses.map((c) => c.id);
+  state.sessions = (await db.sessions.where("courseId").anyOf(ids).toArray()).filter((s) => !s.deletedAt);
+  const firstUse = await getMeta("firstUseAt");
+  state.meta = {
+    firstUseAt: firstUse,
+    lastBackupAt: await getMeta("lastBackupAt"),
+    lastCourseId: await getMeta("lastCourseId"),
+    installDismissed: await getMeta("installDismissed", false),
+    weeksDismissed: await getMeta("weeksDismissed", false),
+  };
+}
+
+export const courseById = (id) => state.courses.find((c) => c.id === id);
+export const sessionById = (id) => state.sessions.find((s) => s.id === id);
+
+function sessionFromEvent(event, courseId, now) {
+  return stamp({
+    id: event.uid, courseId, code: event.code, type: event.type, start: event.start, end: event.end,
+    status: "upcoming", statusChangedAt: null, source: "rooster", roosterUid: event.uid,
+    location: event.location || null, online: event.online, recordings: [], note: null, progressSec: null, verbatimJob: null,
+  }, now);
+}
+
+export async function createSemester({ semester, courses, events }) {
+  const now = new Date();
+  await db.transaction("rw", db.semesters, db.courses, db.sessions, db.meta, async () => {
+    await db.semesters.toCollection().modify({ isActive: false });
+    const saved = stamp({ ...semester, isActive: true, roosterSource: "upload" }, now);
+    await db.semesters.add(saved);
+    const records = courses.map((c) => stamp({ ...c, semesterId: saved.id }, now));
+    await db.courses.bulkAdd(records);
+    await db.sessions.bulkPut(events.map((e) => sessionFromEvent(e, findCourseByCode(records, e.code).id, now)));
+    if (!(await getMeta("firstUseAt"))) await setMeta("firstUseAt", now.toISOString());
+  });
+  requestPersistence();
+  await load();
+}
+
+// Volgende uploads: alleen toevoegen en wijzigen. Verdwenen lessen komen terug als voorstel.
+export async function applyRooster(events) {
+  const now = new Date();
+  const { add, update, vanished } = mergeRooster(state.sessions, events);
+  await db.transaction("rw", db.semesters, db.courses, db.sessions, async () => {
+    const unknown = add.filter((e) => !findCourseByCode(state.courses, e.code));
+    const records = proposeCourses(unknown).map((c, i) => stamp({
+      ...c, semesterId: state.semester.id, order: state.courses.length + i,
+    }, now));
+    await db.courses.bulkAdd(records);
+    const all = [...state.courses, ...records];
+    await db.sessions.bulkPut(add.map((e) => sessionFromEvent(e, findCourseByCode(all, e.code).id, now)));
+    await Promise.all(update.map(({ id, ...changes }) => db.sessions.update(id, { ...changes, updatedAt: now.toISOString() })));
+    const last = events.at(-1)?.end.slice(0, 10);
+    if (last > state.semester.endDate) await db.semesters.update(state.semester.id, { endDate: last, updatedAt: now.toISOString() });
+  });
+  await load();
+  return { added: add.length, updated: update.length, vanished };
+}
+
+export async function updateSession(id, changes) {
+  await db.sessions.update(id, { ...changes, updatedAt: nowIso() });
+  Object.assign(sessionById(id) ?? {}, changes);
+}
+
+export async function setStatus(ids, status) {
+  const time = nowIso();
+  const before = ids.map((id) => ({ id, status: sessionById(id).status, statusChangedAt: sessionById(id).statusChangedAt }));
+  await Promise.all(ids.map((id) => updateSession(id, { status, statusChangedAt: time })));
+  return async () => {
+    await Promise.all(before.map(({ id, ...old }) => updateSession(id, old)));
+  };
+}
+
+export async function deleteSession(id) {
+  await db.sessions.update(id, { deletedAt: nowIso(), updatedAt: nowIso() });
+  await load();
+  return async () => {
+    await db.sessions.update(id, { deletedAt: null, updatedAt: nowIso() });
+    await load();
+  };
+}
+
+export async function addManualSessions({ courseId, type, dates, minutes }) {
+  const now = new Date();
+  await db.sessions.bulkAdd(dates.map((end) => stamp({
+    courseId, code: null, type,
+    start: new Date(end.getTime() - minutes * 60000).toISOString(), end: end.toISOString(),
+    status: "upcoming", statusChangedAt: null, source: "manueel", roosterUid: null,
+    location: null, online: false, recordings: [], note: null, progressSec: null, verbatimJob: null,
+  }, now)));
+  await setMeta("lastCourseId", courseId);
+  await load();
+}
+
+export async function updateCourse(id, changes) {
+  await db.courses.update(id, { ...changes, updatedAt: nowIso() });
+  await load();
+}
+
+export async function updateSemester(changes) {
+  await db.semesters.update(state.semester.id, { ...changes, updatedAt: nowIso() });
+  await load();
+}
+
+export async function setAllDurations(changes) {
+  await Promise.all(state.courses.map((c) => db.courses.update(c.id, { ...changes, updatedAt: nowIso() })));
+  await load();
+}
+
+export async function mergeCourses(keepId, otherId) {
+  const keep = courseById(keepId);
+  const other = courseById(otherId);
+  const time = nowIso();
+  await db.transaction("rw", db.courses, db.sessions, async () => {
+    await db.sessions.where({ courseId: otherId }).modify({ courseId: keepId, updatedAt: time });
+    await db.courses.update(keepId, { codes: [...keep.codes, ...other.codes], updatedAt: time });
+    await db.courses.update(otherId, { deletedAt: time, updatedAt: time });
+  });
+  await load();
+}
+
+export async function splitCode(courseId, code) {
+  const course = courseById(courseId);
+  const now = new Date();
+  const name = `${course.name} (${code})`;
+  const record = stamp({ ...course, id: undefined, name, codes: [code], order: state.courses.length }, now);
+  record.id = crypto.randomUUID();
+  await db.transaction("rw", db.courses, db.sessions, async () => {
+    await db.courses.add(record);
+    await db.courses.update(courseId, { codes: course.codes.filter((c) => c !== code), updatedAt: now.toISOString() });
+    await db.sessions.where({ courseId }).filter((s) => s.code === code).modify({ courseId: record.id, updatedAt: now.toISOString() });
+  });
+  await load();
+}
+
+export async function applyNotesPlan(plan) {
+  const now = new Date();
+  await db.transaction("rw", db.sessions, async () => {
+    for (const { id, checked } of plan.link) {
+      if (checked) await db.sessions.update(id, { status: "watched", statusChangedAt: now.toISOString(), updatedAt: now.toISOString() });
+    }
+    await db.sessions.bulkAdd(plan.create.map(({ checked, ...s }) => stamp({
+      ...s, code: null, status: checked ? "watched" : "upcoming", statusChangedAt: null, source: "manueel", roosterUid: null,
+      location: null, online: false, recordings: [], note: null, progressSec: null, verbatimJob: null,
+    }, now)));
+  });
+  await load();
+}
+
+export async function dumpAll() {
+  return { semesters: await db.semesters.toArray(), courses: await db.courses.toArray(), sessions: await db.sessions.toArray() };
+}
+
+export async function restoreAll({ semesters, courses, sessions }) {
+  await db.transaction("rw", db.semesters, db.courses, db.sessions, async () => {
+    await Promise.all([db.semesters.clear(), db.courses.clear(), db.sessions.clear()]);
+    await db.semesters.bulkPut(semesters);
+    await db.courses.bulkPut(courses);
+    await db.sessions.bulkPut(sessions);
+  });
+  await markBackup();
+}
+
+export async function markBackup() {
+  await setMeta("lastBackupAt", nowIso());
+  await load();
+}
+
+export async function dismiss(key) {
+  await setMeta(key, true);
+  await load();
+}
+
+export async function eraseAll() {
+  await Promise.all([db.semesters.clear(), db.courses.clear(), db.sessions.clear(), db.meta.clear()]);
+  await load();
+}

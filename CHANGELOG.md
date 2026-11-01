@@ -2,12 +2,26 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 0 af: getest op iPhone en laptop, stijl A goedgekeurd (kleine aanpassingen later mogelijk). Publieke
-   repo `studie-ecosysteem`, MIT, commits met het noreply-adres (alleen in deze repo ingesteld). `PLAN.md` blijft
+2. **Nu:** fase 1 gebouwd en lokaal getest, wacht op de test van de eigenaar op iPhone en laptop. Fase 0 is af.
+   Repo `studie-ecosysteem`, MIT, noreply-adres in deze repo, geen Claude-vermelding in commits. `PLAN.md` blijft
    lokaal (geen back-up via GitHub).
-3. **Volgende:** fase 1 (Inhaal-MVP). Daarvoor is een nieuwe rooster-export vanaf de
-   semesterstart nodig: daarmee controleren we ook of de `UID`s stabiel blijven (zie CONTRACT.md).
-4. **Open:** domein voor de tunnel (fase 2), overkoepelende naam en definitief adres (fase 6).
+3. **Volgende:** na goedkeuring fase 2 (hub op de Mac). Daarvoor nodig: domein voor de tunnel.
+4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
+   vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
+
+## 2026-11-01 — fase 1: Inhaal-MVP
+- Rooster uploaden (.ics, meerdere bestanden tegelijk), controle van vakken, overzicht, vakdetail, instellingen,
+  sessie-opties, manueel toevoegen, Selecteer, swipe en lang drukken, undo, Notes plakken, JSON- en Notes-export,
+  back-upherinnering, installatie-uitleg, NL + EN met keuze in instellingen, updatebanner.
+- `domain/` is puur en getest: parser, semesters splitsen (gat > 21 dagen), vakken, nummering, samenvoegen, Notes.
+- Echt rooster + aanvulling (33 sessies uit schermafbeeldingen, week 21/9 tot 11/10; 13 sessies van de week van 12/10
+  vergeleken met de export: identiek): **63 open**, los van de app nageteld. Zonder aanvulling 35.
+- Tests: 78 unit, 88 schermtests lokaal (2 overgeslagen: offline in Firefox). `axe` zonder meldingen op alle schermen.
+- Keuzes zonder overleg, klein en omkeerbaar: alleen het huidige semester wordt geïmporteerd; een bestand uit een
+  later semester start een nieuw semester. Vervolgvakken worden voorgesteld op dezelfde docent en niet-overlappende
+  lessen. Korte namen zijn initialen (EB, DS) en aanpasbaar. De examendatum is een schatting, aanpasbaar.
+- Niet in deze fase: sneltoetsen en commandopalet (fase 2).
+- Niet gemeten: Lighthouse (`npx lighthouse@latest` werd geweigerd omdat het niet-vastgepinde code uitvoert).
 
 ## 2026-11-01 — fase 0: monorepo en stijl A
 - Monorepo met npm-werkruimtes, `CLAUDE.md`, Inhaal-schil, landingspagina, CI met Pages-deploy.

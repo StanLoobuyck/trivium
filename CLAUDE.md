@@ -102,3 +102,7 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 
 ## Valkuilen
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
+- WebKit draait niet op Arch: lokaal Chromium en Firefox, WebKit alleen in de CI.
+- Eigen rooster testen: upload `fixtures/private/rooster.ics` en `rooster-aanvulling.ics` samen. De aanvulling komt
+  uit schermafbeeldingen, omdat TimeEdit niets vóór 12 oktober exporteert. Verwacht op 2026-11-01: 63 open.
+- `fixtures/rooster-anon.ics` hermaken: `node scripts/anonymize-rooster.mjs`.

@@ -6,8 +6,8 @@ export default defineConfig({
   base: "./",
   plugins: [
     VitePWA({
-      registerType: "autoUpdate",
-      injectRegister: "auto",
+      registerType: "prompt",
+      injectRegister: false,
       includeAssets: ["icon.svg", "apple-touch-icon.png"],
       manifestFilename: "manifest.webmanifest",
       manifest: {
@@ -25,7 +25,7 @@ export default defineConfig({
           { src: "icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
-      workbox: { globPatterns: ["**/*.{js,css,html,svg,png,woff2}"] },
+      workbox: { clientsClaim: true, globPatterns: ["**/*.{js,css,html,svg,png,woff2}"] },
     }),
   ],
 });

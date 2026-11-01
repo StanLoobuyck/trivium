@@ -85,3 +85,57 @@ for (const [locale, title] of [["nl-BE", "Inhalen"], ["en-GB", "Catch up"]]) {
     });
   });
 }
+
+const IN_APP = [["overzicht", "/inhaal/#/"], ["lijst", "/inhaal/#/", "Lijst"], ["instellingen", "/inhaal/#/instellingen"], ["vak", "vak"]];
+
+for (const scheme of ["light", "dark"]) {
+  test.describe(`gevulde app ${scheme}`, () => {
+    test.use({ colorScheme: scheme, locale: "nl-BE" });
+
+    test("alle schermen en sheets", async ({ page }, info) => {
+      await page.clock.setFixedTime(new Date("2026-11-01T12:00:00+01:00"));
+      await page.goto("/inhaal/");
+      const chooser = page.waitForEvent("filechooser");
+      await page.getByRole("button", { name: "Rooster uploaden" }).first().click();
+      await (await chooser).setFiles("fixtures/rooster-anon.ics");
+      await page.waitForTimeout(400);
+      const shot = (name) => page.screenshot({ path: `test-results/shots/app-${name}-${info.project.name}-${scheme}.png` });
+      await shot("controle");
+      await page.getByRole("button", { name: "Start", exact: true }).click();
+
+      const check = async () => {
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        expect(overflow).toBeLessThanOrEqual(0);
+        const small = await page.locator(".row, .chip, .btn:not(.btn-small), .check, .tab").evaluateAll((els) =>
+          els.filter((e) => e.offsetParent && e.getBoundingClientRect().height < 44).map((e) => e.className));
+        expect(small).toEqual([]);
+        const { violations } = await new AxeBuilder({ page }).analyze();
+        expect(violations.map((v) => `${v.id}: ${v.nodes[0].target}`)).toEqual([]);
+      };
+
+      for (const [name, path, button] of IN_APP) {
+        if (path === "vak") {
+          await page.goto("/inhaal/#/");
+          await page.getByRole("button", { name: "Per vak" }).click();
+          await page.locator("#view a.row").first().click();
+        }
+        else await page.goto(path);
+        if (button) await page.getByRole("button", { name: button }).click();
+        await page.waitForTimeout(100);
+        await check();
+        await shot(name);
+      }
+
+      await page.getByRole("button", { name: /^Les 1 / }).click();
+      await page.waitForTimeout(400);
+      await check();
+      await shot("opties");
+      await page.keyboard.press("Escape");
+
+      await page.getByRole("button", { name: "Toevoegen" }).click();
+      await page.waitForTimeout(400);
+      await check();
+      await shot("toevoegen");
+    });
+  });
+}
