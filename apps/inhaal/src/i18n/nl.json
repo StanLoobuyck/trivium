@@ -68,7 +68,7 @@
   "merge": "Samenvoegen",
   "mergeWith": "Samenvoegen met…",
   "mergeDone": "Vakken samengevoegd",
-  "missingWeeks": "Je rooster start {n} week na de start van het semester. Upload een aanvulling of voeg die lessen manueel toe.",
+  "missingWeeks": "Je rooster start {n} weken na de start van het semester. Upload een aanvulling of voeg die lessen manueel toe.",
   "dismiss": "Verberg",
   "importResult": "{added} nieuw, {updated} gewijzigd",
   "noRoosterEvents": "Geen lessen gevonden in dit bestand",

@@ -41,7 +41,7 @@ test("rooster geeft vakken en voorbije lessen op in te halen, P&O uit", async ({
   await expect(page.locator("#view")).not.toContainText("P&O");
   await expect(courseLink(page, /Elektronische basisschakelingen/)).toBeVisible();
   await expect(page.locator("#view")).not.toContainText("Elektronische signalen");
-  await expect(page.locator("#view")).toContainText("Je rooster start 3 week na de start");
+  await expect(page.locator("#view")).toContainText("Je rooster start 3 weken na de start");
 });
 
 test("afvinken met undo, en de rij schuift naar Afgewerkt", async ({ page }) => {
@@ -98,7 +98,7 @@ test("swipe naar rechts vinkt af en de volgende tik werkt nog", async ({ page })
   await touch(page, "[data-swipe] .row-link", [["pointerdown", 50], ["pointermove", 80], ["pointermove", 180], ["pointerup", 180]]);
   await expect(page.locator("#toast")).toContainText("afgevinkt");
   await page.waitForTimeout(450);
-  await page.locator("[data-options]").last().click({ force: true });
+  await page.locator("[data-options]").first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
 });
 
@@ -110,9 +110,60 @@ test("swipe naar links opent de opties", async ({ page }) => {
   await expect(page.getByRole("dialog")).toContainText("Status");
 });
 
+test("rijen blijven staan tot je pauzeert, en undo geldt voor alles samen", async ({ page }) => {
+  await start(page);
+  await courseLink(page, /Digitale signaalverwerking/).click();
+  await page.getByRole("checkbox").first().waitFor();
+  const rows = page.locator("#view [data-flip]");
+  const before = await rows.allInnerTexts();
+  await page.getByRole("checkbox").nth(0).click();
+  await page.waitForTimeout(1500);
+  await page.getByRole("checkbox").nth(1).click();
+  await page.waitForTimeout(1500);
+  expect(await rows.allInnerTexts()).toEqual(before);
+  await expect(page.locator("#toast")).toContainText("2 sessies afgevinkt");
+  await expect(page.getByText("Afgewerkt (2)")).toBeVisible({ timeout: 4000 });
+  await page.locator("#toast button").click();
+  await expect(page.getByText(/Afgewerkt/)).toHaveCount(0);
+});
+
+test("naar beneden vegen sluit de sheet", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "aangemaakte touch-events werken alleen in Chromium");
+  await start(page);
+  await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Notes-lijst plakken" }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet).toBeVisible();
+  await page.waitForTimeout(350);
+  const swipe = (dy) => page.evaluate(async (distance) => {
+    const target = document.querySelector("#sheet h2");
+    const fire = (type, y, list = true) => {
+      const touch = new Touch({ identifier: 1, target, clientX: 100, clientY: y });
+      target.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true, touches: list ? [touch] : [], changedTouches: [touch] }));
+    };
+    fire("touchstart", 300); fire("touchmove", 310); fire("touchmove", 300 + distance);
+    await new Promise((done) => { setTimeout(done, 300); });
+    fire("touchend", 300 + distance, false);
+  }, dy);
+  await page.waitForTimeout(100);
+  await swipe(40);
+  await page.waitForTimeout(100);
+  await expect(sheet).toBeVisible();
+  await page.waitForTimeout(400);
+  await swipe(200);
+  await expect(sheet).toBeHidden();
+});
+
+test("de pagina zelf scrolt niet", async ({ page }) => {
+  await start(page);
+  const fits = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
+  expect(fits).toBe(true);
+  expect(await page.evaluate(() => getComputedStyle(document.body).overscrollBehaviorY)).toBe("none");
+});
+
 test("manueel toevoegen via de sheet", async ({ page }) => {
   await start(page);
-  await page.getByRole("button", { name: "Toevoegen" }).click();
+  await page.locator(".fab:visible, .side-add:visible").click();
   const sheet = page.getByRole("dialog");
   await sheet.getByRole("button", { name: "vandaag" }).click();
   await sheet.getByRole("button", { name: "Voeg 1 toe" }).click();

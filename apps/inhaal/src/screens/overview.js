@@ -99,8 +99,7 @@ export function renderOverview(root, now) {
   root.innerHTML = `<main class="page">
     <h1 class="large-title">${esc(t("appTitle"))}</h1>
     ${notices(now)}
-    ${hero(summary)}
-    ${nextCard(summary)}
+    <div class="overview-top">${hero(summary)}${nextCard(summary)}</div>
     <section class="stack-tight">${mode}${filter}</section>
     ${view.mode === "course" ? courseList(summary) : chronological(summary, now)}
   </main>`;

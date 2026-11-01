@@ -104,7 +104,10 @@ for (const scheme of ["light", "dark"]) {
       await page.getByRole("button", { name: "Start", exact: true }).click();
 
       const check = async () => {
-        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        const overflow = await page.evaluate(() => {
+          const view = document.querySelector("#view");
+          return Math.max(document.documentElement.scrollWidth - window.innerWidth, view.scrollWidth - view.clientWidth);
+        });
         expect(overflow).toBeLessThanOrEqual(0);
         const small = await page.locator(".row, .chip, .btn:not(.btn-small), .check, .tab").evaluateAll((els) =>
           els.filter((e) => e.offsetParent && e.getBoundingClientRect().height < 44).map((e) => e.className));
@@ -132,7 +135,7 @@ for (const scheme of ["light", "dark"]) {
       await shot("opties");
       await page.keyboard.press("Escape");
 
-      await page.getByRole("button", { name: "Toevoegen" }).click();
+      await page.locator(".fab:visible, .side-add:visible").click();
       await page.waitForTimeout(400);
       await check();
       await shot("toevoegen");

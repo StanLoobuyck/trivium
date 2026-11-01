@@ -41,7 +41,8 @@
   --hairline: 0.5px;
   --blur: blur(20px);
   --content-width: 720px;
-  --sidebar-width: 280px;
+  --sidebar-width: 288px;
+  --dock-height: 60px;
 
   /* Veer met stijfheid 400 en demping 30 (ζ = 0,75, overshoot 2,8%), uitgerekend tot ze stilligt en
      geschaald naar 300 ms. Oudere browsers vallen terug op de cubic-bezier. */
@@ -76,6 +77,7 @@
   --toast-action: #64AEFF;
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-float: 0 4px 20px rgba(0, 0, 0, 0.1);
   --focus: 0 0 0 3px rgba(0, 102, 214, 0.45);
 
   --on-course: #FFFFFF;
@@ -125,6 +127,7 @@
     --toast-action: #8CC4FF;
     --shadow-card: none;
     --shadow-raised: none;
+    --shadow-float: none;
     --focus: 0 0 0 3px rgba(64, 156, 255, 0.55);
     --on-course: #000000;
     --course-blue: #409CFF;
@@ -170,6 +173,7 @@
   --toast-action: #8CC4FF;
   --shadow-card: none;
   --shadow-raised: none;
+  --shadow-float: none;
   --focus: 0 0 0 3px rgba(64, 156, 255, 0.55);
   --on-course: #000000;
   --course-blue: #409CFF;

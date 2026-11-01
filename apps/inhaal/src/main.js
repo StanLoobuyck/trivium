@@ -49,12 +49,14 @@ function renderChrome() {
   const summary = state.semester ? summarize(state.courses, state.sessions, new Date()) : null;
   $("#sidebar").setAttribute("aria-label", t("courses"));
   $("#sidebar").innerHTML = `
+    <div class="side-brand"><span>Inhaal</span></div>
+    ${state.semester ? `<button class="btn btn-primary btn-block side-add" data-action="add">${icon("plus")}${esc(t("add"))}</button>` : ""}
     <ul class="list list-side">
-      <li><a class="row" href="#/" ${page === "" ? 'aria-current="page"' : ""}>${icon("overview")}<span class="row-main"><span>${esc(t("overview"))}</span></span><span class="row-trail">${summary?.open ?? ""}</span></a></li>
+      <li><a class="row" href="#/" ${page === "" ? 'aria-current="page"' : ""}>${icon("overview")}<span class="row-main"><span>${esc(t("overview"))}</span></span>${summary ? `<span class="count">${summary.open}</span>` : ""}</a></li>
     </ul>
     ${summary ? `<p class="group-title side-title">${esc(t("courses"))}</p>
-    <ul class="list list-side">${summary.perCourse.map((p) => `<li><a class="row ${!p.open && p.done ? "is-done" : ""}" href="#/vak/${esc(p.course.id)}" data-course="${esc(p.course.colorKey)}" ${id === p.course.id ? 'aria-current="page"' : ""}>
-      <span class="dot"></span><span class="row-main"><span>${esc(p.course.name)}</span></span><span class="row-trail">${p.open || ""}</span></a></li>`).join("")}</ul>` : ""}
+    <ul class="list list-side">${summary.perCourse.map((p) => `<li><a class="row" href="#/vak/${esc(p.course.id)}" data-course="${esc(p.course.colorKey)}" ${id === p.course.id ? 'aria-current="page"' : ""}>
+      <span class="dot"></span><span class="row-main"><span>${esc(p.course.name)}</span></span>${p.open ? `<span class="count">${p.open}</span>` : ""}</a></li>`).join("")}</ul>` : ""}
     <ul class="list list-side side-end">
       <li><a class="row" href="#/instellingen" ${page === "instellingen" ? 'aria-current="page"' : ""}>${icon("settings")}<span class="row-main"><span>${esc(t("settings"))}</span></span></a></li>
     </ul>`;
@@ -97,19 +99,37 @@ async function refresh({ flip = true } = {}) {
 
 sheets.setRefresh(refresh);
 
-// De rij blijft even staan, zodat je ziet wat je deed, en schuift dan weg.
-let settle;
-async function tick(id) {
+// Afgevinkte rijen blijven staan tot je even stopt, zodat de lijst niet onder je duim verschuift.
+const SETTLE_MS = 2500;
+let settle = null;
+let batch = [];
+
+function settleLater(ms = SETTLE_MS) {
+  clearTimeout(settle);
+  settle = setTimeout(() => { settle = null; refresh(); }, ms);
+}
+
+async function tick(id, target) {
   const session = store.sessionById(id);
   const open = isOpen(session, new Date());
   const label = sessionLabel(session, numbersNow());
   const undo = await store.setStatus([id], open ? "watched" : "upcoming");
   document.querySelectorAll(`.check[data-tick="${CSS.escape(id)}"]`).forEach((c) => c.setAttribute("aria-checked", open));
   navigator.vibrate?.(10);
-  clearTimeout(settle);
-  settle = setTimeout(refresh, 600);
   renderChrome();
-  if (open) toast(t("ticked", { label }), async () => { clearTimeout(settle); await undo(); refresh(); });
+  // De kaart Volgende toont meteen de volgende les; in een lijst wachten we op de pauze.
+  settleLater(target?.closest(".check") ? SETTLE_MS : 0);
+  if (!open) return;
+  batch = settle && batch.length && performance.now() - batch.at(-1).at < 5000 ? batch : [];
+  batch.push({ undo, at: performance.now() });
+  const undoAll = batch;
+  toast(batch.length > 1 ? t("tickedMany", { n: batch.length }) : t("ticked", { label }), async () => {
+    clearTimeout(settle);
+    settle = null;
+    batch = [];
+    await Promise.all(undoAll.map((item) => item.undo()));
+    refresh();
+  });
 }
 
 async function exportJson() {
@@ -156,7 +176,7 @@ document.addEventListener("click", (e) => {
   if (!target || target.closest("#sheet")) return;
   const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice } = target.dataset;
   if (action) actions[action]();
-  else if (tickId) tick(tickId);
+  else if (tickId) tick(tickId, e.target);
   else if (pick) {
     if (courseView.selecting.has(pick)) courseView.selecting.delete(pick); else courseView.selecting.add(pick);
     render();
@@ -184,7 +204,7 @@ window.addEventListener("hashchange", () => {
   courseView.selecting = null;
   courseView.filter = "all";
   courseView.finishedOpen = false;
-  window.scrollTo(0, 0);
+  $("#view").scrollTo(0, 0);
   render();
 });
 
@@ -196,6 +216,9 @@ initGestures($("#view"), { onTick: tick, onOptions: sheets.openOptions });
 document.documentElement.lang = lang();
 await store.load();
 render();
+
+// Een aanraking in de lijst stelt het opschuiven uit: je bent nog bezig.
+$("#view").addEventListener("pointerdown", () => { if (settle) settleLater(); });
 
 const updateSW = registerSW({
   onNeedRefresh() {
