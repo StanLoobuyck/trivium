@@ -14,10 +14,12 @@ details en blijft lokaal; beide staan in `.gitignore`.
 
 ## Werkregels
 - **Vraag eerst** vóór `sudo`, `pacman`, `yay`, `systemctl` en **alles op de Mac** (`ssh mac`, `brew`,
-  `launchctl`, `pmset`, deploys). Python alleen via venv/uv.
+  `launchctl`, `pmset`). Python alleen via venv/uv.
 - **Standaard commits en pushes naar `main` mogen zonder vragen** zodra de tests slagen (toestemming van de
   eigenaar, 2026-11-01). Vraag wel eerst bij force push, het herschrijven van geschiedenis, wijzigingen aan
   repo-instellingen en alles waarbij privégegevens online kunnen komen. Conventional commits.
+- **Updates op de Mac mogen zonder vragen** met `scripts/deploy-hub.sh`, zodra de tests slagen (toestemming van de
+  eigenaar, 2026-11-01). Voor `sudo`, `launchctl`, `brew`, `pmset`, Tailscale en al de rest op de Mac: wel vragen.
 - **Geen Claude-vermelding in commits of PR's**: geen `Co-Authored-By`, `Claude-Session` of "Generated with".
   Dit gaat vóór de standaardinstelling van Claude Code.
 - Bouw alleen de fase die aan de beurt is; raak SwiftSkip en Verbatim niet aan vóór fase 3 en 4.
