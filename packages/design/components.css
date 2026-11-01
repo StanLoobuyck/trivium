@@ -530,7 +530,7 @@ body.app .topbar { position: fixed; }
   #stage { position: fixed; inset: 0; overflow: clip; }
   body.app #shell { height: 100%; min-height: 0; }
   body.app .view { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
-  body.app .sheet, body.app .scrim, body.app .toast, body.app .update-banner { position: absolute; }
+  body.app .sheet, body.app .scrim, body.app .toast { position: absolute; }
 }
 @media (min-width: 900px) {
   .app .fab { display: none; }
@@ -549,8 +549,6 @@ body.app .topbar { position: fixed; }
 .banner > span:first-child { flex: 1 1 220px; min-width: 0; }
 .banner-actions { display: flex; flex: none; }
 .banner .btn-small { white-space: nowrap; min-height: var(--row-min); }
-.update-banner { position: fixed; inset: calc(var(--safe-top) + var(--space-2)) var(--space-4) auto; z-index: 15; }
-
 /* ---- Sheets met formulieren ---- */
 .group-label { padding: var(--space-4) 0 var(--space-2); font-size: var(--text-label); color: var(--text-2); }
 .sheet-action { margin-top: var(--space-4); }

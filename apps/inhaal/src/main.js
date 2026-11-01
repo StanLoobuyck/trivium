@@ -35,7 +35,6 @@ app.innerHTML = `<div id="stage">
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" tabindex="-1"></div>
   </div>
   <div class="toast" id="toast" role="status"></div>
-  <div class="update-banner" id="update" hidden></div>
 </div>`;
 
 const route = () => {
@@ -76,6 +75,10 @@ function renderChrome() {
   fab.hidden = !state.semester || page === "instellingen";
 }
 
+// Staat als gewone rij bovenaan de pagina, zodat ze de inhoud opschuift in plaats van erover te liggen.
+let updateReady = false;
+let updateApp = () => {};
+
 function render(quiet = false) {
   const now = new Date();
   const { page, id } = route();
@@ -83,6 +86,8 @@ function render(quiet = false) {
   if (page === "vak") renderCourse(root, id, now);
   else if (page === "instellingen") renderSettings(root);
   else renderOverview(root, now);
+  if (updateReady) $("#view .page")?.insertAdjacentHTML("afterbegin", `<div class="banner"><span>${esc(t("newVersion"))}</span>
+    <button class="btn btn-small btn-plain" data-action="update-app">${esc(t("refresh"))}</button></div>`);
   renderChrome();
   playHero(!quiet);
 }
@@ -148,6 +153,7 @@ const actions = {
   "export-notes": exportNotes,
   "import-json": sheets.restoreBackup,
   "link-recordings": sheets.openLinkRecording,
+  "update-app": () => updateApp(true),
   "dismiss-install": async () => { await store.dismiss("installDismissed"); render(); },
   "dismiss-weeks": async () => { await store.dismiss("weeksDismissed"); render(); },
   select: () => { courseView.selecting = new Set(); render(); },
@@ -243,11 +249,9 @@ startSwiftSkip({
   },
 });
 
-const updateSW = registerSW({
+updateApp = registerSW({
   onNeedRefresh() {
-    const banner = $("#update");
-    banner.hidden = false;
-    banner.innerHTML = `<div class="banner"><span>${esc(t("newVersion"))}</span><button class="btn btn-small btn-plain">${esc(t("refresh"))}</button></div>`;
-    banner.querySelector("button").addEventListener("click", () => updateSW(true));
+    updateReady = true;
+    render(true);
   },
 });
