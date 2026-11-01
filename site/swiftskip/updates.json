@@ -31,6 +31,11 @@
           "version": "4.1.2",
           "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.1.2/swiftskip-firefox.xpi",
           "update_hash": "sha256:be1e3b209612e67c75bafd9de827f51b5ea838a87a843b86732b967fe1a2156e"
+        },
+        {
+          "version": "4.2.0",
+          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.2.0/swiftskip-firefox.xpi",
+          "update_hash": "sha256:efb92e1038e8c959bc07edc5bf40edc90b1e258ff2b2c5767ddfedaaa9ee63ee"
         }
       ]
     }
