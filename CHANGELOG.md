@@ -10,6 +10,11 @@
 4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
    vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
 
+## 2026-11-01 — afvinken is direct
+- Scherm en geheugen veranderen meteen, opslaan gebeurt erachter; geen wachttijd en geen animatie meer bij afvinken.
+- Bug: door de wachttijd raakte een snelle tik dezelfde rij opnieuw (aan, uit, aan) terwijl de teller doorliep ("13"
+  bij 7 lessen). De teller telt nu unieke lessen.
+
 ## 2026-11-01 — fase 2: hub en sync (laptop)
 - `apps/hub`: FastAPI + SQLite, `/api/sync` (recentste `updatedAt` wint), rooster elk uur ophalen, koppelcode van
   minstens 32 tekens. 13 pytest-tests.

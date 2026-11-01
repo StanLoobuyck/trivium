@@ -69,9 +69,10 @@ export async function applyRooster(events) {
   return { added: add.length, updated: update.length, vanished };
 }
 
+// Het geheugen verandert meteen, zodat het scherm niet op de opslag hoeft te wachten.
 export async function updateSession(id, changes) {
-  await db.sessions.update(id, { ...changes, updatedAt: nowIso() });
   Object.assign(sessionById(id) ?? {}, changes);
+  await db.sessions.update(id, { ...changes, updatedAt: nowIso() });
 }
 
 export async function setStatus(ids, status) {

@@ -64,6 +64,7 @@ test("de knop Bekeken op de kaart Volgende telt af en overleeft herladen", async
   await start(page);
   await page.getByRole("button", { name: "Bekeken", exact: true }).click();
   await expect(openCount(page)).toHaveText(String(OPEN_BEFORE - 1));
+  await page.waitForTimeout(200);
   await page.reload();
   await expect(openCount(page)).toHaveText(String(OPEN_BEFORE - 1));
 });
@@ -122,6 +123,23 @@ test("een afgevinkte rij schuift meteen door, en undo geldt voor de hele reeks",
   await expect(page.getByText("Afgewerkt (2)")).toBeVisible({ timeout: 600 });
   await page.locator("#toast button").click();
   await expect(page.getByText(/Afgewerkt/)).toHaveCount(0);
+});
+
+test("razendsnel tikken vinkt elke tik een andere les af en telt juist", async ({ page }) => {
+  await start(page);
+  await courseLink(page, /Digitale elektronica/).click();
+  await page.getByRole("checkbox").first().waitFor();
+  const ticks = await page.evaluate(() => {
+    const started = performance.now();
+    for (let i = 0; i < 5; i += 1) document.querySelector(".check[data-tick]").click();
+    return performance.now() - started;
+  });
+  expect(ticks).toBeLessThan(100);
+  await expect(page.getByText("Afgewerkt (5)")).toBeVisible();
+  await expect(page.locator("#toast")).toContainText("5 sessies afgevinkt");
+  await page.waitForTimeout(200);
+  await page.reload();
+  await expect(page.getByText("Afgewerkt (5)")).toBeVisible();
 });
 
 test("de menubalk wordt breder als de + verdwijnt", async ({ page }, info) => {

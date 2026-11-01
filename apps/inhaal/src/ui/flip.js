@@ -17,7 +17,7 @@ export function playFlip(before) {
 // Het grote getal telt mee en de balk schuift van de vorige naar de nieuwe stand.
 let shown = null;
 
-export function playHero() {
+export function playHero(animate = true) {
   const number = document.querySelector(".hero-number");
   const bar = document.querySelector(".hero .progress > span");
   if (!number) { shown = null; return; }
@@ -25,7 +25,7 @@ export function playHero() {
   const value = bar.style.getPropertyValue("--value");
   const from = shown;
   shown = { target, value };
-  if (!from || from.target === target || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!animate || !from || from.target === target || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   bar.style.setProperty("--value", from.value);
   requestAnimationFrame(() => requestAnimationFrame(() => bar.style.setProperty("--value", value)));

@@ -74,7 +74,7 @@ function renderChrome() {
   fab.hidden = !state.semester || page === "instellingen";
 }
 
-function render() {
+function render(quiet = false) {
   const now = new Date();
   const { page, id } = route();
   const root = $("#view");
@@ -82,43 +82,40 @@ function render() {
   else if (page === "instellingen") renderSettings(root);
   else renderOverview(root, now);
   renderChrome();
-  playHero();
+  playHero(!quiet);
 }
 
-async function refresh({ flip = true } = {}) {
+async function refresh({ flip = true, quiet = false } = {}) {
   const before = flip ? captureRects() : null;
-  render();
+  render(quiet);
   if (before) playFlip(before);
   nudge();
 }
 
 sheets.setRefresh(refresh);
 
-// Het vinkje vult meteen, de rij schuift daarna vlot door: wie op dezelfde plek blijft tikken, vinkt de volgende af.
-const SETTLE_MS = 180;
-let settle = null;
-let batch = [];
+// Afvinken is direct: het scherm verandert meteen en opslaan gebeurt erachter. Zo raakt elke tik de volgende les.
+let batch = new Map();
+let batchAt = 0;
 
-async function tick(id) {
+function tick(id) {
   const session = store.sessionById(id);
   const open = isOpen(session, new Date());
   const label = sessionLabel(session, numbersNow());
-  const undo = await store.setStatus([id], open ? "watched" : "upcoming");
-  document.querySelectorAll(`.check[data-tick="${CSS.escape(id)}"]`).forEach((c) => c.setAttribute("aria-checked", open));
+  const saved = store.setStatus([id], open ? "watched" : "upcoming");
   navigator.vibrate?.(10);
-  nudge();
-  clearTimeout(settle);
-  settle = setTimeout(refresh, SETTLE_MS);
-  if (!open) return;
+  refresh({ flip: false, quiet: true });
+
   const time = performance.now();
-  if (!batch.length || time - batch.at(-1).at > 5000) batch = [];
-  batch.push({ undo, at: time });
-  const undoAll = batch;
-  toast(batch.length > 1 ? t("tickedMany", { n: batch.length }) : t("ticked", { label }), async () => {
-    clearTimeout(settle);
-    batch = [];
-    await Promise.all(undoAll.map((item) => item.undo()));
-    refresh();
+  if (time - batchAt > 5000) batch = new Map();
+  batchAt = time;
+  if (!open) { batch.delete(id); return; }
+  batch.set(id, saved);
+  const undoAll = [...batch.values()];
+  toast(batch.size > 1 ? t("tickedMany", { n: batch.size }) : t("ticked", { label }), async () => {
+    batch = new Map();
+    await Promise.all(undoAll.map(async (pending) => (await pending)()));
+    refresh({ flip: false, quiet: true });
   });
 }
 
