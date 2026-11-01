@@ -1,0 +1,646 @@
+/* SwiftSkip's in-player UI: download control, on-screen overlay (OSD),
+   shortcut sheet and toast. One "glass" look shared by all of them.
+
+   Glass: the frosted background lives on a ::before layer that is clipped
+   to the rounded shape. (Chrome otherwise lets the backdrop blur spill out
+   as square corners, especially over video.) The element itself only
+   carries the border and shadow. */
+
+:where(#swiftskip-osd, #swiftskip-download, .swiftskip-sheet, .swiftskip-toast) {
+  --ss-bg: rgba(24, 24, 28, 0.82);
+  --ss-bg-hover: rgba(40, 40, 46, 0.88);
+  --ss-border: rgba(255, 255, 255, 0.12);
+  --ss-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --ss-shadow: 0 10px 30px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --ss-text: #ffffff;
+  --ss-muted: rgba(255, 255, 255, 0.66);
+  --ss-faint: rgba(255, 255, 255, 0.4);
+  --ss-track: rgba(255, 255, 255, 0.18);
+  --ss-accent: #6ea8ff;
+  --ss-success: #6fdc8c;
+  --ss-danger: #ff8a80;
+  --ss-font:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
+
+  font-family: var(--ss-font);
+  color: var(--ss-text);
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+:where(#swiftskip-osd, #swiftskip-download, .swiftskip-sheet, .swiftskip-toast) * {
+  box-sizing: border-box;
+}
+
+.ss-glass,
+#swiftskip-osd,
+.swiftskip-sheet,
+.swiftskip-toast {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--ss-border);
+  border-radius: var(--ss-radius);
+  background: transparent;
+  box-shadow: var(--ss-shadow), var(--ss-highlight);
+}
+
+.ss-glass::before,
+#swiftskip-osd::before,
+.swiftskip-sheet::before,
+.swiftskip-toast::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--ss-bg);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  backdrop-filter: blur(20px) saturate(1.8);
+  clip-path: inset(0 round var(--ss-radius));
+  transition: background 0.15s ease;
+}
+
+.ss-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+/* ─── Download control ───────────────────────────────────────────────────── */
+
+#swiftskip-download {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 2147483647 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* pill and card share one width */
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1;
+  transition: opacity 0.35s ease;
+}
+
+#swiftskip-download.is-collapsed {
+  align-items: flex-start;
+}
+
+#swiftskip-download.is-idle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Neutralize page styles on our buttons, without outweighing our classes. */
+:where(#swiftskip-download) button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+#swiftskip-download button:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+/* Expanded: pill */
+.ss-dl-pill {
+  --ss-radius: 999px;
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  animation: ss-pop-in 0.18s ease-out;
+}
+
+.ss-dl-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 13px;
+  border-radius: 999px 0 0 999px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.15s ease;
+}
+
+.ss-dl-main-icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+}
+
+.ss-dl-divider {
+  width: 1px;
+  margin: 9px 0;
+  background: var(--ss-border);
+}
+
+.ss-dl-side {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  border-radius: 0 999px 999px 0;
+  color: var(--ss-muted);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.ss-dl-main:hover:not(:disabled),
+.ss-dl-side:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ss-text);
+}
+
+.ss-dl-main:disabled {
+  cursor: default;
+}
+
+#swiftskip-download[data-mode="done"] .ss-dl-main-icon {
+  color: var(--ss-success);
+}
+
+#swiftskip-download[data-mode="failed"] .ss-dl-main-icon {
+  color: var(--ss-danger);
+}
+
+/* Spinner while preparing / downloading */
+.ss-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ss-track);
+  border-top-color: var(--ss-text);
+  border-radius: 50%;
+  animation: ss-spin 0.8s linear infinite;
+}
+
+/* Detail card under the pill */
+.ss-dl-card {
+  --ss-radius: 14px;
+  min-width: 0;
+  max-width: 280px;
+  padding: 11px 12px 10px;
+  animation: ss-pop-in 0.18s ease-out;
+}
+
+.ss-dl-card[hidden] {
+  display: none;
+}
+
+.ss-dl-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ss-track);
+}
+
+.ss-dl-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ss-text);
+  transition: width 0.3s ease-out;
+}
+
+.ss-dl-card-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ss-dl-cancel {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: -3px -4px 0 0;
+  border-radius: 6px;
+  color: var(--ss-muted);
+}
+
+.ss-dl-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ss-text);
+}
+
+.ss-dl-cancel .ss-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.ss-dl-cancel[hidden] {
+  display: none;
+}
+
+.ss-dl-meta {
+  color: var(--ss-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
+#swiftskip-download[data-mode="failed"] .ss-dl-fill {
+  background: var(--ss-danger);
+}
+
+#swiftskip-download[data-mode="failed"] .ss-dl-meta {
+  color: #ffc9c4;
+}
+
+/* Progress rings (collapsed button + small indicator in the pill) */
+.ss-ring {
+  display: block;
+  overflow: visible;
+  transform: rotate(-90deg); /* start at 12 o'clock */
+}
+
+.ss-ring circle {
+  fill: none;
+}
+
+.ss-ring-track {
+  stroke: var(--ss-track);
+}
+
+.ss-ring-fill {
+  stroke: var(--ss-text);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease-out;
+}
+
+.ss-dl-mini-ring {
+  width: 16px;
+  height: 16px;
+}
+
+/* Collapsed: round button. Ring and icon are both positioned on the exact
+   center of the circle (the 1px border would otherwise shift a grid). */
+.ss-dl-orb {
+  --ss-radius: 50%;
+  display: none !important;
+  width: 36px;
+  height: 36px;
+  animation: ss-pop-in 0.18s ease-out;
+}
+
+#swiftskip-download.is-collapsed .ss-dl-orb {
+  display: block !important;
+}
+
+#swiftskip-download.is-collapsed .ss-dl-pill,
+#swiftskip-download.is-collapsed .ss-dl-card {
+  display: none;
+}
+
+.ss-dl-orb:hover::before {
+  background: var(--ss-bg-hover);
+}
+
+.ss-dl-orb-ring {
+  position: absolute;
+  inset: -1px;
+  width: 36px;
+  height: 36px;
+}
+
+/* Only show the orb's ring while downloading. */
+#swiftskip-download:not([data-mode="busy"]) .ss-dl-orb-ring {
+  visibility: hidden;
+}
+
+.ss-dl-orb-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#swiftskip-download[data-mode="done"] .ss-dl-orb-icon {
+  color: var(--ss-success);
+}
+
+#swiftskip-download[data-mode="failed"] .ss-dl-orb-icon {
+  color: var(--ss-danger);
+}
+
+/* ─── On-screen overlay (skip / speed / volume / seek) ───────────────────── */
+
+#swiftskip-osd {
+  --ss-radius: 16px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 2147483647 !important;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  min-width: 64px;
+  padding: 11px 18px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+  pointer-events: none;
+  white-space: nowrap;
+  will-change: opacity, transform;
+}
+
+#swiftskip-osd.swiftskip-bump {
+  animation: ss-osd-in 0.16s ease-out forwards;
+}
+
+#swiftskip-osd.swiftskip-fade-out {
+  animation: ss-osd-out 0.22s ease-in forwards !important;
+}
+
+.swiftskip-osd-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiftskip-osd-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.swiftskip-osd-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.swiftskip-osd-label {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.swiftskip-osd-bar {
+  display: none; /* shown via JS when there's a value */
+  width: 84px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ss-track);
+}
+
+.swiftskip-osd-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ss-text);
+  transition: width 0.12s ease-out;
+}
+
+/* ─── Shortcut sheet ("?") ───────────────────────────────────────────────── */
+
+.swiftskip-sheet {
+  --ss-radius: 18px;
+  --ss-bg: rgba(24, 24, 28, 0.9);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 2147483647 !important;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 18px 20px 14px;
+  transform: translate(-50%, -50%);
+  font-size: 13px;
+  line-height: 1.4;
+  animation: ss-sheet-in 0.18s ease-out;
+}
+
+.swiftskip-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.swiftskip-sheet-title {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.swiftskip-sheet-close {
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--ss-muted);
+  font: 400 20px/1 var(--ss-font);
+  cursor: pointer;
+}
+
+.swiftskip-sheet-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ss-text);
+}
+
+.swiftskip-sheet-close:focus-visible {
+  outline: 2px solid var(--ss-accent);
+}
+
+.swiftskip-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  column-gap: 28px;
+}
+
+.swiftskip-sheet-group h3 {
+  margin: 12px 0 4px;
+  color: var(--ss-faint);
+  font: 600 11px/1.4 var(--ss-font);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.swiftskip-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
+
+.swiftskip-sheet-label {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.swiftskip-sheet-bindings,
+.swiftskip-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.swiftskip-sheet-bindings {
+  gap: 8px;
+}
+
+.swiftskip-sheet kbd,
+.swiftskip-toast kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ss-text);
+  font: 600 11px/1 var(--ss-font);
+}
+
+.swiftskip-plus {
+  color: var(--ss-faint);
+  font-size: 11px;
+}
+
+.swiftskip-sheet-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--ss-faint);
+  font-size: 12px;
+}
+
+/* ─── Toast ("Resumed at …") ─────────────────────────────────────────────── */
+
+.swiftskip-toast {
+  --ss-radius: 999px;
+  position: fixed;
+  top: calc(100% - 72px);
+  left: 50%;
+  z-index: 2147483647 !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 6px 0 16px;
+  transform: translate(-50%, -100%);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  animation: ss-toast-in 0.2s ease-out;
+}
+
+.swiftskip-toast-action {
+  all: unset;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--ss-text);
+  font: 600 13px/28px var(--ss-font);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.swiftskip-toast-action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.swiftskip-toast-action:focus-visible {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+/* ─── Motion ─────────────────────────────────────────────────────────────── */
+
+@keyframes ss-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ss-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ss-osd-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes ss-osd-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+}
+
+@keyframes ss-sheet-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes ss-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -85%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+/* Respect "reduce motion": animations still run (the overlay becomes
+   visible through its animation) but finish instantly. The spinner keeps
+   turning slowly, since it's the only sign that something is happening. */
+@media (prefers-reduced-motion: reduce) {
+  #swiftskip-osd,
+  #swiftskip-download,
+  #swiftskip-download *:not(.ss-spinner),
+  .swiftskip-sheet,
+  .swiftskip-toast {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ss-spinner {
+    animation-duration: 2s;
+  }
+}

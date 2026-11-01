@@ -1,0 +1,26 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Firefox extension build output
+web-ext-artifacts/
+*.xpi
+*.zip
+
+# Generated
+dist/
+test/fixtures/media/
+.profiles/
+
+# Editor lock files (LibreOffice etc.)
+.~lock.*
+
+# End-to-end tests
+dist-e2e/
+playwright-report/
+test-results/
