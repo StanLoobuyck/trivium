@@ -31,7 +31,7 @@ test("popup on a site that isn't enabled offers 'Enable on …'", async ({
   await popup.goto(
     popup.url().replace(/url=[^&]+/, `url=${encodeURIComponent("https://example.edu/course")}`),
   );
-  await expect(popup.locator("#lecture-title")).toHaveText("Swiftskip is off on this site");
+  await expect(popup.locator("#lecture-title")).toHaveText("Velox is off on this site");
   await expect(popup.locator("#site-enable")).toContainText("example.edu");
 });
 

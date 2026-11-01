@@ -11,8 +11,8 @@ export default defineConfig({
       includeAssets: ["icon.svg", "apple-touch-icon.png"],
       manifestFilename: "manifest.webmanifest",
       manifest: {
-        name: "Inhaal",
-        short_name: "Inhaal",
+        name: "Sequo",
+        short_name: "Sequo",
         lang: "nl",
         display: "standalone",
         start_url: "./",

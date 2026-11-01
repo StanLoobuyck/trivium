@@ -27,9 +27,9 @@ const syncSection = () => (sync.available ? `<section>
       </div>
     </section>` : "");
 
-// Swiftskip bestaat niet op de gsm.
+// Velox bestaat niet op de gsm.
 const swiftskipSection = () => `<section class="only-wide">
-      <h2 class="group-title">Swiftskip</h2>
+      <h2 class="group-title">Velox</h2>
       ${swiftskip.linked ? `<div class="card"><p class="sub">${esc(t("swiftskipLinked"))}</p></div>` : `<ul class="list">
         <li><a class="row" href="${esc(linkAddress())}" target="_blank" rel="noopener"><span class="row-main"><span>${esc(t("swiftskipLink"))}</span></span>${icon("chevron")}</a></li>
       </ul>

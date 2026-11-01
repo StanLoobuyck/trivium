@@ -1,7 +1,7 @@
-# Studie-ecosysteem — notities voor Claude Code
+# Trivium (studie-ecosysteem) — notities voor Claude Code
 
-Monorepo met drie apps, elk apart te downloaden en te gebruiken: **Inhaal** (nieuw: welke lessen moet ik
-nog inhalen), **Swiftskip** (technisch `swiftskip`, bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
+Monorepo met drie apps, elk apart te downloaden en te gebruiken: **Sequo** (technisch `inhaal`, nieuw: welke lessen moet ik
+nog inhalen), **Velox** (technisch `swiftskip`, bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
 transcripts en notities). De eigenaar schrijft zelf geen code: Claude Code bouwt, draait en test alles; de
 eigenaar test de app en beslist. Dit is een **publieke repo**: geen persoonlijke gegevens, adressen of
 rooster in gecommitte bestanden. Persoonlijke setup hoort in `CLAUDE.local.md`. `PLAN.md` bevat persoonlijke
@@ -29,6 +29,8 @@ details en blijft lokaal; beide staan in `.gitignore`.
 - Houd `CHANGELOG.md` bij: nieuwste eerst, gemeten getallen, bovenaan "▶ Start here".
 - Test elk scherm op iPhone-formaat (375 px) en 1440 px, licht en donker. Vertel wat je niet kon testen.
 - Antwoord in de taal van de eigenaar (Nederlands of Engels).
+
+Namen: Trivium is het geheel, Sequo en Velox zijn wat je ziet. Mappen, id's, opslag, repo- en update-adressen blijven `inhaal` en `swiftskip`, zodat installaties en koppelingen werken.
 
 ## Mapstructuur
 ```

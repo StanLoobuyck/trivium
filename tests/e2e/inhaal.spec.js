@@ -405,7 +405,7 @@ test.describe("Swiftskip-koppeling", () => {
     const one = watched(recording({ courseCode: code, title: "Les A", recordedOn: day }));
     await deliver(page, [one]);
     await expect(openCount(page)).toHaveText(String(before - 1));
-    await expect(page.locator("#toast")).toContainText("afgevinkt via Swiftskip");
+    await expect(page.locator("#toast")).toContainText("afgevinkt via Velox");
     await expect.poll(() => page.evaluate(() => window.acks.length)).toBe(1);
 
     await deliver(page, [one]);
@@ -457,7 +457,7 @@ test.describe("Swiftskip-koppeling", () => {
     test.skip(!testInfo.project.name.startsWith("laptop"), "Swiftskip bestaat niet op de gsm");
     await start(page);
     await page.goto("/inhaal/#/instellingen");
-    const link = page.getByRole("link", { name: "Koppel met Swiftskip" });
+    const link = page.getByRole("link", { name: "Koppel met Velox" });
     await expect(link).toHaveAttribute("href", /^https:\/\/www\.kuleuven\.be\/#swiftskip-koppel=http%3A%2F%2Flocalhost%3A4173%2Finhaal%2F$/);
     await send(page, { type: "hello", version: "4.1.0" });
     await expect(page.getByText("Gekoppeld.")).toBeVisible();

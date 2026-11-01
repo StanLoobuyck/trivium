@@ -27,7 +27,7 @@ test("safari manifest has no downloads permission (unsupported there)", () => {
 });
 
 test("dev builds are labelled so they're distinguishable from the release", () => {
-  assert.equal(buildManifest("chrome", { ...opts, dev: true }).name, "Swiftskip (dev)");
+  assert.equal(buildManifest("chrome", { ...opts, dev: true }).name, "Velox (dev)");
   assert.equal(buildManifest("chrome", opts).version, "1.2.3");
 });
 

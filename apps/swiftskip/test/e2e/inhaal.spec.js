@@ -33,7 +33,7 @@ test("a kuleuven.be link opens the settings; only a valid address asks to link",
     `https://www.kuleuven.be/#swiftskip-koppel=${encodeURIComponent("https://inhaal.example/")}`,
   );
   const settings = await opened;
-  await expect(settings.locator("#inhaal-text")).toContainText("Inhaal at inhaal.example asks to link");
+  await expect(settings.locator("#inhaal-text")).toContainText("Sequo at inhaal.example asks to link");
   await expect(page).toHaveURL("https://www.kuleuven.be/");
 
   await page.goto("https://www.kuleuven.be/other#swiftskip-koppel=http%3A%2F%2Fonveilig.example%2F");
@@ -100,7 +100,7 @@ test("the player script stays away from the Inhaal page; unlinking stops the bri
   await expect.poll(registered).toEqual(["swiftskip-inhaal"]);
 
   await settings.getByRole("button", { name: "Unlink" }).click();
-  await expect(settings.locator("#inhaal-text")).toContainText("Open the settings in Inhaal");
+  await expect(settings.locator("#inhaal-text")).toContainText("Open the settings in Sequo");
   await expect.poll(registered).toEqual([]);
 });
 

@@ -1,12 +1,12 @@
-# Studie-ecosysteem
+# Trivium
 
 Drie apps voor studenten, elk apart te gebruiken. In opbouw.
 
 | App | Wat het doet | Status |
 | --- | --- | --- |
-| [Inhaal](apps/inhaal) | Toont welke lessen je nog moet inhalen | In opbouw |
-| SwiftSkip | Maakt Toledo-opnames kijkbaar en downloadbaar | Verhuist later naar deze repo |
-| Verbatim | Maakt transcripts en notities van opnames | Verhuist later naar deze repo |
+| [Sequo](apps/inhaal) | Toont welke lessen je nog moet inhalen | In gebruik |
+| [Velox](apps/swiftskip) | Maakt Toledo-opnames kijkbaar en downloadbaar | In gebruik |
+| [Verbatim](apps/verbatim) | Maakt transcripts en notities van opnames | Experimenteel |
 
 ## Ontwikkelen
 

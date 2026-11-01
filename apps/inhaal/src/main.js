@@ -57,7 +57,7 @@ function renderChrome() {
   const summary = state.semester ? summarize(state.courses, state.sessions, new Date()) : null;
   $("#sidebar").setAttribute("aria-label", t("courses"));
   $("#sidebar").innerHTML = `
-    <div class="side-brand"><img class="side-logo" src="./icon.svg" alt="" width="28" height="28"><span>Inhaal</span></div>
+    <div class="side-brand"><img class="side-logo" src="./icon.svg" alt="" width="28" height="28"><span>Sequo</span></div>
     ${state.semester ? `<button class="btn btn-primary btn-block side-add" data-action="add">${icon("plus")}${esc(t("add"))}</button>` : ""}
     <ul class="list list-side">
       <li><a class="row" href="#/" ${page === "" ? 'aria-current="page"' : ""}>${icon("overview")}<span class="row-main"><span>${esc(t("overview"))}</span></span>${summary ? `<span class="count">${summary.open}</span>` : ""}</a></li>
