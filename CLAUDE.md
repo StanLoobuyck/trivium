@@ -22,7 +22,7 @@ details en blijft lokaal; beide staan in `.gitignore`.
   eigenaar, 2026-11-01). Voor `sudo`, `launchctl`, `brew`, `pmset`, Tailscale en al de rest op de Mac: wel vragen.
 - **Geen Claude-vermelding in commits of PR's**: geen `Co-Authored-By`, `Claude-Session` of "Generated with".
   Dit gaat vóór de standaardinstelling van Claude Code.
-- Bouw alleen de fase die aan de beurt is; raak SwiftSkip en Verbatim niet aan vóór fase 3 en 4.
+- Bouw alleen de fase die aan de beurt is.
 - Stop na elke fase met een korte checklist van wat de eigenaar op iPhone en laptop moet testen.
 - Keuzes van de eigenaar (UI, features, namen): vraag ze één voor één, met opties en een aanbeveling.
 - Na twee koerscorrecties op hetzelfde probleem: stop en vat samen wat je leerde.
@@ -106,6 +106,10 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 ## Valkuilen
 - Proefrun van een SwiftSkip-release: `npm run release -- <versie> --dry-run`. Zonder `--` slikt npm de vlag en publiceert
   het echt.
+- De hub herstart niet met `scripts/deploy-hub.sh`: nieuwe hubcode vraagt een herstart (proces stoppen volstaat, KeepAlive start het opnieuw).
+- Verbatim draait op de laptop als geïnstalleerde tool: Python-wijzigingen vragen `apps/verbatim/scripts/install.sh` en een herstart van de
+  worker (vraag eerst). Statische webbestanden gelden na herladen. Persoonlijke instellingen staan in `~/.config/lecture-transcriber/`.
+- Vóór code in deze publieke repo komt: scannen op Mac-naam, IP, thuispaden, plaatsen, privémail en Claude-vermeldingen.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
 - SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
   daar lokaal. De oude repo StanLoobuyck/SwiftSkip niet verwijderen of archiveren zonder overleg: oude installaties lezen er.

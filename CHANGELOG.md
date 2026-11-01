@@ -1,12 +1,13 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 5 is gebouwd: Verbatim en SwiftSkip gebruiken stijl A, keuze van de eigenaar op de ontwerpcanvas.
-3. **Volgende:** de eigenaar test de look. Daarna fase 6 of de slides-stroom. Later: LaTeX-skill in Verbatim, nadat de eigenaar de
-   skill heeft verfijnd en alleen als de kwaliteit van de notities niet daalt.
-4. **Wacht op de eigenaar:** oordeel over de look, overkoepelende naam, en een eigen naam voor Inhaal.
-5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
+2. **Klaar:** fase 0 t/m 5 gebouwd en live, SwiftSkip 4.3.0. Getest door de eigenaar: reboot, koppeling in Zen op Toledo, keten
+   naar Verbatim. Door Claude: 87+27 SwiftSkip, 231 Verbatim, 16 hub, 120 unit, 134 schermtests, screenshots licht en donker.
+3. **Niet getest:** look op de echte Kaltura-speler, badges in de Inhaal-app zelf, klik op Instellingen in het `?`-venster, Safari.
+4. **Volgende:** vraag de eigenaar naar de testresultaten van fase 5, kies dan de slides-stroom (aanbevolen) of fase 6.
+5. **Wacht op de eigenaar:** oordeel over de look, notitiemodel in Verbatim (nu Gemini), namen voor fase 6, LaTeX-skill verfijnen.
+6. **Open:** Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
 
 ## 2026-11-01 — fase 5: één look
 - Keuze: richting A (blauw zoals Inhaal), met het modellenblok uit C en het app-icoon uit B. Canvas: privé, in de sessie gelinkt.
