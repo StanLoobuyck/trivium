@@ -2,11 +2,18 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 3 is gebouwd en SwiftSkip 4.1.2 staat live. Delen van een les tellen op tot 80% van de lesduur.
-3. **Volgende:** als de eigenaar de checklist afrondt: fase 4 (Verbatim verhuist naar de monorepo). Eerst de geschiedenis
-   nakijken op privé-mailadressen en Claude-vermeldingen.
-4. **Wacht op de eigenaar:** checklist fase 3: halverwege, download, opname koppelen en onthouden, les in delen, iPhone.
+2. **Nu:** fase 4 begonnen. Verbatim staat in `apps/verbatim` (opgeschoond, 221 tests). De draaiende worker gebruikt nog
+   `~/Documents/lecture-transcriber`; die map blijft tot de eigenaar overschakelt (install.sh + worker herstarten).
+3. **Volgende:** vakcodes in Verbatim, inbox in Downloads, SwiftSkip per vak, melding notities klaar, badge in Inhaal.
+4. **Wacht op de eigenaar:** keuzes per onderdeel.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — fase 4: Verbatim verhuisd
+- De repo had één commit. In de monorepo zijn weggehaald: Mac-naam en -IP, thuispaden, plaatsen en weekritme, privémail,
+  echte docentennamen, Claude-vermeldingen. De voorbeeldvakken blijven; de eigenaar gaf akkoord om te pushen.
+- `CLAUDE.local.md`, `PLAN.md` en `CHANGELOG.private.md` staan alleen lokaal in `apps/verbatim`.
+- Het Mac-adres staat niet meer in de standaardinstellingen: bij overschakelen hoort `stt.mac.url` in de eigen config.
+- Updatemelding van Inhaal staat nu in de pagina en schuift de inhoud op, in plaats van eroverheen te liggen.
 
 ## 2026-11-01 — halverwege toont de resterende tijd
 - Eigenaarstest: de rij toonde de bekeken tijd in plaats van wat overblijft ("0u 10" bij een les van 2 uur). De rij en de

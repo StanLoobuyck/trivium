@@ -2,7 +2,7 @@
 
 The server answers in Groq's verbose_json shape (+ `x_mac`), so stitching, the repair pass, eval and
 subtitles work unchanged. Decoding settings are sent with every request: config.yaml stays the only
-source. Checking availability is one /health call with a short timeout, so a Mac that is away
+source. Checking availability is one /health call with a short timeout, so a Mac that is away (or a
 power cut) costs ~3 s before the chain moves on, and the laptop's GPU is never touched to find out.
 
 A Mac that stops answering *during* a lecture is retried for stt.mac.give_up_after_s, then transcribe()
