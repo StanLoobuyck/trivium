@@ -441,6 +441,18 @@ test.describe("SwiftSkip-koppeling", () => {
     await expect(page.getByText("1 opname koppelen")).toBeHidden();
   });
 
+  test("halverwege toont wat overblijft en wat al bekeken is", async ({ page }) => {
+    await start(page);
+    const { day, code } = await firstSession(page);
+    await deliver(page, [event("recording.progress", recording({ courseCode: code, recordedOn: day }), { positionSec: 600, durationSec: 7200 })]);
+    await page.getByRole("button", { name: "Lijst" }).click();
+    const row = page.locator(".swipe", { hasText: "Halverwege · 0u 10 bekeken" });
+    await expect(row).toHaveCount(1);
+    await expect(row.locator(".row-trail")).toHaveText(/^1u 45$|^2u 05$/);
+    await row.locator(".row-link").click();
+    await expect(page.getByRole("dialog")).toContainText("Halverwege · 0u 10 bekeken");
+  });
+
   test("instellingen tonen de koppellink en daarna de status", async ({ page }, testInfo) => {
     test.skip(!testInfo.project.name.startsWith("laptop"), "SwiftSkip bestaat niet op de gsm");
     await start(page);

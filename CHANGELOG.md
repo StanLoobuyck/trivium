@@ -8,6 +8,10 @@
 4. **Wacht op de eigenaar:** checklist fase 3: halverwege, download, opname koppelen en onthouden, les in delen, iPhone.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
 
+## 2026-11-01 — halverwege toont de resterende tijd
+- Eigenaarstest: de rij toonde de bekeken tijd in plaats van wat overblijft ("0u 10" bij een les van 2 uur). De rij en de
+  sheet tonen nu "Halverwege · 0u 10 bekeken", rechts de resterende tijd. Het getal bovenaan rekende al juist.
+
 ## 2026-11-01 — delen van een les
 - Een les in delen (`deel`/`part` in de titel, of meerdere opnames bij één les) wordt afgevinkt als de bekeken tijd samen 80%
   van de lesduur haalt; tot dan staat ze op halverwege, met de juiste resterende tijd. Keuze van de eigenaar.

@@ -9,7 +9,7 @@ import * as store from "../db/store.js";
 import { chipDate, t } from "../i18n/index.js";
 import { $, $$, esc, pickFiles } from "../ui/dom.js";
 import { closeSheet, openSheet, toast } from "../ui/feedback.js";
-import { numbersNow, sessionLabel } from "../ui/rows.js";
+import { numbersNow, progressText, sessionLabel } from "../ui/rows.js";
 
 const { state } = store;
 let refresh = () => {};
@@ -78,6 +78,7 @@ export function openOptions(id) {
   const link = recording?.url ?? "";
   const sheet = openSheet(`<h2 class="title">${esc(label)}</h2>
     <p class="sub">${esc(course.name)}${session.location ? ` · ${esc(session.location)}` : ""}</p>
+    ${progressText(session) ? `<p class="sub">${esc(progressText(session))}</p>` : ""}
     <p class="group-label">${esc(t("statusTitle"))}</p>
     <div class="chips chips-wrap">${statuses.map(([value, key]) =>
       `<button class="chip" aria-pressed="${session.status === value}" data-status="${value}">${esc(t(key))}</button>`).join("")}</div>

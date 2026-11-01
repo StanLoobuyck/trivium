@@ -11,6 +11,10 @@ export function sessionTitle(session, numbers = computeNumbers(state.sessions)) 
   return number && key ? t(key, { n: number }) : t("extra");
 }
 
+// Halverwege: de rij toont wat overblijft, deze regel wat al bekeken is.
+export const progressText = (session) => (session.status === "inProgress" && session.progressSec
+  ? t("inProgress", { time: duration(session.progressSec / 60) }) : "");
+
 export const sessionLabel = (session, numbers) => `${sessionTitle(session, numbers)} · ${shortDate(new Date(session.start))}`;
 
 export function sessionRow(session, { numbers, now, showCourse = false, selecting = null }) {
@@ -32,8 +36,9 @@ export function sessionRow(session, { numbers, now, showCourse = false, selectin
       <button class="row-main row-link" data-options="${esc(session.id)}">
         <span>${esc(label)}</span>
         ${showCourse ? `<span class="sub">${esc(course.name)}</span>` : ""}
+        ${progressText(session) ? `<span class="sub">${esc(progressText(session))}</span>` : ""}
       </button>
-      <span class="row-trail">${status === "inProgress" && session.progressSec ? esc(duration(session.progressSec / 60)) : esc(duration(sessionMinutes(session, course)))}</span>
+      <span class="row-trail">${esc(duration(sessionMinutes(session, course)))}</span>
     </div>
   </li>`;
 }
