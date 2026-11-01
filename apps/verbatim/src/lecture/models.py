@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
+from urllib.parse import urlsplit
 from typing import Any
 
 from . import config as cfgmod
@@ -51,6 +52,8 @@ def add_model(kind: str, preset: str, model: str, label: str = "", base_url: str
         raise ValueError(f"unknown provider {preset!r}")
     conf = cfgmod.load_config()
     spec = {**presets[preset]}
+    if preset == "ollama-mac":  # same machine as the speech-to-text server
+        spec["base_url"] = f"http://{urlsplit(conf.stt.mac.url).hostname}:11434/v1"
     if spec["provider"] == "openai" and preset == "openai":
         spec.update(base_url=base_url, key_name=key_name or None)
     entry = {"id": new_id(label or model, {m.id for m in conf.models}), "kind": kind, "model": model.strip(),

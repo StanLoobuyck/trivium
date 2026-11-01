@@ -12,3 +12,4 @@ playwright-report/
 CLAUDE.local.md
 PLAN.md
 *.sqlite*
+*.private.md

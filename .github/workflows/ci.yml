@@ -55,7 +55,16 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
-  # verbatim (fase 4) krijgt hier een eigen job.
+  verbatim:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/verbatim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - run: uv run pytest -q
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
