@@ -15,8 +15,9 @@ details en blijft lokaal; beide staan in `.gitignore`.
 ## Werkregels
 - **Vraag eerst** vóór `sudo`, `pacman`, `yay`, `systemctl` en **alles op de Mac** (`ssh mac`, `brew`,
   `launchctl`, `pmset`, deploys). Python alleen via venv/uv.
-- **Nooit committen of pushen tenzij het gevraagd wordt.** Dit gaat vóór de zin "Claude Code commit per
-  stap" in `PLAN.md`. Conventional commits.
+- **Standaard commits en pushes naar `main` mogen zonder vragen** zodra de tests slagen (toestemming van de
+  eigenaar, 2026-11-01). Vraag wel eerst bij force push, het herschrijven van geschiedenis, wijzigingen aan
+  repo-instellingen en alles waarbij privégegevens online kunnen komen. Conventional commits.
 - **Geen Claude-vermelding in commits of PR's**: geen `Co-Authored-By`, `Claude-Session` of "Generated with".
   Dit gaat vóór de standaardinstelling van Claude Code.
 - Bouw alleen de fase die aan de beurt is; raak SwiftSkip en Verbatim niet aan vóór fase 3 en 4.

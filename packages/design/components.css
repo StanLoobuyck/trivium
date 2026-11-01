@@ -100,6 +100,21 @@ h1, h2, h3, p { margin: 0; }
 }
 .tab[aria-current="page"], .tab[aria-selected="true"] { background: var(--accent-tint); color: var(--accent-text); }
 .tab:focus-visible { border-radius: var(--radius-full); }
+/* Zonder + neemt de balk de hele breedte; de actieve pil schuift naar het gekozen tabblad. */
+.tabbar { transition: right var(--dur-spring) var(--ease-spring); }
+.tabbar:has(+ .fab[hidden]) { right: calc(var(--space-4) + var(--safe-right)); }
+.tabbar[data-active] .tab { position: relative; z-index: 1; }
+.tabbar[data-active] .tab[aria-current="page"] { background: none; }
+.tabbar[data-active]::before {
+  content: "";
+  position: absolute;
+  inset: var(--space-1) auto var(--space-1) var(--space-1);
+  width: calc(50% - 6px);
+  border-radius: var(--radius-full);
+  background: var(--accent-tint);
+  transition: transform var(--dur-spring) var(--ease-spring);
+}
+.tabbar[data-active="1"]::before { transform: translateX(calc(100% + var(--space-1))); }
 .tab .icon { width: 24px; height: 24px; }
 
 /* Laptop: zijbalk links, inhoud rechts; de tabbalk verdwijnt. */
@@ -502,14 +517,17 @@ button.row:active, a.row:active { background: var(--fill); }
   .settings-grid > section + section { margin-top: 0; }
 }
 
-/* De app vult het hele scherm in #stage en scrolt binnen .view. Alles zweeft binnen #stage, niet tegen de
-   browser: op iOS is het venster van een app op het beginscherm korter dan het scherm. */
-html:has(body.app) { height: 100%; background: var(--bg); overscroll-behavior: none; }
-body.app { height: 100%; min-height: 0; overscroll-behavior: none; }
-#stage { position: fixed; inset: 0 0 auto 0; height: var(--app-height, 100dvh); overflow: clip; }
-body.app #shell { height: 100%; min-height: 0; }
-body.app .view { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
-body.app .tabbar, body.app .fab, body.app .sheet, body.app .scrim, body.app .toast, body.app .update-banner { position: absolute; }
+/* Gsm: de pagina zelf scrolt. iOS knipt een app op het beginscherm af op een venster dat korter is dan het
+   scherm, dus alleen fixed tegen dat venster komt de menubalk echt onderaan. Laptop: alles in #stage. */
+html:has(body.app) { background: var(--bg); overscroll-behavior-y: contain; }
+body.app .topbar { position: fixed; }
+@media (min-width: 900px) {
+  html:has(body.app), body.app { height: 100%; overscroll-behavior: none; }
+  #stage { position: fixed; inset: 0; overflow: clip; }
+  body.app #shell { height: 100%; min-height: 0; }
+  body.app .view { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+  body.app .sheet, body.app .scrim, body.app .toast, body.app .update-banner { position: absolute; }
+}
 @media (min-width: 900px) {
   .app .fab { display: none; }
   .app .sidebar { position: static; height: calc(100% - var(--space-6)); }
@@ -581,9 +599,21 @@ textarea.field { resize: vertical; }
 }
 .fab[hidden] { display: none; }
 
+/* ---- Kleine animaties ---- */
+@keyframes page-in { from { opacity: 0; transform: translateY(var(--space-1)); } }
+@keyframes pop { from { transform: scale(0.6); } }
+@keyframes draw { from { stroke-dashoffset: 24; } }
+.page-enter { animation: page-in var(--dur-fast) var(--ease-out); }
+.check[aria-checked="true"] .check-mark { animation: pop var(--dur-spring) var(--ease-spring); }
+.check[aria-checked="true"] .check-mark .icon { stroke-dasharray: 24; animation: draw var(--dur-fast) var(--ease-out); }
+.chip, .btn, .color-button { transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-spring); }
+.chip:active { transform: scale(0.96); }
+.hero-number.is-changing { animation: pop var(--dur-spring) var(--ease-spring); }
+
 /* Bij verminderde beweging: alleen fades. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; }
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; }
+  .tabbar, .tabbar[data-active]::before { transition: none; }
   .btn, .btn:active, .check:active .check-mark { transform: none; }
   .switch::after, .swipe > .row { transition: none; }
   .sheet, .toast { transition: opacity var(--dur-fast) linear, visibility 0s linear var(--dur-fast); }

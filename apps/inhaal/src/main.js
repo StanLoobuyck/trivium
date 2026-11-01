@@ -11,9 +11,9 @@ import { renderCourse, courseView } from "./screens/course.js";
 import { renderOverview, view } from "./screens/overview.js";
 import { renderSettings } from "./screens/settings.js";
 import * as sheets from "./screens/sheets.js";
-import { $, download, esc } from "./ui/dom.js";
+import { $, $$, download, esc } from "./ui/dom.js";
 import { initSheet, toast } from "./ui/feedback.js";
-import { captureRects, playFlip } from "./ui/flip.js";
+import { captureRects, playFlip, playHero } from "./ui/flip.js";
 import { clickIgnored, initGestures } from "./ui/gestures.js";
 import { numbersNow, sessionLabel } from "./ui/rows.js";
 
@@ -35,16 +35,6 @@ app.innerHTML = `<div id="stage">
   <div class="update-banner" id="update" hidden></div>
 </div>`;
 
-// Op het beginscherm van een iPhone is het venster korter dan het scherm; de echte hoogte komt van screen.
-function fitScreen() {
-  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-  if (!standalone || !/iphone/i.test(navigator.userAgent)) return;
-  const height = window.innerWidth < window.innerHeight ? screen.height : screen.width;
-  document.documentElement.style.setProperty("--app-height", `${height}px`);
-}
-fitScreen();
-window.addEventListener("resize", fitScreen);
-
 const route = () => {
   const [, page, id] = location.hash.split("/");
   return { page: page || "", id };
@@ -54,8 +44,13 @@ function renderChrome() {
   const { page, id } = route();
   const tabs = [["", "overview", "overview"], ["instellingen", "settings", "settings"]];
   $("#tabbar").setAttribute("aria-label", t("overview"));
-  $("#tabbar").innerHTML = tabs.map(([path, name, key]) =>
+  $("#tabbar").dataset.active = page === "instellingen" ? "1" : "0";
+  if (!$("#tabbar").childElementCount || $("#tabbar").dataset.lang !== lang()) {
+    $("#tabbar").dataset.lang = lang();
+    $("#tabbar").innerHTML = tabs.map(([path, name, key]) =>
     `<a class="tab" href="#/${path}" ${(path === page || (page === "vak" && !path)) ? 'aria-current="page"' : ""}>${icon(name)}<span>${esc(t(key))}</span></a>`).join("");
+  }
+  $$(".tab").forEach((tab, i) => { if (i === +$("#tabbar").dataset.active) tab.setAttribute("aria-current", "page"); else tab.removeAttribute("aria-current"); });
 
   const summary = state.semester ? summarize(state.courses, state.sessions, new Date()) : null;
   $("#sidebar").setAttribute("aria-label", t("courses"));
@@ -86,6 +81,7 @@ function render() {
   else if (page === "instellingen") renderSettings(root);
   else renderOverview(root, now);
   renderChrome();
+  playHero();
 }
 
 async function refresh({ flip = true } = {}) {
@@ -96,33 +92,27 @@ async function refresh({ flip = true } = {}) {
 
 sheets.setRefresh(refresh);
 
-// Afgevinkte rijen blijven staan tot je even stopt, zodat de lijst niet onder je duim verschuift.
-const SETTLE_MS = 2500;
+// Het vinkje vult meteen, de rij schuift daarna vlot door: wie op dezelfde plek blijft tikken, vinkt de volgende af.
+const SETTLE_MS = 180;
 let settle = null;
 let batch = [];
 
-function settleLater(ms = SETTLE_MS) {
-  clearTimeout(settle);
-  settle = setTimeout(() => { settle = null; refresh(); }, ms);
-}
-
-async function tick(id, target) {
+async function tick(id) {
   const session = store.sessionById(id);
   const open = isOpen(session, new Date());
   const label = sessionLabel(session, numbersNow());
   const undo = await store.setStatus([id], open ? "watched" : "upcoming");
   document.querySelectorAll(`.check[data-tick="${CSS.escape(id)}"]`).forEach((c) => c.setAttribute("aria-checked", open));
   navigator.vibrate?.(10);
-  renderChrome();
-  // De kaart Volgende toont meteen de volgende les; in een lijst wachten we op de pauze.
-  settleLater(target?.closest(".check") ? SETTLE_MS : 0);
+  clearTimeout(settle);
+  settle = setTimeout(refresh, SETTLE_MS);
   if (!open) return;
-  batch = settle && batch.length && performance.now() - batch.at(-1).at < 5000 ? batch : [];
-  batch.push({ undo, at: performance.now() });
+  const time = performance.now();
+  if (!batch.length || time - batch.at(-1).at > 5000) batch = [];
+  batch.push({ undo, at: time });
   const undoAll = batch;
   toast(batch.length > 1 ? t("tickedMany", { n: batch.length }) : t("ticked", { label }), async () => {
     clearTimeout(settle);
-    settle = null;
     batch = [];
     await Promise.all(undoAll.map((item) => item.undo()));
     refresh();
@@ -173,7 +163,7 @@ document.addEventListener("click", (e) => {
   if (!target || target.closest("#sheet")) return;
   const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice, themeChoice } = target.dataset;
   if (action) actions[action]();
-  else if (tickId) tick(tickId, e.target);
+  else if (tickId) tick(tickId);
   else if (pick) {
     if (courseView.selecting.has(pick)) courseView.selecting.delete(pick); else courseView.selecting.add(pick);
     render();
@@ -188,10 +178,6 @@ document.addEventListener("click", (e) => {
   else if (themeChoice) { setTheme(themeChoice); render(); }
 });
 
-document.addEventListener("toggle", (e) => {
-  if (e.target.matches?.(".finished")) courseView.finishedOpen = e.target.open;
-}, true);
-
 document.addEventListener("change", async (e) => {
   const { semester, duration } = e.target.dataset;
   if (semester && e.target.value) { await store.updateSemester({ [semester]: e.target.value }); render(); }
@@ -201,9 +187,10 @@ document.addEventListener("change", async (e) => {
 window.addEventListener("hashchange", () => {
   courseView.selecting = null;
   courseView.filter = "all";
-  courseView.finishedOpen = false;
+  window.scrollTo(0, 0);
   $("#view").scrollTo(0, 0);
   render();
+  $("#view .page")?.classList.add("page-enter");
 });
 
 // Na het einduur schuift een les vanzelf naar "in te halen", ook als de app openstaat.
@@ -214,9 +201,6 @@ initGestures($("#view"), { onTick: tick, onOptions: sheets.openOptions });
 document.documentElement.lang = lang();
 await store.load();
 render();
-
-// Een aanraking in de lijst stelt het opschuiven uit: je bent nog bezig.
-$("#view").addEventListener("pointerdown", () => { if (settle) settleLater(); });
 
 const updateSW = registerSW({
   onNeedRefresh() {

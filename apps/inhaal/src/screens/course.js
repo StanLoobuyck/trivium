@@ -5,7 +5,7 @@ import { t } from "../i18n/index.js";
 import { esc } from "../ui/dom.js";
 import { numbersNow, sessionRow } from "../ui/rows.js";
 
-export const courseView = { filter: "all", finishedOpen: false, selecting: null };
+export const courseView = { filter: "all", selecting: null };
 
 export function renderCourse(root, id, now) {
   const course = courseById(id);
@@ -45,10 +45,10 @@ export function renderCourse(root, id, now) {
     <div class="detail-main flow">
     ${open.length ? `<ul class="list">${open.map((s) => sessionRow(s, options)).join("")}</ul>`
       : `<div class="empty">${icon("check")}<span>${esc(t("allCaughtUp"))}</span></div>`}
-    ${finished.length ? `<details class="finished" ${courseView.finishedOpen ? "open" : ""}>
-      <summary class="group-title">${esc(t("finished", { n: finished.length }))}</summary>
+    ${finished.length ? `<section>
+      <h2 class="group-title">${esc(t("finished", { n: finished.length }))}</h2>
       <ul class="list">${finished.map((s) => sessionRow(s, { numbers, now })).join("")}</ul>
-    </details>` : ""}
+    </section>` : ""}
     ${courseView.selecting?.size ? `<button class="btn btn-primary btn-block select-bar" data-action="tick-selected">${esc(t("tickSelected", { n: courseView.selecting.size }))}</button>` : ""}
     </div>
     </div>

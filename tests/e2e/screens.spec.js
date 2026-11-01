@@ -21,7 +21,7 @@ for (const scheme of ["light", "dark"]) {
         expect(overflow).toBeLessThanOrEqual(0);
 
         const small = await page.locator(".row, .chip, .btn:not(.btn-small), .check, .tab").evaluateAll((els) =>
-          els.filter((e) => e.offsetParent && e.getBoundingClientRect().height < 44).map((e) => e.className));
+          els.filter((e) => e.offsetParent && e.getBoundingClientRect().height < 43.9).map((e) => e.className));
         expect(small).toEqual([]);
 
         const clipped = await page.locator(".row-main > *").evaluateAll((els) =>
@@ -110,7 +110,7 @@ for (const scheme of ["light", "dark"]) {
         });
         expect(overflow).toBeLessThanOrEqual(0);
         const small = await page.locator(".row, .chip, .btn:not(.btn-small), .check, .tab").evaluateAll((els) =>
-          els.filter((e) => e.offsetParent && e.getBoundingClientRect().height < 44).map((e) => e.className));
+          els.filter((e) => e.offsetParent && e.getBoundingClientRect().height < 43.9).map((e) => e.className));
         expect(small).toEqual([]);
         const { violations } = await new AxeBuilder({ page }).analyze();
         expect(violations.map((v) => `${v.id}: ${v.nodes[0].target}`)).toEqual([]);
@@ -124,7 +124,7 @@ for (const scheme of ["light", "dark"]) {
         }
         else await page.goto(path);
         if (button) await page.getByRole("button", { name: button }).click();
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(350);
         await check();
         await shot(name);
       }

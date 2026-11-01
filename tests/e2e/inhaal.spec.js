@@ -110,21 +110,30 @@ test("swipe naar links opent de opties", async ({ page }) => {
   await expect(page.getByRole("dialog")).toContainText("Status");
 });
 
-test("rijen blijven staan tot je pauzeert, en undo geldt voor alles samen", async ({ page }) => {
+test("een afgevinkte rij schuift meteen door, en undo geldt voor de hele reeks", async ({ page }) => {
   await start(page);
   await courseLink(page, /Digitale signaalverwerking/).click();
   await page.getByRole("checkbox").first().waitFor();
-  const rows = page.locator("#view [data-flip]");
-  const before = await rows.allInnerTexts();
   await page.getByRole("checkbox").nth(0).click();
-  await page.waitForTimeout(1500);
-  await page.getByRole("checkbox").nth(1).click();
-  await page.waitForTimeout(1500);
-  expect(await rows.allInnerTexts()).toEqual(before);
+  await expect(page.getByText("Afgewerkt (1)")).toBeVisible({ timeout: 600 });
+  await expect(page.locator("#view section .list .row").first()).toBeVisible();
+  await page.getByRole("checkbox").nth(0).click();
   await expect(page.locator("#toast")).toContainText("2 sessies afgevinkt");
-  await expect(page.getByText("Afgewerkt (2)")).toBeVisible({ timeout: 4000 });
+  await expect(page.getByText("Afgewerkt (2)")).toBeVisible({ timeout: 600 });
   await page.locator("#toast button").click();
   await expect(page.getByText(/Afgewerkt/)).toHaveCount(0);
+});
+
+test("de menubalk wordt breder als de + verdwijnt", async ({ page }, info) => {
+  test.skip(info.project.name !== "iphone-chromium", "alleen op iPhone-formaat");
+  await start(page);
+  const width = () => page.locator(".tabbar").evaluate((e) => e.getBoundingClientRect().width);
+  await page.waitForTimeout(400);
+  const before = await width();
+  await page.goto("/inhaal/#/instellingen");
+  await expect(page.locator("#fab")).toBeHidden();
+  await expect.poll(width).toBeGreaterThan(before + 40);
+  await expect(page.locator(".tab[aria-current]")).toContainText("Instellingen");
 });
 
 test("naar beneden vegen sluit de sheet", async ({ page, browserName }) => {
@@ -154,24 +163,9 @@ test("naar beneden vegen sluit de sheet", async ({ page, browserName }) => {
   await expect(sheet).toBeHidden();
 });
 
-test("de pagina zelf scrolt niet, de lijst wel", async ({ page }) => {
+test("de strook onder de statusbalk bevat geen titel", async ({ page }) => {
   await start(page);
-  const fits = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
-  expect(fits).toBe(true);
-  expect(await page.evaluate(() => getComputedStyle(document.querySelector("#view")).overflowY)).toBe("auto");
   await expect(page.locator(".topbar")).toHaveText("");
-});
-
-test("op een iPhone op het beginscherm vult de app het hele scherm", async ({ page }, info) => {
-  test.skip(info.project.name !== "iphone-chromium", "alleen op iPhone-formaat");
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "standalone", { value: true });
-    Object.defineProperty(navigator, "userAgent", { value: "iPhone" });
-    Object.defineProperty(screen, "height", { value: 932 });
-  });
-  await page.goto("/inhaal/");
-  const height = await page.evaluate(() => document.querySelector("#stage").getBoundingClientRect().height);
-  expect(height).toBe(932);
 });
 
 test("niets schuift de app uit beeld en onder de keuzeknop staat ruimte", async ({ page }) => {

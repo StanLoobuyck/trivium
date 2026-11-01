@@ -13,3 +13,30 @@ export function playFlip(before) {
     if (delta) element.animate([{ transform: `translateY(${delta}px)` }, { transform: "none" }], { duration: 300, easing });
   }
 }
+
+// Het grote getal telt mee en de balk schuift van de vorige naar de nieuwe stand.
+let shown = null;
+
+export function playHero() {
+  const number = document.querySelector(".hero-number");
+  const bar = document.querySelector(".hero .progress > span");
+  if (!number) { shown = null; return; }
+  const target = +number.textContent;
+  const value = bar.style.getPropertyValue("--value");
+  const from = shown;
+  shown = { target, value };
+  if (!from || from.target === target || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  bar.style.setProperty("--value", from.value);
+  requestAnimationFrame(() => requestAnimationFrame(() => bar.style.setProperty("--value", value)));
+  number.classList.add("is-changing");
+  const frames = 12;
+  let frame = 0;
+  const step = () => {
+    frame += 1;
+    if (!number.isConnected) return;
+    number.textContent = Math.round(from.target + ((target - from.target) * frame) / frames);
+    if (frame < frames) requestAnimationFrame(step);
+  };
+  step();
+}
