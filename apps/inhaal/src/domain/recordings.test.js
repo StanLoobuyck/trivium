@@ -71,6 +71,48 @@ describe("findSession", () => {
   });
 });
 
+describe("delen van een les", () => {
+  const list = [session("a", "2026-09-23T08:00:00Z")];
+  const lesson = { ...courses[0], minutesPerLecture: 100, minutesPerExercise: 100 };
+  const parts = { ...context, courses: [lesson, courses[1]], sessions: list };
+  const deel = (part) => recording({ title: `Les 1, deel ${part}`, lectureNumber: 1, part });
+  const whole = (rec, durationSec) => event("recording.watched", rec, { watchedFraction: 0.95, durationSec });
+
+  it("vinkt niet af na één deel, maar telt de bekeken tijd", () => {
+    const plan = planRecordings([whole(deel(1), 1800)], parts);
+    expect(plan.ticked).toEqual([]);
+    expect(plan.changes.get("a")).toMatchObject({ status: "inProgress", progressSec: 1800 });
+  });
+
+  it("vinkt af zodra de delen samen 80% van de lesduur halen", () => {
+    expect(planRecordings([whole(deel(1), 2400), whole(deel(2), 2300)], parts).ticked).toEqual([]);
+    expect(planRecordings([whole(deel(1), 2400), whole(deel(2), 2400)], parts).ticked).toEqual(["a"]);
+  });
+
+  it("onthoudt delen van eerdere reeksen", () => {
+    const first = planRecordings([whole(deel(1), 2400)], parts);
+    const saved = [{ ...list[0], ...first.changes.get("a") }];
+    expect(planRecordings([whole(deel(2), 2400)], { ...parts, sessions: saved }).ticked).toEqual(["a"]);
+  });
+
+  it("telt een half bekeken deel met zijn positie mee, zonder terug te lopen", () => {
+    const plan = planRecordings([
+      event("recording.progress", deel(1), { positionSec: 1200, durationSec: 2400 }, "2026-11-01T10:00:00+01:00"),
+      event("recording.progress", deel(1), { positionSec: 300, durationSec: 2400 }, "2026-11-01T11:00:00+01:00"),
+    ], parts);
+    expect(plan.changes.get("a").progressSec).toBe(1200);
+  });
+
+  it("een opname uit één stuk vinkt af, ook als ze korter is dan de les", () => {
+    const rec = recording({ title: "Les 1", lectureNumber: 1 });
+    expect(planRecordings([whole(rec, 1800)], parts).ticked).toEqual(["a"]);
+  });
+
+  it("zonder duur blijft het afvinken zoals voorheen", () => {
+    expect(planRecordings([watched(deel(1))], parts).ticked).toEqual(["a"]);
+  });
+});
+
 describe("planRecordings", () => {
   const rec = recording({ recordedOn: "2026-09-23", url: "https://t/1" });
 

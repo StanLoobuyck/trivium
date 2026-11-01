@@ -1,7 +1,10 @@
 // Opnames uit SwiftSkip koppelen aan lessen. Pure functies; zie packages/contract/CONTRACT.md.
 import { findCourseByCode } from "./courses.js";
 import { codeKey } from "./rooster.js";
-import { DONE, isDone, isAlive } from "./sessions.js";
+import { DONE, isDone, isAlive, sessionMinutes } from "./sessions.js";
+
+// Een les in delen is klaar als de bekeken tijd samen dit deel van de lesduur haalt.
+const PARTS_FRACTION = 0.8;
 
 const brusselsDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Brussels" });
 const dayOf = (iso) => brusselsDay.format(new Date(iso));
@@ -44,8 +47,15 @@ function withRecording(session, event, key) {
   const next = { ...manual[0], ...old, key, title };
   if (url && !manual[0]?.url) next.url = url;
   if (event.type === "recording.downloaded") next.fileName = event.payload.fileName;
+  const { durationSec, positionSec } = event.payload;
+  const seconds = event.type === "recording.watched" ? durationSec : positionSec;
+  if (durationSec) next.durationSec = durationSec;
+  if (seconds != null) next.watchedSec = Math.max(old?.watchedSec ?? 0, seconds);
   return [...list.filter((r) => r !== old && !manual.includes(r)), next];
 }
+
+// Opnames uit één stuk lopen via recording.watched; delen tellen op, omdat niemand weet hoeveel delen er zijn.
+const isInParts = (recording, list) => Boolean(recording.part) || list.filter((r) => r.key).length > 1;
 
 function addUnmatched(unmatched, event, key, course) {
   const entry = unmatched.find((u) => u.key === key);
@@ -73,8 +83,15 @@ export function planRecordings(events, { courses, sessions, numbers, now, unmatc
     if (!course) continue;
     if (!session) { waiting = addUnmatched(waiting, event, key, course); continue; }
 
-    change(session, { recordings: withRecording(session, event, key) });
-    if (event.type === "recording.watched") {
+    const recordings = withRecording(session, event, key);
+    change(session, { recordings });
+    if (event.type !== "recording.downloaded" && event.payload.durationSec && isInParts(recording, recordings)) {
+      if (isDone(session, now) || ticked.has(session.id)) continue;
+      const watched = recordings.reduce((sum, r) => sum + (r.watchedSec ?? 0), 0);
+      const whole = sessionMinutes({ ...session, progressSec: 0 }, courses.find((c) => c.id === session.courseId)) * 60;
+      if (watched >= PARTS_FRACTION * whole) ticked.add(session.id);
+      else change(session, { status: "inProgress", progressSec: watched });
+    } else if (event.type === "recording.watched") {
       if (!DONE.has(session.status) && !ticked.has(session.id)) ticked.add(session.id);
     } else if (event.type === "recording.progress" && !isDone(session, now) && !ticked.has(session.id)) {
       change(session, { status: "inProgress", progressSec: event.payload.positionSec });

@@ -12,8 +12,8 @@ const recording = buildRecording({ code: "H01L6A", lecture: "Les 1 (2026-09-23):
 
 describe("events van SwiftSkip volgen het contract", () => {
   it.each([
-    ["recording.watched", { watchedFraction: 0.93 }],
-    ["recording.progress", { positionSec: 2892 }],
+    ["recording.watched", { watchedFraction: 0.93, durationSec: 3600 }],
+    ["recording.progress", { positionSec: 2892, durationSec: 3600 }],
     ["recording.downloaded", { fileName: "les.mp4" }],
   ])("%s", (type, payload) => {
     const event = createEvent(type, recording, payload, meta);

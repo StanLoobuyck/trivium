@@ -2,11 +2,16 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** de koppeling werkt op echt Toledo in Zen voor een hoorcollege (bekeken, door de eigenaar getest). De rest van de
-   checklist van fase 3 is nog open: positie, download, keuze onthouden, iPhone.
-3. **Volgende:** delen van een les ("Les 6, part 3"): nu vinkt elk deel de hele les af. Daarna fase 4 (Verbatim).
-4. **Wacht op de eigenaar:** keuze voor de delen van een les.
+2. **Nu:** fase 3 is gebouwd en SwiftSkip 4.1.2 staat live. Delen van een les tellen op tot 80% van de lesduur.
+3. **Volgende:** als de eigenaar de checklist afrondt: fase 4 (Verbatim verhuist naar de monorepo). Eerst de geschiedenis
+   nakijken op privé-mailadressen en Claude-vermeldingen.
+4. **Wacht op de eigenaar:** checklist fase 3: halverwege, download, opname koppelen en onthouden, les in delen, iPhone.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — delen van een les
+- Een les in delen (`deel`/`part` in de titel, of meerdere opnames bij één les) wordt afgevinkt als de bekeken tijd samen 80%
+  van de lesduur haalt; tot dan staat ze op halverwege, met de juiste resterende tijd. Keuze van de eigenaar.
+- Een opname uit één stuk vinkt af bij 90% van de opname, ook als ze korter is dan de les.
 
 ## 2026-11-01 — Claude-vermelding uit de geschiedenis
 - 19 regels `Co-Authored-By` verwijderd met een force push, op verzoek van de eigenaar. Alle 56 commits hebben dezelfde datums

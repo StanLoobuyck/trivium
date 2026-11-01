@@ -61,6 +61,7 @@ test("position and watched reach Inhaal; delivered events are forgotten", async 
     source: "swiftskip",
     payload: { positionSec: 45 },
   });
+  expect(event.payload.durationSec).toBeGreaterThan(45);
   expect(event.payload.recording).toMatchObject({
     title: "Les 2 (2026-09-24): e2e",
     recordedOn: "2026-09-24",

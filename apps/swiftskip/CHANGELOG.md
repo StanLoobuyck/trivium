@@ -3,6 +3,11 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.1.2
+
+**Changed**
+- Link with Inhaal: a lecture recorded in parts is ticked off when the parts together cover most of it, not after the first part
+
 ## 4.1.1
 
 **Fixed**

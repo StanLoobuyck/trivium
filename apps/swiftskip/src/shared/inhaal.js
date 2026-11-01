@@ -55,6 +55,8 @@ export function buildRecording({ code, lecture, recording: name, url }) {
   const number = /\b(?:les|lecture|college|hc)\s*(\d+)\b/i.exec(title)?.[1];
   if (date) recording.recordedOn = date;
   if (number && Number(number) > 0) recording.lectureNumber = Number(number);
+  const part = /\b(?:part|deel)\s*(\d+)\b/i.exec(title)?.[1];
+  if (part && Number(part) > 0) recording.part = Number(part);
   if (url) recording.url = url;
   return recording;
 }

@@ -61,8 +61,16 @@ test("recording: without a Toledo title, the Kaltura name identifies it", () => 
     courseCode: "H06F2A",
     title: "DEP Les7, deel2",
     lectureNumber: 7,
+    part: 2,
   });
   assert.equal(buildRecording({ code: "H06F2A", lecture: "Les 1", recording: "x" }).title, "Les 1");
+});
+
+test("recording: part numbers come from the title", () => {
+  const part = (lecture) => buildRecording({ code: "H01L6A", lecture }).part;
+  assert.equal(part("DEP Les 6, part 3 - March 14th 2023"), 3);
+  assert.equal(part("Les7, deel4 - March 16th 2023"), 4);
+  assert.equal(part("Les 7"), undefined);
 });
 
 test("queue keeps one position per recording, and none after watched", () => {

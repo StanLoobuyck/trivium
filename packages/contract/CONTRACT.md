@@ -40,8 +40,8 @@ Elk event heeft dezelfde envelop (`schema/event.schema.json`):
 | `recording.downloaded` | Browser | `fileName` | Bestandsnaam bij de les |
 | `notes.ready` | Hub | `kind` (`transcript` of `notes`), `verbatimJob` | Badge "notities" bij de les |
 
-Elke payload bevat `recording`: `courseCode`, en waar gekend `title`, `recordedOn` (`JJJJ-MM-DD`), `lectureNumber`
-en `url`. Tijden en posities staan in seconden.
+Elke payload bevat `recording`: `courseCode`, en waar gekend `title`, `recordedOn` (`JJJJ-MM-DD`), `lectureNumber`,
+`part` (deel van een les) en `url`. `recording.watched` en `recording.progress` dragen ook `durationSec`. Tijden en posities staan in seconden.
 
 ## Browserroute (SwiftSkip ↔ Inhaal)
 De koppeling is opt-in. Inhaal opent `https://www.kuleuven.be/#swiftskip-koppel=<eigen adres, URL-gecodeerd>`. SwiftSkip
@@ -57,6 +57,9 @@ Daarna draait op dat adres alleen een klein script dat met de pagina praat via `
 | Inhaal | `inhaal` / `ack` | `ids[]` | Verwerkt, SwiftSkip mag ze vergeten |
 
 Een opname is herkenbaar aan `courseCode` + `title`. Inhaal bewaart die koppeling bij de les.
+
+Een les in delen (`part`, of meerdere opnames bij één les) wordt afgevinkt zodra de bekeken tijd samen 80% van de lesduur
+haalt; tot dan staat ze op halverwege. Een opname uit één stuk volgt `recording.watched`.
 
 ## Regels
 - Nieuwe velden mogen altijd; ontvangers negeren wat ze niet kennen.

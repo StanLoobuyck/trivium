@@ -18,11 +18,11 @@
   "allOf": [
     {
       "if": { "properties": { "type": { "const": "recording.watched" } } },
-      "then": { "properties": { "payload": { "required": ["watchedFraction"], "properties": { "watchedFraction": { "type": "number", "minimum": 0.9, "maximum": 1 } } } } }
+      "then": { "properties": { "payload": { "required": ["watchedFraction"], "properties": { "watchedFraction": { "type": "number", "minimum": 0.9, "maximum": 1 }, "durationSec": { "type": "number", "minimum": 0 } } } } }
     },
     {
       "if": { "properties": { "type": { "const": "recording.progress" } } },
-      "then": { "properties": { "payload": { "required": ["positionSec"], "properties": { "positionSec": { "type": "number", "minimum": 0 } } } } }
+      "then": { "properties": { "payload": { "required": ["positionSec"], "properties": { "positionSec": { "type": "number", "minimum": 0 }, "durationSec": { "type": "number", "minimum": 0 } } } } }
     },
     {
       "if": { "properties": { "type": { "const": "recording.downloaded" } } },
@@ -42,6 +42,7 @@
         "title": { "type": "string" },
         "recordedOn": { "type": "string", "format": "date" },
         "lectureNumber": { "type": "integer", "minimum": 1 },
+        "part": { "type": "integer", "minimum": 1 },
         "url": { "type": "string", "format": "uri" }
       }
     }

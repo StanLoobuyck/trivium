@@ -928,12 +928,13 @@ import { createDownloadControl } from "./download-control.js";
           void chrome.runtime.lastError;
         });
       lastReport = Date.now();
+      const durationSec = Math.round(duration) || undefined;
       if (isWatched(time, duration)) {
         if (watchedReported) return;
         watchedReported = true;
-        message("recording.watched", { watchedFraction: Math.min(1, time / duration) });
+        message("recording.watched", { watchedFraction: Math.min(1, time / duration), durationSec });
       } else if (time >= MIN_PROGRESS_SEC) {
-        message("recording.progress", { positionSec: Math.round(time) });
+        message("recording.progress", { positionSec: Math.round(time), durationSec });
       }
     };
 
