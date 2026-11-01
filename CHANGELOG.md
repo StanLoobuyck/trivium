@@ -4,7 +4,8 @@
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
 2. **Nu:** fase 1 af. Fase 2 bezig: hub en sync gebouwd en getest op de laptop, nog niet op de Mac. Repo
    `studie-ecosysteem`, MIT. `PLAN.md` blijft lokaal (geen back-up via GitHub).
-3. **Volgende:** hub op de Mac (vraag eerst), Tailscale Funnel, lijst verhuizen, dan inhaalplan, grafiek, sneltoetsen.
+3. **Volgende:** hub draait op de Mac als LaunchDaemon, Funnel staat aan. Lijst verhuizen, dan inhaalplan, grafiek,
+   sneltoetsen. Reboot-test van Funnel nog open (Tailscale draait als gewone app op de Mac).
    Toegang: Funnel + koppelcode, geen eigen domein (eigenaar wil het Chiro-domein niet en wil niet betalen).
 4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
    vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
