@@ -1,5 +1,5 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: { include: ["apps/**/*.test.js", "packages/**/*.test.js"] },
+  test: { include: ["apps/**/*.test.js", "packages/**/*.test.js"], exclude: ["**/node_modules/**", "apps/swiftskip/**"] },
 });

@@ -2,12 +2,23 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** oorzaak van de mislukte reboot-test gevonden: de hub start bij het opstarten, maar Tailscale is de gewone app
-   en start pas na aanmelden. Zonder aanmelding dus geen Funnel. Brugversie SwiftSkip 4.0.2 staat op beide update-adressen.
-3. **Volgende:** na de keuze van de eigenaar (automatisch aanmelden of Tailscale als systeemdienst) de reboot-test herhalen.
-   Daarna controleren dat een installatie van 4.0.1 naar 4.0.2 gaat, en de code verhuizen naar `apps/swiftskip`.
-4. **Wacht op de eigenaar:** die keuze, en de updatecontrole in Firefox.
+2. **Nu:** fase 2 is af: de reboot-test slaagt met automatisch aanmelden op de Mac. SwiftSkip staat met geschiedenis in
+   `apps/swiftskip`; 4.0.1 naar 4.0.2 is door de eigenaar bevestigd. Update naar een volgende versie via het nieuwe adres
+   is nog niet bewezen.
+3. **Volgende:** "Koppel met Inhaal" (opt-in, zie `PLAN.md`, sectie Ecosysteem). Daarmee komt ook de eerste release vanuit
+   de monorepo (`swiftskip-v`), die de laatste test van fase 3 is.
+4. **Wacht op de eigenaar:** niets.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — SwiftSkip verhuisd naar de monorepo
+- 30 commits met geschiedenis naar `apps/swiftskip`, vanuit een gefilterde kopie: auteur op het noreply-adres, zodat privé-
+  mailadressen niet in deze repo komen. De commit-id's verschillen dus van de oude repo. Daarom geen tags meegenomen.
+- SwiftSkip is geen npm-werkruimte: eigen `node_modules` en lockfile, en `npm test` vanuit `apps/swiftskip`. Zo blijft de
+  app los te bouwen en verandert de root-lockfile niet. De CI-job heet `swiftskip` en blokkeert de Pages-deploy niet.
+- `release.js` schrijft nu `site/swiftskip/updates.json`, met tags `swiftskip-v`, en respecteert `--dry-run` ook zonder `--`.
+- De oude repo moet blijven bestaan: installaties tot 4.0.1 lezen daar hun update, en de downloadlinks in de README's en de
+  instellingenpagina wijzen er nog naar. Die links aanpassen hoort bij fase 6.
+- Reboot-test geslaagd na automatisch aanmelden; 4.0.1 kreeg 4.0.2 in Firefox.
 
 ## 2026-11-01 — SwiftSkip 4.0.2 gepubliceerd, reboot-test mislukt
 - 4.0.2 is de brugversie: update-adres `stanloobuyck.github.io/studie-ecosysteem/swiftskip/updates.json`. Gecontroleerd:

@@ -68,7 +68,6 @@ scripts/
   build.js / dev.js         build + dev mode (auto-reload, local test pages)
   sign.js / release.js      Mozilla signing, full release
 test/                       unit tests (npm test); fixtures/ = local test pages
-updates.json                Firefox/Zen auto-update manifest (written by release.js)
 ```
 
 `__BROWSER__` (`"firefox"`, `"chrome"`, `"safari"`) and `__DEV__` are
@@ -110,11 +109,12 @@ loaded from it.
 ## Releasing
 
 1. Add a `## <version>` section to `CHANGELOG.md` (what friends will notice) and commit it.
-2. `npm run release <version> --dry-run` — checks everything and builds, publishes nothing.
-3. `npm run release <version>` — bumps the version, tests, builds, has Mozilla sign the
-   Firefox build (keys in `.env`), tags and pushes, creates the GitHub Release
+2. `npm run release -- <version> --dry-run` — checks everything and builds, publishes nothing.
+3. `npm run release -- <version>` — bumps the version, tests, builds, has Mozilla sign the
+   Firefox build (keys in `.env`), tags (`swiftskip-v<version>`) and pushes, creates the GitHub Release
    (`swiftskip-firefox.xpi` + `swiftskip-chrome.zip`), and only then adds the version to
-   `updates.json`, which Firefox/Zen installs check for automatic updates.
+   `site/swiftskip/updates.json` in the monorepo, which Firefox/Zen installs check for
+   automatic updates once Pages has deployed it.
 
 Every version number can be signed only once, so a failed release needs a new number
 if Mozilla already accepted the upload.

@@ -45,7 +45,8 @@ export async function signFirefox() {
 
   execFileSync(process.execPath, ["scripts/build.js", "firefox"], { cwd: ROOT, stdio: "inherit" });
   const sourceZip = join(artifactsDir, `swiftskip-source-${version}.zip`);
-  git("archive", "--format=zip", "-o", sourceZip, "HEAD");
+  // Run from apps/swiftskip, this archives only SwiftSkip, not the whole monorepo.
+  git("archive", "--format=zip", "-o", sourceZip, "HEAD", ".");
 
   const webExt = (await import("web-ext")).default;
   const result = await webExt.cmd.sign({

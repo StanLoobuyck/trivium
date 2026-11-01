@@ -107,6 +107,8 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Proefrun van een SwiftSkip-release: `npm run release -- <versie> --dry-run`. Zonder `--` slikt npm de vlag en publiceert
   het echt.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
+- SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
+  daar lokaal. De oude repo StanLoobuyck/SwiftSkip niet verwijderen of archiveren zonder overleg: oude installaties lezen er.
 - WebKit draait niet op Arch: lokaal Chromium en Firefox, WebKit alleen in de CI.
 - Eigen rooster testen: upload `fixtures/private/rooster.ics` en `rooster-aanvulling.ics` samen. De aanvulling komt
   uit schermafbeeldingen, omdat TimeEdit niets vóór 12 oktober exporteert. Verwacht op 2026-11-01: 63 open.

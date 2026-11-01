@@ -5,7 +5,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/StanLoobuyck/SwiftSkip.git"
+    "url": "https://github.com/StanLoobuyck/studie-ecosysteem.git",
+    "directory": "apps/swiftskip"
   },
   "private": true,
   "type": "module",

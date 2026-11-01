@@ -34,7 +34,28 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv run --project apps/hub pytest apps/hub/tests -q
 
-  # swiftskip (fase 3) en verbatim (fase 4) krijgen hier hun eigen job.
+  swiftskip:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/swiftskip
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/swiftskip/package-lock.json
+      - run: npm ci
+      # Echte TS-naar-MP4-test en testmedia voor de lokale pagina's.
+      - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+  # verbatim (fase 4) krijgt hier een eigen job.
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

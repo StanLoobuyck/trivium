@@ -1,7 +1,7 @@
 // Publishes a new SwiftSkip version for friends:
 //
-//   npm run release 4.1.0            (add a "## 4.1.0" section to CHANGELOG.md first)
-//   npm run release 4.1.0 --dry-run  (checks + builds, publishes nothing)
+//   npm run release -- 4.1.0            (add a "## 4.1.0" section to CHANGELOG.md first)
+//   npm run release -- 4.1.0 --dry-run  (checks + builds, publishes nothing)
 //
 // 1. checks: clean tree on main, up to date, new version, changelog entry
 // 2. bumps the version (commit), runs the tests, builds every browser
@@ -24,11 +24,15 @@ import { fileURLToPath } from "node:url";
 import { signFirefox } from "./sign.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REPO = "StanLoobuyck/SwiftSkip";
+const REPO = "StanLoobuyck/studie-ecosysteem";
+const TAG_PREFIX = "swiftskip-v";
+// Served by GitHub Pages; Pages deploys on every push to main.
+const UPDATES = join(ROOT, "..", "..", "site", "swiftskip", "updates.json");
 const ADDON_ID = "swiftskip@stanloobuyck.github.io";
 
 const args = process.argv.slice(2);
-const dryRun = args.includes("--dry-run");
+// Without "--" npm swallows --dry-run, but passes it on in this variable.
+const dryRun = args.includes("--dry-run") || process.env.npm_config_dry_run === "true";
 const version = args.find((a) => !a.startsWith("--"));
 
 const run = (cmd, cmdArgs, opts = {}) =>
@@ -47,7 +51,8 @@ function fail(message) {
 
 // ─── 1. Checks ────────────────────────────────────────────────────────────────
 
-if (!/^\d+\.\d+\.\d+$/.test(version || "")) fail("Usage: npm run release <version> [--dry-run], e.g. 4.1.0");
+if (!/^\d+\.\d+\.\d+$/.test(version || ""))
+  fail("Usage: npm run release -- <version> [--dry-run], e.g. 4.1.0");
 
 step("Checking the repository");
 if (git("status", "--porcelain")) fail("Commit or stash your changes first.");
@@ -57,21 +62,21 @@ git("fetch", "--quiet", "--tags", "origin");
 // commit is fine (left behind by an earlier run that stopped).
 const unpushed = git("log", "--format=%s", "origin/main..HEAD").split("\n").filter(Boolean);
 const behind = git("rev-list", "--count", "HEAD..origin/main") !== "0";
-if (behind || unpushed.some((subject) => subject !== `Release ${version}`))
+if (behind || unpushed.some((subject) => subject !== `chore(swiftskip): release ${version}`))
   fail("main differs from origin/main: pull/push first.");
 
 // An earlier run of this release that got as far as tagging: carry on, as
 // long as the tag is this commit and the GitHub Release doesn't exist yet.
-const tagged = Boolean(git("tag", "--list", `v${version}`));
+const tagged = Boolean(git("tag", "--list", `${TAG_PREFIX}${version}`));
 if (tagged) {
-  if (git("rev-parse", `v${version}^{commit}`) !== git("rev-parse", "HEAD"))
-    fail(`Tag v${version} already exists (on another commit).`);
+  if (git("rev-parse", `${TAG_PREFIX}${version}^{commit}`) !== git("rev-parse", "HEAD"))
+    fail(`Tag ${TAG_PREFIX}${version} already exists (on another commit).`);
   if (released(version)) fail(`SwiftSkip ${version} is already released.`);
 }
 
 function released(v) {
   try {
-    execFileSync("gh", ["release", "view", `v${v}`, "--repo", REPO], { stdio: "pipe" });
+    execFileSync("gh", ["release", "view", `${TAG_PREFIX}${v}`, "--repo", REPO], { stdio: "pipe" });
     return true;
   } catch {
     return false;
@@ -85,7 +90,7 @@ const newer = (a, b) => {
   for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i];
   return false;
 };
-const updates = JSON.parse(readFileSync(join(ROOT, "updates.json"), "utf8"));
+const updates = JSON.parse(readFileSync(UPDATES, "utf8"));
 const published = updates.addons[ADDON_ID].updates.map((u) => u.version);
 if (published.includes(version)) fail(`${version} is already published in updates.json.`);
 if (published.some((v) => !newer(version, v))) fail(`${version} must be newer than ${published.join(", ")}.`);
@@ -108,7 +113,16 @@ run("npm", ["test", "--silent"], { quiet: true });
 if (version !== current) {
   step(`Setting version ${version}`);
   run("npm", ["version", version, "--no-git-tag-version"], { quiet: true });
-  if (!dryRun) git("commit", "-q", "-am", `Release ${version}`);
+  if (!dryRun)
+    git(
+      "commit",
+      "-q",
+      "-m",
+      `chore(swiftskip): release ${version}`,
+      "--",
+      "package.json",
+      "package-lock.json",
+    );
 }
 
 step("Building every browser");
@@ -124,7 +138,9 @@ copyFileSync(
 
 if (dryRun) {
   if (version !== current) git("checkout", "--", "package.json", "package-lock.json");
-  console.log(`\n✔ Dry run OK. "npm run release ${version}" would sign, tag v${version}, publish:`);
+  console.log(
+    `\n✔ Dry run OK. "npm run release ${version}" would sign, tag ${TAG_PREFIX}${version}, publish:`,
+  );
   console.log(`  swiftskip-firefox.xpi, swiftskip-chrome.zip\n\n${notes}\n`);
   process.exit(0);
 }
@@ -150,20 +166,20 @@ const hash = createHash("sha256").update(readFileSync(xpi)).digest("hex");
 
 // ─── 4. Tag + GitHub Release ──────────────────────────────────────────────────
 
-step(`Tagging v${version} and pushing`);
-if (!tagged) git("tag", "-a", `v${version}`, "-m", `SwiftSkip ${version}`);
-run("git", ["push", "--quiet", "origin", "main", `v${version}`]);
+step(`Tagging ${TAG_PREFIX}${version} and pushing`);
+if (!tagged) git("tag", "-a", `${TAG_PREFIX}${version}`, "-m", `SwiftSkip ${version}`);
+run("git", ["push", "--quiet", "origin", "main", `${TAG_PREFIX}${version}`]);
 
 step("Creating the GitHub Release");
 const notesFile = join(assets, "NOTES.md");
 writeFileSync(
   notesFile,
-  `${notes}\n\n---\n**Installeren / Install:** [Nederlands](https://github.com/${REPO}/blob/main/README_NL.md#installeren) · [English](https://github.com/${REPO}/blob/main/README_EN.md#installing)\n`,
+  `${notes}\n\n---\n**Installeren / Install:** [Nederlands](https://github.com/${REPO}/blob/main/apps/swiftskip/README_NL.md#installeren) · [English](https://github.com/${REPO}/blob/main/apps/swiftskip/README_EN.md#installing)\n`,
 );
 run("gh", [
   "release",
   "create",
-  `v${version}`,
+  `${TAG_PREFIX}${version}`,
   xpi,
   join(assets, "swiftskip-chrome.zip"),
   "--repo",
@@ -172,7 +188,7 @@ run("gh", [
   `SwiftSkip ${version}`,
   "--notes-file",
   notesFile,
-  "--latest",
+  "--latest=false",
 ]);
 
 // ─── 5. Point Firefox updates at it ───────────────────────────────────────────
@@ -180,14 +196,16 @@ run("gh", [
 step("Publishing the update for Firefox / Zen");
 updates.addons[ADDON_ID].updates.push({
   version,
-  update_link: `https://github.com/${REPO}/releases/download/v${version}/swiftskip-firefox.xpi`,
+  update_link: `https://github.com/${REPO}/releases/download/${TAG_PREFIX}${version}/swiftskip-firefox.xpi`,
   update_hash: `sha256:${hash}`,
 });
-writeFileSync(join(ROOT, "updates.json"), JSON.stringify(updates, null, 2) + "\n");
-git("commit", "-q", "-m", `Firefox updates: ${version}`, "--", "updates.json");
+writeFileSync(UPDATES, JSON.stringify(updates, null, 2) + "\n");
+git("commit", "-q", "-m", `chore(swiftskip): publish Firefox update ${version}`, "--", UPDATES);
 run("git", ["push", "--quiet", "origin", "main"]);
 
-console.log(`\n✔ SwiftSkip ${version} is out: https://github.com/${REPO}/releases/tag/v${version}`);
+console.log(
+  `\n✔ SwiftSkip ${version} is out: https://github.com/${REPO}/releases/tag/${TAG_PREFIX}${version}`,
+);
 console.log(
   "  Firefox/Zen installs pick it up automatically (within a day, or via about:addons → ⚙ → Check for Updates).",
 );
