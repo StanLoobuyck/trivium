@@ -1,0 +1,11 @@
+{
+  "name": "@studie/design",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./components.css": "./components.css",
+    "./icons.js": "./icons.js"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event.schema.json",
+  "title": "Ecosysteem-event",
+  "type": "object",
+  "required": ["id", "type", "source", "occurredAt", "payload"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "type": { "enum": ["recording.watched", "recording.progress", "recording.downloaded", "notes.ready"] },
+    "source": { "enum": ["swiftskip", "verbatim"] },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "required": ["recording"],
+      "properties": { "recording": { "$ref": "#/$defs/recording" } }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "recording.watched" } } },
+      "then": { "properties": { "payload": { "required": ["watchedFraction"], "properties": { "watchedFraction": { "type": "number", "minimum": 0.9, "maximum": 1 } } } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "recording.progress" } } },
+      "then": { "properties": { "payload": { "required": ["positionSec"], "properties": { "positionSec": { "type": "number", "minimum": 0 } } } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "recording.downloaded" } } },
+      "then": { "properties": { "payload": { "required": ["fileName"], "properties": { "fileName": { "type": "string", "minLength": 1 } } } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "notes.ready" } } },
+      "then": { "properties": { "payload": { "required": ["kind", "verbatimJob"], "properties": { "kind": { "enum": ["transcript", "notes"] }, "verbatimJob": { "type": "string", "minLength": 1 } } } } }
+    }
+  ],
+  "$defs": {
+    "recording": {
+      "type": "object",
+      "required": ["courseCode"],
+      "properties": {
+        "courseCode": { "type": "string", "pattern": "^[A-Za-z0-9]+$" },
+        "title": { "type": "string" },
+        "recordedOn": { "type": "string", "format": "date" },
+        "lectureNumber": { "type": "integer", "minimum": 1 },
+        "url": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

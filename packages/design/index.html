@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Stijl A · componenten</title>
+  <link rel="stylesheet" href="./tokens.css">
+  <link rel="stylesheet" href="./components.css">
+  <style>
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-2); }
+    .swatch { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-row); background: var(--tone-tint); font-size: var(--text-sub); }
+    .stack { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+    section > h2 { margin-bottom: var(--space-3); }
+    .type-scale > * + * { margin-top: var(--space-2); }
+    .sidebar-note { padding: var(--space-3) var(--space-2); }
+    main { padding-bottom: calc(49px + var(--space-12) + var(--safe-bottom)); }
+  </style>
+</head>
+<body>
+  <div class="split">
+    <aside class="sidebar" aria-label="Zijbalk">
+      <p class="title sidebar-note">Vakken</p>
+      <ul class="list" id="sidebar-list"></ul>
+      <p class="label sidebar-note">Op de laptop vervangt deze zijbalk de tabbalk.</p>
+    </aside>
+    <div>
+      <header class="navbar">
+        <span class="sub">Stijl A</span>
+        <div class="segmented" role="group" aria-label="Weergave" id="theme" style="min-width: 220px">
+          <button aria-pressed="true" data-theme-choice="">Systeem</button>
+          <button aria-pressed="false" data-theme-choice="light">Licht</button>
+          <button aria-pressed="false" data-theme-choice="dark">Donker</button>
+        </div>
+      </header>
+      <main class="page">
+        <h1 class="large-title">Componenten</h1>
+
+        <section class="hero" aria-label="Hero">
+          <span class="hero-number">47</span>
+          <span class="sub">sessies · ± 71 uur</span>
+          <div class="progress" role="img" aria-label="62% van het semester"><span style="--value: 0.62"></span></div>
+        </section>
+
+        <section>
+          <h2 class="title">Kaart</h2>
+          <div class="card" data-course="blue">
+            <p class="label">Volgende</p>
+            <div class="row" style="padding-inline: 0">
+              <span class="dot"></span>
+              <div class="row-main"><div>Les 4 · di 13 okt</div><div class="sub">Voorbeeldvak A</div></div>
+              <button class="btn btn-small btn-primary" data-toast>Bekeken</button>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="group-title">Lijst</h2>
+          <ul class="list" id="course-list"></ul>
+        </section>
+
+        <section>
+          <h2 class="title">Vakdetail</h2>
+          <div class="course-head stack" data-course="green" style="justify-content: space-between">
+            <div><p class="title">Voorbeeldvak B</p><p class="sub">3 van 12 afgewerkt</p></div>
+            <div class="ring" style="--value: 0.25" role="img" aria-label="25%"></div>
+          </div>
+          <div class="segmented" role="tablist" aria-label="Type" style="margin-top: var(--space-3)">
+            <button role="tab" aria-selected="true">Alle</button>
+            <button role="tab" aria-selected="false">HC</button>
+            <button role="tab" aria-selected="false">OZ</button>
+          </div>
+          <ul class="list" style="margin-top: var(--space-3)" data-course="green" id="session-list"></ul>
+        </section>
+
+        <section>
+          <h2 class="title">Knoppen</h2>
+          <div class="stack">
+            <button class="btn btn-primary">Voeg 3 toe</button>
+            <button class="btn">Exporteren</button>
+            <button class="btn btn-plain">Annuleer</button>
+            <button class="btn btn-danger">Verwijderen</button>
+            <button class="btn" disabled>Uit</button>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="title">Chips</h2>
+          <div class="chips" id="chips"></div>
+        </section>
+
+        <section>
+          <h2 class="title">Invoer</h2>
+          <input class="field" placeholder="Notitie" aria-label="Notitie">
+        </section>
+
+        <section>
+          <h2 class="title">Sheet en toast</h2>
+          <div class="stack">
+            <button class="btn" id="open-sheet">Open sheet</button>
+            <button class="btn" data-toast>Toon toast</button>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="title">Banner en lege staat</h2>
+          <div class="banner"><span>Nieuwe versie</span><button class="btn btn-small btn-plain">Vernieuwen</button></div>
+          <div class="empty" id="empty"></div>
+        </section>
+
+        <section class="type-scale">
+          <h2 class="title">Typografie</h2>
+          <p class="large-title">Large title 34</p>
+          <p class="title">Titel 22</p>
+          <p>Body 17 · 0123456789</p>
+          <p class="sub">Subtekst 15</p>
+          <p class="label">Label 13</p>
+          <p class="micro">Micro 11</p>
+        </section>
+
+        <section>
+          <h2 class="title">Vakkleuren</h2>
+          <div class="swatches" id="swatches"></div>
+        </section>
+
+        <section>
+          <h2 class="title">Iconen</h2>
+          <div class="stack" id="icons"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-label="Hoofdnavigatie" id="tabbar"></nav>
+  <button class="fab" aria-label="Toevoegen" id="fab"></button>
+
+  <div id="sheet-root">
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1" id="sheet">
+      <h2 class="title" id="sheet-title">Toevoegen</h2>
+      <p class="group-title" style="padding: var(--space-3) 0 0">Datums</p>
+      <div class="chips"><button class="chip" aria-pressed="true">vandaag</button><button class="chip" aria-pressed="false">di 28/10</button><button class="chip" aria-pressed="false">do 30/10</button></div>
+      <button class="btn btn-primary btn-block" id="close-sheet" style="margin-top: var(--space-4)">Voeg 1 toe</button>
+    </div>
+  </div>
+
+  <div class="toast" role="status" id="toast"><span>Les 4 afgevinkt</span><button id="undo">Ongedaan</button></div>
+
+  <script type="module">
+    import { icon, iconNames } from "./icons.js";
+
+    const $ = (id) => document.getElementById(id);
+    const colors = ["blue", "indigo", "purple", "pink", "red", "orange", "yellow", "green"];
+    const courses = [["blue", "Voorbeeldvak A", "6 HC · 2 OZ"], ["orange", "Voorbeeldvak B", "4 HC"], ["green", "Een vak met een erg lange naam die netjes moet afbreken", "1 OZ"]];
+
+    const courseRow = ([color, name, count]) =>
+      `<li><a class="row" href="#" data-course="${color}"><span class="dot"></span><span class="row-main"><span>${name}</span></span><span class="row-trail">${count}${icon("chevron")}</span></a></li>`;
+    $("course-list").innerHTML = courses.map(courseRow).join("") +
+      `<li><div class="row is-done"><span class="dot"></span><span class="row-main"><span>Helemaal bij</span></span><span class="row-trail">${icon("check")}</span></div></li>`;
+    $("sidebar-list").innerHTML = courses.map(courseRow).join("");
+
+    const sessions = [["Les 1", "ma 28 sep", true], ["Les 2", "do 1 okt", false], ["Les 3", "ma 5 okt", false]];
+    $("session-list").innerHTML = sessions.map(([label, date, done]) =>
+      `<li><div class="row"><button class="check" role="checkbox" aria-checked="${done}" aria-label="${label} afvinken"><span class="check-mark">${icon("check")}</span></button><span class="row-main"><span>${label} · ${date}</span></span><span class="row-trail">1u 50</span></div></li>`).join("") +
+      `<li><div class="row is-done"><span class="row-main"><span>Geschrapt · do 8 okt</span></span></div></li>`;
+
+    $("chips").innerHTML = ["vandaag", "di 28/10", "do 30/10", "ma 2/11", "wo 4/11"].map((c, i) =>
+      `<button class="chip" aria-pressed="${i === 1}">${c}</button>`).join("");
+    $("swatches").innerHTML = colors.map((c) => `<div class="swatch" data-course="${c}"><span class="dot"></span>${c}</div>`).join("");
+    $("icons").innerHTML = iconNames.map(icon).join("");
+    $("empty").innerHTML = `${icon("check")}<span>Helemaal bij</span>`;
+    $("fab").innerHTML = icon("plus");
+    $("tabbar").innerHTML = [["overview", "Overzicht", true], ["book", "Vakken", false], ["settings", "Instellingen", false]].map(([i, t, on]) =>
+      `<button class="tab" ${on ? 'aria-current="page"' : ""}>${icon(i)}<span>${t}</span></button>`).join("");
+
+    document.addEventListener("click", (e) => {
+      const check = e.target.closest(".check");
+      if (check) check.setAttribute("aria-checked", check.getAttribute("aria-checked") !== "true");
+      const chip = e.target.closest(".chip");
+      if (chip) chip.setAttribute("aria-pressed", chip.getAttribute("aria-pressed") !== "true");
+      const tab = e.target.closest("[role=tab]");
+      if (tab) tab.parentElement.querySelectorAll("[role=tab]").forEach((t) => t.setAttribute("aria-selected", t === tab));
+      if (e.target.closest("[data-toast]")) showToast();
+    });
+
+    $("theme").addEventListener("click", (e) => {
+      const button = e.target.closest("button");
+      if (!button) return;
+      const choice = button.dataset.themeChoice;
+      if (choice) document.documentElement.dataset.theme = choice;
+      else delete document.documentElement.dataset.theme;
+      $("theme").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b === button));
+    });
+
+    let toastTimer;
+    function showToast() {
+      $("toast").classList.add("is-open");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $("toast").classList.remove("is-open"), 5000);
+    }
+    $("undo").addEventListener("click", () => { clearTimeout(toastTimer); $("toast").classList.remove("is-open"); });
+
+    let opener;
+    const sheet = (open) => {
+      $("sheet-root").classList.toggle("is-open", open);
+      if (open) { opener = document.activeElement; $("sheet").focus(); } else opener?.focus();
+    };
+    $("open-sheet").addEventListener("click", () => sheet(true));
+    $("fab").addEventListener("click", () => sheet(true));
+    $("scrim").addEventListener("click", () => sheet(false));
+    $("close-sheet").addEventListener("click", () => sheet(false));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") sheet(false); });
+  </script>
+</body>
+</html>

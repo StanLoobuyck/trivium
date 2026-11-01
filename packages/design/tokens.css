@@ -1,0 +1,188 @@
+/* Stijl A (native iOS): de enige plek voor kleuren, fonts, radii en beweging. Geen framework, geen build. */
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/Inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  --font: -apple-system, "SF Pro Text", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* 1 rem = 17 px (zie html in components.css), zodat de systeemtekstgrootte alles meeschaalt. */
+  --text-hero: 3.294rem;   /* 56 px, enkel het hero-getal */
+  --text-large: 2rem;      /* 34 px */
+  --text-title: 1.294rem;  /* 22 px */
+  --text-body: 1rem;       /* 17 px */
+  --text-sub: 0.882rem;    /* 15 px */
+  --text-label: 0.765rem;  /* 13 px */
+  --text-micro: 0.647rem;  /* 11 px */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-hero: 700;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-row: 10px;
+  --radius-card: 16px;
+  --radius-sheet: 22px;
+  --radius-full: 999px;
+  --row-min: 44px;
+  --hairline: 0.5px;
+  --blur: blur(20px);
+  --content-width: 720px;
+  --sidebar-width: 280px;
+
+  /* Veer met stijfheid 400 en demping 30 (ζ = 0,75, overshoot 2,8%), uitgerekend tot ze stilligt en
+     geschaald naar 300 ms. Oudere browsers vallen terug op de cubic-bezier. */
+  --ease-spring: cubic-bezier(0.3, 1.2, 0.5, 1);
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur-fast: 200ms;
+  --dur-spring: 300ms;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  --bg: #F2F2F7;
+  --card: #FFFFFF;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-strong: rgba(120, 120, 128, 0.2);
+  --separator: rgba(0, 0, 0, 0.12);
+  --segment-on: #FFFFFF;
+  --bar: rgba(242, 242, 247, 0.8);
+  --scrim: rgba(0, 0, 0, 0.3);
+  --text: #000000;
+  --text-2: #5E5E63;
+  --accent: #0066D6;
+  --accent-text: #0058BA;
+  --on-accent: #FFFFFF;
+  --accent-tint: rgba(0, 102, 214, 0.12);
+  --danger: #BF0012;
+  --toast: #2C2C2E;
+  --on-toast: #FFFFFF;
+  --toast-action: #64AEFF;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-raised: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --focus: 0 0 0 3px rgba(0, 102, 214, 0.45);
+
+  --on-course: #FFFFFF;
+  --course-blue: #0A6CDB;
+  --course-blue-tint: rgba(10, 108, 219, 0.1);
+  --course-indigo: #5856D6;
+  --course-indigo-tint: rgba(88, 86, 214, 0.1);
+  --course-purple: #A445D6;
+  --course-purple-tint: rgba(164, 69, 214, 0.1);
+  --course-pink: #DB2777;
+  --course-pink-tint: rgba(219, 39, 119, 0.1);
+  --course-red: #D9342B;
+  --course-red-tint: rgba(217, 52, 43, 0.1);
+  --course-orange: #C75F00;
+  --course-orange-tint: rgba(199, 95, 0, 0.1);
+  --course-yellow: #A67C00;
+  --course-yellow-tint: rgba(166, 124, 0, 0.12);
+  --course-green: #2A8A3E;
+  --course-green-tint: rgba(42, 138, 62, 0.1);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  :root { --ease-spring: linear(0, 0.081, 0.255, 0.451, 0.631, 0.776, 0.882, 0.953, 0.996, 1.019, 1.027, 1.028, 1.024, 1.019, 1.013, 1.009, 1.005, 1.002, 1.001, 1, 1); }
+}
+
+/* De donkere waarden staan twee keer: volgens het systeem, en voor de keuze via html[data-theme]. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000;
+    --card: #1C1C1E;
+    --fill: rgba(120, 120, 128, 0.24);
+    --fill-strong: rgba(120, 120, 128, 0.36);
+    --separator: rgba(255, 255, 255, 0.14);
+    --segment-on: #636366;
+    --bar: rgba(22, 22, 24, 0.8);
+    --scrim: rgba(0, 0, 0, 0.55);
+    --text: #FFFFFF;
+    --text-2: #A5A5AC;
+    --accent: #0071E3;
+    --accent-text: #409CFF;
+    --on-accent: #FFFFFF;
+    --accent-tint: rgba(64, 156, 255, 0.16);
+    --danger: #FF6961;
+    --toast: #3A3A3C;
+    --on-toast: #FFFFFF;
+    --toast-action: #8CC4FF;
+    --shadow-card: none;
+    --shadow-raised: none;
+    --focus: 0 0 0 3px rgba(64, 156, 255, 0.55);
+    --on-course: #000000;
+    --course-blue: #409CFF;
+    --course-blue-tint: rgba(64, 156, 255, 0.16);
+    --course-indigo: #8583FF;
+    --course-indigo-tint: rgba(133, 131, 255, 0.16);
+    --course-purple: #C77DF3;
+    --course-purple-tint: rgba(199, 125, 243, 0.16);
+    --course-pink: #FF7AB0;
+    --course-pink-tint: rgba(255, 122, 176, 0.16);
+    --course-red: #FF6961;
+    --course-red-tint: rgba(255, 105, 97, 0.16);
+    --course-orange: #FF9F0A;
+    --course-orange-tint: rgba(255, 159, 10, 0.16);
+    --course-yellow: #FFD60A;
+    --course-yellow-tint: rgba(255, 214, 10, 0.14);
+    --course-green: #30D158;
+    --course-green-tint: rgba(48, 209, 88, 0.16);
+  }
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --card: #1C1C1E;
+  --fill: rgba(120, 120, 128, 0.24);
+  --fill-strong: rgba(120, 120, 128, 0.36);
+  --separator: rgba(255, 255, 255, 0.14);
+  --segment-on: #636366;
+  --bar: rgba(22, 22, 24, 0.8);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --text: #FFFFFF;
+  --text-2: #A5A5AC;
+  --accent: #0071E3;
+  --accent-text: #409CFF;
+  --on-accent: #FFFFFF;
+  --accent-tint: rgba(64, 156, 255, 0.16);
+  --danger: #FF6961;
+  --toast: #3A3A3C;
+  --on-toast: #FFFFFF;
+  --toast-action: #8CC4FF;
+  --shadow-card: none;
+  --shadow-raised: none;
+  --focus: 0 0 0 3px rgba(64, 156, 255, 0.55);
+  --on-course: #000000;
+  --course-blue: #409CFF;
+  --course-blue-tint: rgba(64, 156, 255, 0.16);
+  --course-indigo: #8583FF;
+  --course-indigo-tint: rgba(133, 131, 255, 0.16);
+  --course-purple: #C77DF3;
+  --course-purple-tint: rgba(199, 125, 243, 0.16);
+  --course-pink: #FF7AB0;
+  --course-pink-tint: rgba(255, 122, 176, 0.16);
+  --course-red: #FF6961;
+  --course-red-tint: rgba(255, 105, 97, 0.16);
+  --course-orange: #FF9F0A;
+  --course-orange-tint: rgba(255, 159, 10, 0.16);
+  --course-yellow: #FFD60A;
+  --course-yellow-tint: rgba(255, 214, 10, 0.14);
+  --course-green: #30D158;
+  --course-green-tint: rgba(48, 209, 88, 0.16);
+}
