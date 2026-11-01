@@ -4,12 +4,13 @@
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
 2. **Klaar:** fase 0 t/m 5 gebouwd. Verbatim en SwiftSkip laden `packages/design`; zelfde blauwe logofamilie; SwiftSkip-instellingen per sectie met thema-keuze.
 3. **Wacht op de eigenaar:** herstart van de hub (nodig voor vakkleuren), SwiftSkip beoordelen via `about:debugging`, daarna akkoord voor release 4.4.0.
-   Keuzes: logo A, B of C, nieuwe naam voor Inhaal, notitiemodel in Verbatim (nu Gemini), overkoepelende naam voor fase 6, LaTeX-skill verfijnen.
+   Keuzes: nieuwe naam voor Inhaal (Dacapo aanbevolen, internationaal en niet letterlijk), notitiemodel in Verbatim (nu Gemini), overkoepelende naam voor fase 6.
 4. **Niet getest:** ronde hoeken van het echte Zen-venster, look op de echte Kaltura-speler, badges in de Inhaal-app zelf, Safari.
-5. **Volgende:** release 4.4.0, dan de slides-stroom (aanbevolen, nog uit te werken) en daarna fase 6.
+5. **Volgende:** release 4.4.0, dan de slides-stroom (nog uit te werken), de LaTeX-skill als functie in Verbatim (wens van de eigenaar) en daarna fase 6.
 6. **Open:** menu's verder herwerken (eigenaar komt erop terug); Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
 
-## 2026-11-02 — vakkleuren, logo's en SwiftSkip-instellingen
+## 2026-11-02 — vakkleuren, logo's en Swiftskip-instellingen
+- Naam: Swiftskip met kleine s in alles wat je ziet. Repo-adressen, mapnamen en technische id's blijven `SwiftSkip`/`swiftskip`. Logo A gekozen.
 - Vakkleuren: de hub geeft `colorKey` mee, Verbatim haalt ze op via `/api/course-colors` (zelfde koppeling als het importeren: code, dan naam) en onthoudt ze.
   Niets nieuws in `courses.yaml`, dus de worker hoeft niet te herstarten.
 - Logo's: Verbatim blauw met de hoek van Inhaal, nieuw SwiftSkip-icoon (`apps/swiftskip/branding/icon.svg`, PNG's opnieuw gemaakt). Boekje past nu binnen het raster.

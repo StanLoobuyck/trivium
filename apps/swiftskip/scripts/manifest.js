@@ -11,7 +11,7 @@ const ICONS = {
 
 const ACTION = {
   default_popup: "popup.html",
-  default_title: "SwiftSkip",
+  default_title: "Swiftskip",
   default_icon: ICONS,
 };
 
@@ -24,7 +24,7 @@ const DEV_HOSTS = ["http://localhost/*", "http://127.0.0.1/*"];
 export function buildManifest(target, { version, dev }) {
   const hosts = dev ? [...REQUIRED_HOSTS, ...DEV_HOSTS] : REQUIRED_HOSTS;
   const base = {
-    name: dev ? "SwiftSkip (dev)" : "SwiftSkip",
+    name: dev ? "Swiftskip (dev)" : "Swiftskip",
     version,
     // Shown in the browser's extension list, in the browser's language.
     description: "__MSG_appDescription__",
@@ -59,7 +59,7 @@ export function buildManifest(target, { version, dev }) {
             id: "swiftskip@stanloobuyck.github.io",
             // 140 = current ESR; needed for data_collection_permissions (and :has() in CSS).
             strict_min_version: "140.0",
-            // SwiftSkip sends no data anywhere (required by addons.mozilla.org).
+            // Swiftskip sends no data anywhere (required by addons.mozilla.org).
             data_collection_permissions: { required: ["none"] },
             // Self-hosted updates (the add-on is signed "unlisted", not on AMO).
             ...(dev ? {} : { update_url: UPDATE_URL }),

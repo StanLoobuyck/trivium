@@ -1,7 +1,7 @@
 # Studie-ecosysteem — notities voor Claude Code
 
 Monorepo met drie apps, elk apart te downloaden en te gebruiken: **Inhaal** (nieuw: welke lessen moet ik
-nog inhalen), **SwiftSkip** (bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
+nog inhalen), **Swiftskip** (technisch `swiftskip`, bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
 transcripts en notities). De eigenaar schrijft zelf geen code: Claude Code bouwt, draait en test alles; de
 eigenaar test de app en beslist. Dit is een **publieke repo**: geen persoonlijke gegevens, adressen of
 rooster in gecommitte bestanden. Persoonlijke setup hoort in `CLAUDE.local.md`. `PLAN.md` bevat persoonlijke

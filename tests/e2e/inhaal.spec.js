@@ -363,7 +363,7 @@ test("data blijft beschikbaar zonder netwerk", async ({ page, context, browserNa
   await expect(openCount(page)).toHaveText(String(OPEN_BEFORE));
 });
 
-test.describe("SwiftSkip-koppeling", () => {
+test.describe("Swiftskip-koppeling", () => {
   const recording = (fields) => ({ courseCode: "H01L1A", title: "Les", ...fields });
   let counter = 0;
   const event = (type, rec, payload) => ({
@@ -372,7 +372,7 @@ test.describe("SwiftSkip-koppeling", () => {
   });
   const watched = (rec) => event("recording.watched", rec, { watchedFraction: 0.95 });
 
-  // Speelt de brug van SwiftSkip na; de extensie zelf wordt getest in apps/swiftskip.
+  // Speelt de brug van Swiftskip na; de extensie zelf wordt getest in apps/swiftskip.
   const bridge = (page) => page.evaluate(() => {
     window.acks = [];
     window.addEventListener("message", ({ data }) => {
@@ -405,7 +405,7 @@ test.describe("SwiftSkip-koppeling", () => {
     const one = watched(recording({ courseCode: code, title: "Les A", recordedOn: day }));
     await deliver(page, [one]);
     await expect(openCount(page)).toHaveText(String(before - 1));
-    await expect(page.locator("#toast")).toContainText("afgevinkt via SwiftSkip");
+    await expect(page.locator("#toast")).toContainText("afgevinkt via Swiftskip");
     await expect.poll(() => page.evaluate(() => window.acks.length)).toBe(1);
 
     await deliver(page, [one]);
@@ -454,10 +454,10 @@ test.describe("SwiftSkip-koppeling", () => {
   });
 
   test("instellingen tonen de koppellink en daarna de status", async ({ page }, testInfo) => {
-    test.skip(!testInfo.project.name.startsWith("laptop"), "SwiftSkip bestaat niet op de gsm");
+    test.skip(!testInfo.project.name.startsWith("laptop"), "Swiftskip bestaat niet op de gsm");
     await start(page);
     await page.goto("/inhaal/#/instellingen");
-    const link = page.getByRole("link", { name: "Koppel met SwiftSkip" });
+    const link = page.getByRole("link", { name: "Koppel met Swiftskip" });
     await expect(link).toHaveAttribute("href", /^https:\/\/www\.kuleuven\.be\/#swiftskip-koppel=http%3A%2F%2Flocalhost%3A4173%2Finhaal%2F$/);
     await send(page, { type: "hello", version: "4.1.0" });
     await expect(page.getByText("Gekoppeld.")).toBeVisible();
