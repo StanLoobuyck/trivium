@@ -2,12 +2,11 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** de reboot-test van fase 2 is mislukt: na de herstart was de hub niet bereikbaar (TLS-fout via Funnel, geen
-   antwoord op `tailscale ping`). De iPhone vinkte alleen lokaal af. Oorzaak nog niet vastgesteld: FileVault, slaapstand
-   of Tailscale. Brugversie SwiftSkip 4.0.2 is gepubliceerd en staat op beide update-adressen.
-3. **Volgende:** de Mac onderzoeken (met toestemming, Mac wakker en aangemeld), oplossen, reboot-test herhalen. Daarna
-   controleren dat een installatie van 4.0.1 naar 4.0.2 gaat, en de code verhuizen naar `apps/swiftskip`.
-4. **Wacht op de eigenaar:** Mac open en aangemeld houden voor het onderzoek.
+2. **Nu:** oorzaak van de mislukte reboot-test gevonden: de hub start bij het opstarten, maar Tailscale is de gewone app
+   en start pas na aanmelden. Zonder aanmelding dus geen Funnel. Brugversie SwiftSkip 4.0.2 staat op beide update-adressen.
+3. **Volgende:** na de keuze van de eigenaar (automatisch aanmelden of Tailscale als systeemdienst) de reboot-test herhalen.
+   Daarna controleren dat een installatie van 4.0.1 naar 4.0.2 gaat, en de code verhuizen naar `apps/swiftskip`.
+4. **Wacht op de eigenaar:** die keuze, en de updatecontrole in Firefox.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
 
 ## 2026-11-01 — SwiftSkip 4.0.2 gepubliceerd, reboot-test mislukt
@@ -15,7 +14,9 @@
   ondertekend, id en adres kloppen, sha256 van de download gelijk aan de waarde in beide manifesten.
 - Bedoeld was eerst een proefrun, maar `npm run release 4.0.2 --dry-run` publiceerde echt: npm slikt de vlag. De eigenaar
   had de release wel toegestaan. De fout staat ook in `DEVELOPMENT.md` en `release.js`; aanpassen bij de verhuizing.
-- Reboot-test: hub onbereikbaar vanaf de laptop na de herstart. Hernoem je de repo in fase 6, dan moet er eerst nog een
+- Reboot-test mislukt. Gemeten op de Mac: FileVault uit, `SleepDisabled 1`, hub draait sinds het opstarten (`runs = 1`),
+  Tailscale pas sinds de aanmelding, geen automatisch aanmelden. Het wachtwoord was dus het aanmeldscherm, niet FileVault.
+- Hernoem je de repo in fase 6, dan moet er eerst nog een
   brugversie uit, want dan valt dit update-adres weg.
 
 ## 2026-11-01 — fase 3: updatebestand van SwiftSkip op Pages
