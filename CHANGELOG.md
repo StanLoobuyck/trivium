@@ -2,11 +2,19 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 2 gebouwd en live: hub als LaunchDaemon op de Mac, Funnel aan, sync door de eigenaar getest, inhaalplan,
-   grafiek, sneltoetsen. Niet getest door de eigenaar: tikken op balkjes op de iPhone.
-3. **Volgende:** fase 3 (SwiftSkip), te beginnen met de brugversie. Vraag eerst: het raakt echte gebruikers.
-4. **Wacht op de eigenaar:** echte examendatum invullen, reboot-test van hub en Funnel als hij thuis is.
+2. **Nu:** fase 2 gebouwd, live en door de eigenaar getest, op de reboot-test na. Fase 3 is begonnen: het updatebestand
+   staat op Pages (`site/swiftskip/updates.json`). De brugversie 4.0.2 staat onafgewerkt op de lokale tak
+   `bridge-update-url` in de SwiftSkip-repo, nog niet gecommit.
+3. **Volgende:** akkoord van de eigenaar op het adres, dan `npm run release 4.0.2` vanuit `main` in de SwiftSkip-repo en
+   dezelfde versie toevoegen aan `site/swiftskip/updates.json`. Niet zonder akkoord: het raakt echte gebruikers.
+4. **Wacht op de eigenaar:** reboot-test van hub en Funnel.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — fase 3: updatebestand van SwiftSkip op Pages
+- `site/swiftskip/updates.json` is een kopie van het bestand in de oude repo (4.0.0 en 4.0.1). Nog geen enkele installatie
+  leest het. Drie tests bewaken de vorm, want een fout hier stopt stil de updates.
+- Installaties tot 4.0.1 blijven het oude adres lezen. Dat bestand moet dus 4.0.2 krijgen en blijven bestaan.
+- De eigenaar testte het tikken op balkjes op de iPhone en vulde de examendata in.
 
 ## 2026-11-01 — sessie-id's zijn stabiel
 - Nieuwe download vergeleken met de vorige: 154 gedeelde sessies, 0 gewijzigd, 0 lessen met een nieuwe id. Wel een
