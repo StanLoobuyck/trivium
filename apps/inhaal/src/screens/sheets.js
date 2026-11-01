@@ -4,6 +4,7 @@ import { COLORS, mergeProposal, proposeCourses, proposeMerges } from "../domain/
 import { parseNotes, planNotesImport } from "../domain/notes.js";
 import { currentCluster, parseRooster, proposeSemester, splitSemesters } from "../domain/rooster.js";
 import { readBackup } from "../domain/backup.js";
+import { COUNTED_TYPES, isOpen } from "../domain/sessions.js";
 import * as store from "../db/store.js";
 import { chipDate, t } from "../i18n/index.js";
 import { $, $$, esc, pickFiles } from "../ui/dom.js";
@@ -73,7 +74,8 @@ export function openOptions(id) {
   const course = store.courseById(session.courseId);
   const label = sessionLabel(session, numbersNow());
   const statuses = [["watched", "statusWatched"], ["processed", "statusProcessed"], ["attended", "statusAttended"], ["cancelled", "statusCancelled"], ["skipped", "statusSkipped"], ["upcoming", "statusMissed"]];
-  const link = session.recordings?.[0]?.url ?? "";
+  const recording = session.recordings?.[0];
+  const link = recording?.url ?? "";
   const sheet = openSheet(`<h2 class="title">${esc(label)}</h2>
     <p class="sub">${esc(course.name)}${session.location ? ` · ${esc(session.location)}` : ""}</p>
     <p class="group-label">${esc(t("statusTitle"))}</p>
@@ -84,6 +86,7 @@ export function openOptions(id) {
     <p class="group-label"><label for="session-link">${esc(t("recordingLink"))}</label></p>
     <input class="field" id="session-link" type="url" inputmode="url" value="${esc(link)}">
     ${link ? `<a class="btn btn-block sheet-action" href="${esc(link)}" target="_blank" rel="noopener">${esc(t("openRecording"))}</a>` : ""}
+    ${recording?.fileName ? `<p class="sub">${esc(t("downloadedAs", { name: recording.fileName }))}</p>` : ""}
     <p class="group-label"><label for="session-date">${esc(t("date"))}</label></p>
     <input class="field" id="session-date" type="date" value="${dateValue(session.start)}">
     <div class="sheet-split">
@@ -94,7 +97,7 @@ export function openOptions(id) {
   const save = async () => {
     const note = $("#session-note", sheet).value.trim() || null;
     const url = $("#session-link", sheet).value.trim();
-    const recordings = url ? [{ url }] : [];
+    const recordings = url ? [{ ...recording, url }, ...(session.recordings ?? []).slice(1)] : [];
     const changes = { note, recordings };
     const date = $("#session-date", sheet).value;
     if (date && date !== dateValue(session.start)) {
@@ -219,6 +222,32 @@ export function openVanished(sessions) {
     if ("mark" in button.dataset) await store.setStatus(sessions.map((s) => s.id), "cancelled");
     closeSheet();
     refresh();
+  };
+}
+
+// ---- Opname koppelen ----
+export function openLinkRecording() {
+  const entry = state.meta.unmatchedRecordings[0];
+  if (!entry) { closeSheet(); refresh(); return; }
+  const course = store.courseById(entry.courseId);
+  const numbers = numbersNow();
+  const now = new Date();
+  const choices = state.sessions.filter((s) => s.courseId === entry.courseId && s.status !== "cancelled" && COUNTED_TYPES.includes(s.type))
+    .sort((a, b) => isOpen(b, now) - isOpen(a, now) || a.start.localeCompare(b.start));
+  const title = t("linkRecordingTitle", { course: course?.shortName ?? "" });
+  const sheet = openSheet(`<h2 class="title">${esc(title)}</h2>
+    <p class="sub">${esc(entry.recording.title ?? "")}</p>
+    <ul class="list list-inset">${choices.map((s) => `<li><button class="row" data-session="${esc(s.id)}"><span class="row-main"><span>${esc(sessionLabel(s, numbers))}</span></span></button></li>`).join("")}</ul>
+    <button class="btn btn-block sheet-action" data-skip>${esc(t("linkRecordingSkip"))}</button>`, title);
+  sheet.onclick = async (e) => {
+    const button = e.target.closest("button");
+    if (!button) return;
+    if ("skip" in button.dataset) await store.dropRecording(entry.key);
+    else {
+      const { undo } = await store.chooseRecording(entry.key, button.dataset.session);
+      if (undo) toast(t("tickedRecording", { label: sessionLabel(store.sessionById(button.dataset.session), numbers) }), async () => { await undo(); refresh(); });
+    }
+    if (state.meta.unmatchedRecordings.length) { openLinkRecording(); refresh(); } else { closeSheet(); refresh(); }
   };
 }
 

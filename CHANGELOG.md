@@ -2,13 +2,22 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 2 is af: de reboot-test slaagt met automatisch aanmelden op de Mac. SwiftSkip staat met geschiedenis in
-   `apps/swiftskip`; 4.0.1 naar 4.0.2 is door de eigenaar bevestigd. Update naar een volgende versie via het nieuwe adres
-   is nog niet bewezen.
-3. **Volgende:** "Koppel met Inhaal" (opt-in, zie `PLAN.md`, sectie Ecosysteem). Daarmee komt ook de eerste release vanuit
-   de monorepo (`swiftskip-v`), die de laatste test van fase 3 is.
-4. **Wacht op de eigenaar:** niets.
+2. **Nu:** "Koppel met Inhaal" is gebouwd en in Chromium getest; Inhaal staat live. SwiftSkip staat met geschiedenis in
+   `apps/swiftskip`. Echte Toledo-pagina's en Firefox zijn nog niet getest met de koppeling.
+3. **Volgende:** de eigenaar test de koppeling; daarna is fase 3 af en volgt fase 4 (Verbatim).
+4. **Wacht op de eigenaar:** de checklist van fase 3.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — fase 3: Koppel met Inhaal
+- SwiftSkip geeft bekeken (vanaf 90% van de positie), positie en downloads door. Zonder koppeling wordt niets bewaard.
+- Koppelen start in Inhaal. Een webpagina kan geen extensiepagina openen, dus de link gaat naar `www.kuleuven.be`, waar
+  SwiftSkip al draait en zijn instellingen opent. De gebruiker bevestigt daar, en daarna vraagt de browser toestemming.
+- Op het Inhaal-adres draait alleen een klein script, niet het spelerscript. De wachtrij blijft tot Inhaal bevestigt.
+- Keuzes van de eigenaar: koppelen vanuit Inhaal, één melding met undo, rustige rij voor opnames zonder les.
+- Opnames zonder les blijven lokaal op de laptop; de gekozen koppeling staat bij de les en synct wel mee.
+- Bekeken telt de positie: doorspoelen tot 90% vinkt dus ook af. Undo vangt dat op.
+- Gevonden: een manuele link opslaan had de opnamegegevens van een les gewist. Opgelost.
+- Tests: 109 unit (root), 85 unit SwiftSkip, 130 schermtests Inhaal (11 overgeslagen), 24 browsertests SwiftSkip.
 
 ## 2026-11-01 — SwiftSkip verhuisd naar de monorepo
 - 30 commits met geschiedenis naar `apps/swiftskip`, vanuit een gefilterde kopie: auteur op het noreply-adres, zodat privé-

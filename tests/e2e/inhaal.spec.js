@@ -362,3 +362,92 @@ test("data blijft beschikbaar zonder netwerk", async ({ page, context, browserNa
   await page.reload();
   await expect(openCount(page)).toHaveText(String(OPEN_BEFORE));
 });
+
+test.describe("SwiftSkip-koppeling", () => {
+  const recording = (fields) => ({ courseCode: "H01L1A", title: "Les", ...fields });
+  let counter = 0;
+  const event = (type, rec, payload) => ({
+    id: `00000000-0000-4000-8000-${String(++counter).padStart(12, "0")}`, type, source: "swiftskip",
+    occurredAt: "2026-11-01T11:00:00+01:00", payload: { recording: rec, ...payload },
+  });
+  const watched = (rec) => event("recording.watched", rec, { watchedFraction: 0.95 });
+
+  // Speelt de brug van SwiftSkip na; de extensie zelf wordt getest in apps/swiftskip.
+  const bridge = (page) => page.evaluate(() => {
+    window.acks = [];
+    window.addEventListener("message", ({ data }) => {
+      if (data?.channel === "swiftskip-inhaal" && data.from === "inhaal" && data.type === "ack") window.acks.push(...data.ids);
+    });
+  });
+  const send = (page, message) => page.evaluate((m) =>
+    window.postMessage({ channel: "swiftskip-inhaal", from: "swiftskip", ...m }, location.origin), message);
+  const deliver = (page, events) => send(page, { type: "events", events });
+
+  async function firstSession(page) {
+    return page.evaluate(async () => {
+      const open = indexedDB.open("inhaal");
+      const db = await new Promise((resolve) => { open.onsuccess = () => resolve(open.result); });
+      const read = (table) => new Promise((resolve) => { db.transaction(table).objectStore(table).getAll().onsuccess = (e) => resolve(e.target.result); });
+      const [courses, sessions] = [await read("courses"), await read("sessions")];
+      const list = sessions.filter((s) => s.type === "lecture" && new Date(s.end) < new Date()).sort((a, b) => a.start.localeCompare(b.start));
+      const session = list[0];
+      const course = courses.find((c) => c.id === session.courseId);
+      const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Brussels" }).format(new Date(session.start));
+      return { day, code: session.code, course: course.shortName };
+    });
+  }
+
+  test("één melding, undo voor de hele reeks, en dubbels tellen niet", async ({ page }) => {
+    await start(page);
+    await bridge(page);
+    const before = Number(await openCount(page).textContent());
+    const { day, code } = await firstSession(page);
+    const one = watched(recording({ courseCode: code, title: "Les A", recordedOn: day }));
+    await deliver(page, [one]);
+    await expect(openCount(page)).toHaveText(String(before - 1));
+    await expect(page.locator("#toast")).toContainText("afgevinkt via SwiftSkip");
+    await expect.poll(() => page.evaluate(() => window.acks.length)).toBe(1);
+
+    await deliver(page, [one]);
+    await expect.poll(() => page.evaluate(() => window.acks.length)).toBe(2);
+    await expect(openCount(page)).toHaveText(String(before - 1));
+
+    await page.locator("#toast button").click();
+    await expect(openCount(page)).toHaveText(String(before));
+  });
+
+  test("een opname zonder les vraagt rustig om te kiezen, en de keuze blijft", async ({ page }) => {
+    await start(page);
+    await bridge(page);
+    const before = Number(await openCount(page).textContent());
+    const { code } = await firstSession(page);
+    const old = recording({ courseCode: code, title: "Oude opname", recordedOn: "2025-09-30" });
+    await deliver(page, [watched(old)]);
+    await expect(page.getByText("1 opname koppelen")).toBeVisible();
+    await expect(openCount(page)).toHaveText(String(before));
+
+    await page.getByRole("button", { name: "Koppel", exact: true }).click();
+    const sheet = page.getByRole("dialog");
+    await expect(sheet).toContainText("Oude opname");
+    await sheet.locator("[data-session]").first().click();
+    await expect(sheet).toBeHidden();
+    await expect(openCount(page)).toHaveText(String(before - 1));
+    await expect(page.getByText("1 opname koppelen")).toBeHidden();
+
+    await page.locator("#toast button").click();
+    await expect(openCount(page)).toHaveText(String(before));
+    await deliver(page, [watched(old)]);
+    await expect(openCount(page)).toHaveText(String(before - 1));
+    await expect(page.getByText("1 opname koppelen")).toBeHidden();
+  });
+
+  test("instellingen tonen de koppellink en daarna de status", async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.name.startsWith("laptop"), "SwiftSkip bestaat niet op de gsm");
+    await start(page);
+    await page.goto("/inhaal/#/instellingen");
+    const link = page.getByRole("link", { name: "Koppel met SwiftSkip" });
+    await expect(link).toHaveAttribute("href", /^https:\/\/www\.kuleuven\.be\/#swiftskip-koppel=http%3A%2F%2Flocalhost%3A4173%2Finhaal%2F$/);
+    await send(page, { type: "hello", version: "4.1.0" });
+    await expect(page.getByText("Gekoppeld.")).toBeVisible();
+  });
+});

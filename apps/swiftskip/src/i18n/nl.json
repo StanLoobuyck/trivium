@@ -126,5 +126,12 @@
   "keySpace": "Spatie",
   "downloadSavedShort": "Opgeslagen",
   "minimize": "Minimaliseren",
-  "expand": "klik om uit te klappen"
+  "expand": "klik om uit te klappen",
+  "inhaalTitle": "Koppel met Inhaal",
+  "inhaalIntro": "Inhaal houdt bij welke lessen je nog moet inhalen. Open in Inhaal de instellingen en kies Koppel met SwiftSkip. Dan komen bekeken lessen, je positie en downloads vanzelf in Inhaal. Zonder koppeling gaat er niets naar Inhaal.",
+  "inhaalAsk": "Inhaal op {site} vraagt om te koppelen. Dan krijgt die pagina welke opnames je bekeek, je positie en de naam van je downloads. Koppel alleen als dit jouw adres is.",
+  "inhaalLink": "Koppel",
+  "inhaalLinked": "Gekoppeld met {site}. Bekeken lessen, je positie en downloads komen in Inhaal zodra je het opent.",
+  "inhaalUnlink": "Ontkoppel",
+  "inhaalDenied": "Niet gekoppeld: de browser kreeg geen toestemming."
 }

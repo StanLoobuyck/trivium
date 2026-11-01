@@ -11,6 +11,7 @@ import { renderCourse, courseView } from "./screens/course.js";
 import { renderOverview, view } from "./screens/overview.js";
 import { renderSettings, syncStatusText } from "./screens/settings.js";
 import { connect, nudge, startSync } from "./sync/index.js";
+import { startSwiftSkip } from "./sync/swiftskip.js";
 import * as sheets from "./screens/sheets.js";
 import { $, $$, download, esc } from "./ui/dom.js";
 import { initSheet, toast } from "./ui/feedback.js";
@@ -146,6 +147,7 @@ const actions = {
   "export-json": exportJson,
   "export-notes": exportNotes,
   "import-json": sheets.restoreBackup,
+  "link-recordings": sheets.openLinkRecording,
   "dismiss-install": async () => { await store.dismiss("installDismissed"); render(); },
   "dismiss-weeks": async () => { await store.dismiss("weeksDismissed"); render(); },
   select: () => { courseView.selecting = new Set(); render(); },
@@ -227,6 +229,17 @@ startSync({
     const status = $("#sync-status");
     if (status) status.textContent = syncStatusText();
     if (route().page === "instellingen" && !status) render();
+  },
+});
+
+startSwiftSkip({
+  onLinked: () => { if (route().page === "instellingen") render(); },
+  onResult: ({ ticked, undo }) => {
+    if (!$("#sheet-root").classList.contains("is-open")) refresh();
+    if (!ticked.length) return;
+    const message = ticked.length > 1 ? t("tickedRecordings", { n: ticked.length })
+      : t("tickedRecording", { label: sessionLabel(store.sessionById(ticked[0]), numbersNow()) });
+    toast(message, async () => { await undo(); refresh(); });
   },
 });
 

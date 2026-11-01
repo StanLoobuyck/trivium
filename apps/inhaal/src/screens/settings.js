@@ -1,6 +1,7 @@
 import { icon } from "@studie/design/icons.js";
 import { state } from "../db/store.js";
 import { sync } from "../sync/index.js";
+import { linkAddress, swiftskip } from "../sync/swiftskip.js";
 import { langChoice, t, themeChoice, timeOf } from "../i18n/index.js";
 import { esc } from "../ui/dom.js";
 
@@ -25,6 +26,15 @@ const syncSection = () => (sync.available ? `<section>
         <button class="btn btn-primary btn-block" data-action="sync-connect">${esc(t("syncConnect"))}</button>`}
       </div>
     </section>` : "");
+
+// SwiftSkip bestaat niet op de gsm.
+const swiftskipSection = () => `<section class="only-wide">
+      <h2 class="group-title">SwiftSkip</h2>
+      ${swiftskip.linked ? `<p class="sub">${esc(t("swiftskipLinked"))}</p>` : `<ul class="list">
+        <li><a class="row" href="${esc(linkAddress())}" target="_blank" rel="noopener"><span class="row-main"><span>${esc(t("swiftskipLink"))}</span></span>${icon("chevron")}</a></li>
+      </ul>
+      <p class="sub">${esc(t("swiftskipLinkBody"))}</p>`}
+    </section>`;
 
 export function renderSettings(root) {
   const semester = state.semester;
@@ -71,6 +81,7 @@ export function renderSettings(root) {
           `<button aria-pressed="${themeChoice() === key}" data-theme-choice="${key}">${esc(label)}</button>`).join("")}
       </div>
     </section>
+    ${swiftskipSection()}
     <section class="only-wide">
       <h2 class="group-title">${esc(t("shortcuts"))}</h2>
       <p class="sub">${esc(t("shortcutsBody"))}</p>

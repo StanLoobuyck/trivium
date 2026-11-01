@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Inhaal (test page)</title>
+<script>
+  // Plays Inhaal's side of the link (see packages/contract/CONTRACT.md).
+  window.received = [];
+  const post = (message) =>
+    window.postMessage({ channel: "swiftskip-inhaal", from: "inhaal", ...message }, location.origin);
+  window.addEventListener("message", ({ data }) => {
+    if (data?.channel !== "swiftskip-inhaal" || data.from !== "swiftskip") return;
+    if (data.type === "hello") window.linked = true;
+    if (data.type === "events") {
+      window.received.push(...data.events);
+      post({ type: "ack", ids: data.events.map((event) => event.id) });
+    }
+  });
+  post({ type: "ready" });
+</script>

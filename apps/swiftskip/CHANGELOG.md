@@ -3,6 +3,11 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.1.0
+
+**New**
+- **Link with Inhaal** (optional): lectures you watched are ticked off by themselves, and your position and downloads show up in Inhaal. Off until you link it from Inhaal's settings
+
 ## 4.0.2
 
 **Changed**

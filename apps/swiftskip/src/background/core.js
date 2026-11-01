@@ -5,6 +5,8 @@
 // `runDownload` and `cancelDownload`.
 
 import { buildLectureTitle, sanitizeFilename } from "../shared/filename.js";
+import { normalizeInhaalUrl } from "../shared/inhaal.js";
+import { forgetDelivered, reportToInhaal } from "./inhaal.js";
 import { ext } from "../shared/ext.js";
 import { describeError } from "../shared/errors.js";
 import { startSiteManagement } from "./sites.js";
@@ -171,6 +173,7 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
   setDownloadState(tabId, {
     ...createState(tabId),
     context: state.context,
+    pageUrl: state.pageUrl,
     available: true,
     active: true,
     jobId: resolvedJobId,
@@ -213,6 +216,12 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
     });
   }
 
+  reportToInhaal(
+    "recording.downloaded",
+    { fileName: `${resolvedTitle}.${response.type || "mp4"}` },
+    { context: state.context, url: state.pageUrl },
+  ).catch(() => {});
+
   return setDownloadState(tabId, {
     active: false,
     phase: "Complete",
@@ -252,8 +261,31 @@ export function startBackground({ runDownload, cancelDownload, extraHandlers = {
     registerLectureContext(msg, sender) {
       const tabId = tabOf(msg, sender);
       const state = getState(tabId);
-      state.context = { course: msg.course || null, lecture: msg.lecture || null };
+      state.context = { course: msg.course || null, code: msg.code || null, lecture: msg.lecture || null };
+      state.pageUrl = sender.tab?.url || null;
       persistState(state);
+      return { ok: true };
+    },
+
+    // From the frame with the video: how far this lecture got.
+    async inhaalReport(msg, sender) {
+      const { context, pageUrl } = getState(tabOf(msg, sender));
+      await reportToInhaal(msg.type, msg.payload, { context, url: pageUrl });
+      return { ok: true };
+    },
+
+    async inhaalDelivered(msg) {
+      await forgetDelivered(msg.ids);
+      return { ok: true };
+    },
+
+    // Inhaal's "link with SwiftSkip" arrives through a kuleuven.be page.
+    async inhaalOpenLink(msg) {
+      const address = normalizeInhaalUrl(msg.address);
+      if (!address) return { ok: false };
+      await ext.tabs.create({
+        url: ext.runtime.getURL(`options.html#link=${encodeURIComponent(address)}`),
+      });
       return { ok: true };
     },
 

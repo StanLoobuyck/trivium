@@ -20,6 +20,11 @@ const counts = (p) => [
 
 function notices(now) {
   const parts = [];
+  const waiting = state.meta.unmatchedRecordings.length;
+  if (waiting) {
+    parts.push(`<div class="banner"><span>${esc(t(waiting === 1 ? "linkOneRecording" : "linkRecordings", { n: waiting }))}</span>
+      <button class="btn btn-small btn-plain" data-action="link-recordings">${esc(t("linkRecordingsAction"))}</button></div>`);
+  }
   const weeks = missingWeeks(state.semester.startDate, state.sessions);
   if (weeks > 0 && !state.meta.weeksDismissed) {
     parts.push(`<div class="banner"><span>${esc(t("missingWeeks", { n: weeks }))}</span>

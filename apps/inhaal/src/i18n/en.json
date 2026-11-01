@@ -149,5 +149,16 @@
   "shortcuts": "Keyboard shortcuts",
   "shortcutsBody": "J and K: move · X or space: tick off · N: add · 1 to 9: pick a course · Z: undo",
   "planParts": "{open} to catch up + {coming} lectures still to come",
-  "chartHint": "Tap a bar to see the week"
+  "chartHint": "Tap a bar to see the week",
+  "tickedRecording": "{label} ticked off via SwiftSkip",
+  "tickedRecordings": "{n} lectures ticked off via SwiftSkip",
+  "linkOneRecording": "1 recording to link",
+  "linkRecordings": "{n} recordings to link",
+  "linkRecordingsAction": "Link",
+  "linkRecordingTitle": "Which lecture is this {course} recording?",
+  "linkRecordingSkip": "Not a lecture",
+  "downloadedAs": "Downloaded as {name}",
+  "swiftskipLink": "Link with SwiftSkip",
+  "swiftskipLinkBody": "Watched recordings are then ticked off by themselves. Needs SwiftSkip 4.1 in this browser; the link opens SwiftSkip's settings through kuleuven.be.",
+  "swiftskipLinked": "Linked. What you watch in SwiftSkip arrives here by itself."
 }

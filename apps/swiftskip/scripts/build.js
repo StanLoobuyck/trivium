@@ -51,6 +51,7 @@ async function buildTarget(target) {
   const entries = {
     background: `background/${target}.js`,
     content: "content/content.js",
+    "inhaal-bridge": "content/inhaal-bridge.js",
     popup: "popup/popup.js",
     options: "options/options.js",
     welcome: "welcome/welcome.js",

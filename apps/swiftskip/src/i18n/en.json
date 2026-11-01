@@ -126,5 +126,12 @@
   "keySpace": "Space",
   "downloadSavedShort": "Saved",
   "minimize": "Minimize",
-  "expand": "click to expand"
+  "expand": "click to expand",
+  "inhaalTitle": "Link with Inhaal",
+  "inhaalIntro": "Inhaal tracks which lectures you still have to catch up on. Open the settings in Inhaal and choose Link with SwiftSkip. Watched lectures, your position and downloads then reach Inhaal by themselves. Without a link, nothing goes to Inhaal.",
+  "inhaalAsk": "Inhaal at {site} asks to link. That page then gets which recordings you watched, your position and the names of your downloads. Only link if this is your address.",
+  "inhaalLink": "Link",
+  "inhaalLinked": "Linked with {site}. Watched lectures, your position and downloads reach Inhaal as soon as you open it.",
+  "inhaalUnlink": "Unlink",
+  "inhaalDenied": "Not linked: the browser didn't get permission."
 }

@@ -14,6 +14,8 @@ import {
 import { formatSpeed } from "../shared/playback.js";
 import { patternHost } from "../shared/sites.js";
 import { enabledSites } from "../background/sites.js";
+import { getInhaalLink, removeInhaalLink, setInhaalLink } from "../background/inhaal.js";
+import { inhaalPermission, normalizeInhaalUrl } from "../shared/inhaal.js";
 import {
   clearResumePositions,
   countResumePositions,
@@ -279,6 +281,46 @@ ext.permissions.onRemoved.addListener(renderSites);
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 
+// ─── Link with Inhaal ─────────────────────────────────────────────────────────
+
+const askedLink = () => {
+  const match = /^#link=(.+)$/.exec(window.location.hash);
+  return match ? normalizeInhaalUrl(decodeURIComponent(match[1])) : null;
+};
+
+async function renderInhaal() {
+  const linked = await getInhaalLink();
+  const asked = linked ? null : askedLink();
+  const host = (address) => new URL(address).host;
+  $("inhaal-text").textContent = linked
+    ? t("inhaalLinked", { site: host(linked) })
+    : asked
+      ? t("inhaalAsk", { site: host(asked) })
+      : t("inhaalIntro");
+  const link = $("inhaal-link");
+  link.hidden = !asked;
+  link.textContent = t("inhaalLink");
+  link.onclick = async () => {
+    // The browser only asks right after a click, so nothing may be awaited first.
+    const saved = setInhaalLink(asked);
+    const granted = await ext.permissions.request({ origins: [inhaalPermission(asked)] }).catch(() => false);
+    await saved;
+    if (!granted) await removeInhaalLink();
+    const notice = $("inhaal-notice");
+    notice.hidden = granted;
+    notice.textContent = granted ? "" : t("inhaalDenied");
+    if (granted) history.replaceState(null, "", window.location.pathname);
+    renderInhaal();
+  };
+  const unlink = $("inhaal-unlink");
+  unlink.hidden = !linked;
+  unlink.textContent = t("inhaalUnlink");
+  unlink.onclick = async () => {
+    await removeInhaalLink();
+    renderInhaal();
+  };
+}
+
 function render() {
   setLanguage(settings.language);
   localizePage();
@@ -288,12 +330,14 @@ function render() {
   renderShortcuts();
   renderForgetPositions();
   renderSites();
+  renderInhaal();
 }
 
 loadSettings().then((loaded) => {
   settings = loaded;
   render();
   if (location.hash === "#shortcuts") $("shortcuts").scrollIntoView();
+  if (location.hash.startsWith("#link=")) $("inhaal").scrollIntoView();
 });
 
 // Changes from the popup, another settings tab, or a synced browser.

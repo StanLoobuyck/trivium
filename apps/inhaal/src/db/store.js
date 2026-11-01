@@ -1,6 +1,8 @@
 // De toestand van de app: laden, wijzigen en bij elke wijziging de schermen verwittigen.
 import { findCourseByCode, proposeCourses } from "../domain/courses.js";
 import { mergeRooster } from "../domain/merge.js";
+import { planRecordings } from "../domain/recordings.js";
+import { computeNumbers } from "../domain/sessions.js";
 import { db, getMeta, requestPersistence, setMeta, stamp } from "./index.js";
 
 export const state = { semester: null, semesters: [], courses: [], sessions: [], meta: {} };
@@ -20,6 +22,7 @@ export async function load() {
     lastCourseId: await getMeta("lastCourseId"),
     installDismissed: await getMeta("installDismissed", false),
     weeksDismissed: await getMeta("weeksDismissed", false),
+    unmatchedRecordings: await getMeta("unmatchedRecordings", []),
   };
 }
 
@@ -82,6 +85,39 @@ export async function setStatus(ids, status) {
   return async () => {
     await Promise.all(before.map(({ id, ...old }) => updateSession(id, old)));
   };
+}
+
+async function applyRecordingPlan(events, forced = {}, unmatched = state.meta.unmatchedRecordings) {
+  const now = new Date();
+  const plan = planRecordings(events, {
+    courses: state.courses, sessions: state.sessions, numbers: computeNumbers(state.sessions), now, unmatched, forced,
+  });
+  await Promise.all([...plan.changes].map(([id, changes]) => updateSession(id, changes)));
+  const undo = plan.ticked.length ? await setStatus(plan.ticked, "watched") : null;
+  await setMeta("unmatchedRecordings", plan.unmatched);
+  state.meta.unmatchedRecordings = plan.unmatched;
+  return { ticked: plan.ticked, undo };
+}
+
+// Wat SwiftSkip stuurt, kan dubbel aankomen: de wachtrij wordt pas na de bevestiging geleegd.
+export async function ingestRecordings(events) {
+  const seen = await getMeta("seenEvents", []);
+  const known = new Set(seen);
+  const fresh = events.filter((e) => !known.has(e.id));
+  const result = await applyRecordingPlan(fresh);
+  await setMeta("seenEvents", [...seen, ...fresh.map((e) => e.id)].slice(-1000));
+  return result;
+}
+
+export async function chooseRecording(key, sessionId) {
+  const entry = state.meta.unmatchedRecordings.find((u) => u.key === key);
+  const others = state.meta.unmatchedRecordings.filter((u) => u !== entry);
+  return applyRecordingPlan(entry.events, { [key]: sessionId }, others);
+}
+
+export async function dropRecording(key) {
+  state.meta.unmatchedRecordings = state.meta.unmatchedRecordings.filter((u) => u.key !== key);
+  await setMeta("unmatchedRecordings", state.meta.unmatchedRecordings);
 }
 
 export async function deleteSession(id) {
@@ -195,6 +231,6 @@ export async function dismiss(key) {
 
 export async function eraseAll() {
   await softDeleteAll();
-  await db.meta.bulkDelete(["firstUseAt", "lastBackupAt", "lastCourseId", "installDismissed", "weeksDismissed"]);
+  await db.meta.bulkDelete(["firstUseAt", "lastBackupAt", "lastCourseId", "installDismissed", "weeksDismissed", "unmatchedRecordings", "seenEvents"]);
   await load();
 }

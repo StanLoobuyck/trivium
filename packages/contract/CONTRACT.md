@@ -43,6 +43,21 @@ Elk event heeft dezelfde envelop (`schema/event.schema.json`):
 Elke payload bevat `recording`: `courseCode`, en waar gekend `title`, `recordedOn` (`JJJJ-MM-DD`), `lectureNumber`
 en `url`. Tijden en posities staan in seconden.
 
+## Browserroute (SwiftSkip ↔ Inhaal)
+De koppeling is opt-in. Inhaal opent `https://www.kuleuven.be/#swiftskip-koppel=<eigen adres, URL-gecodeerd>`. SwiftSkip
+draait daar al en toont dan zijn instellingen met dat adres; de gebruiker bevestigt en de browser vraagt toestemming.
+Daarna draait op dat adres alleen een klein script dat met de pagina praat via `window.postMessage`, met
+`channel: "swiftskip-inhaal"`, op de eigen origin:
+
+| Van | `from` / `type` | Inhoud | Betekenis |
+| --- | --- | --- | --- |
+| Inhaal | `inhaal` / `ready` | | Inhaal luistert en wil de wachtrij |
+| SwiftSkip | `swiftskip` / `hello` | `version` | Gekoppeld |
+| SwiftSkip | `swiftskip` / `events` | `events[]` | De hele wachtrij; kan dubbels bevatten |
+| Inhaal | `inhaal` / `ack` | `ids[]` | Verwerkt, SwiftSkip mag ze vergeten |
+
+Een opname is herkenbaar aan `courseCode` + `title`. Inhaal bewaart die koppeling bij de les.
+
 ## Regels
 - Nieuwe velden mogen altijd; ontvangers negeren wat ze niet kennen.
 - Een veld van betekenis veranderen of verwijderen = nieuw eventtype.

@@ -27,6 +27,13 @@ import {
   resumeKey,
 } from "../shared/playback.js";
 import { parseCourseTitle } from "../shared/filename.js";
+import {
+  LINK_HOST,
+  MIN_PROGRESS_SEC,
+  PROGRESS_INTERVAL_MS,
+  isWatched,
+  parseLinkHash,
+} from "../shared/inhaal.js";
 import { setLanguage, t } from "../shared/i18n.js";
 import {
   closeShortcutSheet,
@@ -909,6 +916,26 @@ import { createDownloadControl } from "./download-control.js";
     let started = false; // first "playing" handled
     let key = null; // resume key, fixed once the video has started
     let lastSave = 0;
+    let lastReport = 0;
+    let watchedReported = false;
+
+    // For the optional link with Inhaal; the background drops this when off.
+    const reportProgress = () => {
+      if (!started || !settings.enabled || isRetired()) return;
+      const { currentTime: time, duration } = v;
+      const message = (type, payload) =>
+        chrome.runtime.sendMessage({ action: "inhaalReport", type, payload }, () => {
+          void chrome.runtime.lastError;
+        });
+      lastReport = Date.now();
+      if (isWatched(time, duration)) {
+        if (watchedReported) return;
+        watchedReported = true;
+        message("recording.watched", { watchedFraction: Math.min(1, time / duration) });
+      } else if (time >= MIN_PROGRESS_SEC) {
+        message("recording.progress", { positionSec: Math.round(time) });
+      }
+    };
 
     const save = () => {
       if (!started || !key || !settings.enabled || !settings.resumePlayback) return;
@@ -955,11 +982,19 @@ import { createDownloadControl } from "./download-control.js";
     });
 
     v.addEventListener("timeupdate", () => {
+      if (
+        isWatched(v.currentTime, v.duration)
+          ? !watchedReported
+          : Date.now() - lastReport >= PROGRESS_INTERVAL_MS
+      ) {
+        reportProgress();
+      }
       if (Date.now() - lastSave < 5000) return;
       lastSave = Date.now();
       save();
     });
     v.addEventListener("pause", save);
+    v.addEventListener("pause", reportProgress);
     // Show the download control again when paused; start its idle timer on play.
     v.addEventListener("pause", wakeDownloadControl);
     v.addEventListener("play", wakeDownloadControl);
@@ -973,9 +1008,15 @@ import { createDownloadControl } from "./download-control.js";
     v.addEventListener("emptied", () => {
       started = false;
       key = null;
+      watchedReported = false;
     });
     window.addEventListener("pagehide", save);
-    document.addEventListener("visibilitychange", () => document.hidden && save());
+    window.addEventListener("pagehide", reportProgress);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) return;
+      save();
+      reportProgress();
+    });
   }
 
   startHlsDetection();
@@ -989,14 +1030,28 @@ import { createDownloadControl } from "./download-control.js";
   function readLectureContext() {
     const lecture = new URLSearchParams(window.location.search).get("toolTitle");
     let course = null;
+    let code = null;
     for (const link of document.querySelectorAll("nav a")) {
       const parsed = parseCourseTitle(link.textContent);
       if (parsed) {
         course = parsed.name;
+        code = parsed.code;
         break;
       }
     }
-    return { course, lecture: lecture && lecture.trim() };
+    return { course, code, lecture: lecture && lecture.trim() };
+  }
+
+  // Inhaal's "link with SwiftSkip": the settings page takes it from here, and
+  // nothing happens there without the user confirming.
+  if (window === window.top && window.location.hostname === LINK_HOST) {
+    const address = parseLinkHash(window.location.hash);
+    if (address) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+      chrome.runtime.sendMessage({ action: "inhaalOpenLink", address }, () => {
+        void chrome.runtime.lastError;
+      });
+    }
   }
 
   if (window === window.top) {

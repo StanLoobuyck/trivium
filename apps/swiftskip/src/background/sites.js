@@ -5,8 +5,12 @@
 // without a page reload after installing, updating or enabling a site.
 
 import { ext } from "../shared/ext.js";
+import { inhaalMatch, inhaalPermission } from "../shared/inhaal.js";
+import { LINK_KEY, getInhaalLink } from "./inhaal.js";
 
 const SCRIPT_ID = "swiftskip-sites";
+const BRIDGE_ID = "swiftskip-inhaal";
+const BRIDGE = ["inhaal-bridge.js"];
 const JS = ["content.js"];
 const CSS = ["style.css"];
 
@@ -16,12 +20,33 @@ function builtInPatterns() {
 }
 
 export async function enabledSites() {
-  const builtIn = new Set(builtInPatterns());
+  // Inhaal's address gets the small bridge, never the player script.
+  const link = await getInhaalLink();
+  const skipped = new Set([...builtInPatterns(), "*://*/*", "<all_urls>"]);
+  if (link) skipped.add(inhaalPermission(link));
   const { origins = [] } = await ext.permissions.getAll();
-  return origins.filter((origin) => !builtIn.has(origin) && origin !== "*://*/*" && origin !== "<all_urls>");
+  return origins.filter((origin) => !skipped.has(origin));
+}
+
+async function syncBridge() {
+  const link = await getInhaalLink();
+  const registered = await ext.scripting.getRegisteredContentScripts({ ids: [BRIDGE_ID] }).catch(() => []);
+  if (registered.length) await ext.scripting.unregisterContentScripts({ ids: [BRIDGE_ID] });
+  if (!link || !(await ext.permissions.contains({ origins: [inhaalPermission(link)] }))) return;
+  const matches = [inhaalMatch(link)];
+  await ext.scripting.registerContentScripts([
+    { id: BRIDGE_ID, matches, js: BRIDGE, runAt: "document_idle", persistAcrossSessions: true },
+  ]);
+  const tabs = await ext.tabs.query({ url: matches }).catch(() => []);
+  await Promise.all(
+    tabs.map((tab) =>
+      ext.scripting.executeScript({ target: { tabId: tab.id }, files: BRIDGE }).catch(() => {}),
+    ),
+  );
 }
 
 export async function syncSiteScripts() {
+  await syncBridge();
   const sites = await enabledSites();
   const registered = await ext.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] }).catch(() => []);
   if (registered.length) await ext.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
@@ -62,10 +87,15 @@ export function startSiteManagement() {
 
   ext.permissions.onAdded.addListener(async ({ origins = [] }) => {
     await syncSiteScripts().catch(() => {});
-    injectIntoOpenTabs(origins);
+    const sites = new Set(await enabledSites());
+    injectIntoOpenTabs(origins.filter((origin) => sites.has(origin)));
   });
   ext.permissions.onRemoved.addListener(() => {
     syncSiteScripts().catch(() => {});
+  });
+
+  ext.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && LINK_KEY in changes) syncSiteScripts().catch(() => {});
   });
 
   // Chrome and Safari don't inject into tabs that were open before an

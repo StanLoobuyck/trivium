@@ -149,5 +149,16 @@
   "shortcuts": "Sneltoetsen",
   "shortcutsBody": "J en K: bewegen · X of spatie: afvinken · N: toevoegen · 1 tot 9: vak kiezen · Z: ongedaan maken",
   "planParts": "{open} in te halen + {coming} lessen die nog komen",
-  "chartHint": "Tik op een balkje om de week te zien"
+  "chartHint": "Tik op een balkje om de week te zien",
+  "tickedRecording": "{label} afgevinkt via SwiftSkip",
+  "tickedRecordings": "{n} lessen afgevinkt via SwiftSkip",
+  "linkOneRecording": "1 opname koppelen",
+  "linkRecordings": "{n} opnames koppelen",
+  "linkRecordingsAction": "Koppel",
+  "linkRecordingTitle": "Bij welke les hoort deze opname van {course}?",
+  "linkRecordingSkip": "Hoort bij geen les",
+  "downloadedAs": "Gedownload als {name}",
+  "swiftskipLink": "Koppel met SwiftSkip",
+  "swiftskipLinkBody": "Bekeken opnames worden dan vanzelf afgevinkt. Vereist SwiftSkip 4.1 in deze browser; de link opent de instellingen van SwiftSkip via kuleuven.be.",
+  "swiftskipLinked": "Gekoppeld. Wat je in SwiftSkip bekijkt, komt hier vanzelf binnen."
 }
