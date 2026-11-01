@@ -2,10 +2,9 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 1 gebouwd en lokaal getest, wacht op de test van de eigenaar op iPhone en laptop. Fase 0 is af.
-   Repo `studie-ecosysteem`, MIT, noreply-adres in deze repo, geen Claude-vermelding in commits. `PLAN.md` blijft
-   lokaal (geen back-up via GitHub).
-3. **Volgende:** na goedkeuring fase 2 (hub op de Mac). Daarvoor nodig: domein voor de tunnel.
+2. **Nu:** fase 1 af en goedgekeurd op iPhone en laptop (2026-11-01). Repo `studie-ecosysteem`, MIT, noreply-adres
+   in deze repo, geen Claude-vermelding in commits. `PLAN.md` blijft lokaal (geen back-up via GitHub).
+3. **Volgende:** fase 2 (hub op de Mac). Daarvoor nodig: domein voor de tunnel.
 4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
    vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
 
