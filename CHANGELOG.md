@@ -2,11 +2,16 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** "Koppel met Inhaal" is gebouwd en in Chromium getest; Inhaal staat live. SwiftSkip staat met geschiedenis in
-   `apps/swiftskip`. Echte Toledo-pagina's en Firefox zijn nog niet getest met de koppeling.
-3. **Volgende:** de eigenaar test de koppeling; daarna is fase 3 af en volgt fase 4 (Verbatim).
-4. **Wacht op de eigenaar:** de checklist van fase 3.
+2. **Nu:** de koppeling werkt op echt Toledo in Zen voor een hoorcollege (bekeken, door de eigenaar getest). De rest van de
+   checklist van fase 3 is nog open: positie, download, keuze onthouden, iPhone.
+3. **Volgende:** delen van een les ("Les 6, part 3"): nu vinkt elk deel de hele les af. Daarna fase 4 (Verbatim).
+4. **Wacht op de eigenaar:** keuze voor de delen van een les.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — Claude-vermelding uit de geschiedenis
+- 19 regels `Co-Authored-By` verwijderd met een force push, op verzoek van de eigenaar. Alle 56 commits hebben dezelfde datums
+  en dezelfde bestandsbomen; alleen de commit-id's en de tags `swiftskip-v4.1.0` en `-v4.1.1` zijn verplaatst.
+- De oude repo StanLoobuyck/SwiftSkip is niet aangepast.
 
 ## 2026-11-01 — fix: opnames zonder Toledo-titel
 - Eigenaarstest: bekijken en downloaden kwamen niet aan. `Semiconductor Physics - Lecture - Recording2.mp4` toont waarom
