@@ -37,7 +37,6 @@ describe("één look: de apps gebruiken packages/design", () => {
     const dark = darkTokens();
     const value = (name) => css.match(new RegExp(`${name}:\\s*([^;]+);`))[1].trim().toLowerCase();
     expect(value("--ss-card")).toBe(dark["--card"]);
-    expect(value("--ss-toast")).toBe(dark["--toast"]);
     expect(value("--ss-text-2")).toBe(dark["--text-2"]);
     expect(value("--ss-accent")).toBe(dark["--accent"]);
     expect(value("--ss-accent-text")).toBe(dark["--accent-text"]);

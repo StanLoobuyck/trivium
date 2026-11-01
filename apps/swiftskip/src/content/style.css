@@ -12,7 +12,6 @@
 
 :where(#swiftskip-osd, #swiftskip-download, .swiftskip-sheet, .swiftskip-toast) {
   --ss-card: #1c1c1e;
-  --ss-toast: #3a3a3c;
   --ss-text: #ffffff;
   --ss-text-2: #a5a5ac;
   --ss-separator: rgba(255, 255, 255, 0.14);
@@ -522,7 +521,7 @@
   color: var(--ss-text-2);
 }
 
-/* ─── Toast ("Resumed at …"): Inhaal's undo toast ────────────────────────── */
+/* ─── Toast ("Resumed at …"): the same dark card as the rest ────────────────────────── */
 
 .swiftskip-toast {
   position: fixed;
@@ -535,7 +534,7 @@
   min-height: 44px;
   padding: 8px 16px;
   border-radius: 16px;
-  background: var(--ss-toast);
+  background: var(--ss-card);
   box-shadow: var(--ss-shadow);
   transform: translate(-50%, -100%);
   font-size: 15px;

@@ -4,7 +4,7 @@
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
 2. **Klaar:** fase 0 t/m 5 gebouwd. Verbatim en SwiftSkip laden `packages/design`; zelfde blauwe logofamilie; SwiftSkip-instellingen per sectie met thema-keuze.
 3. **Wacht op de eigenaar:** herstart van de hub (nodig voor vakkleuren), SwiftSkip beoordelen via `about:debugging`, daarna akkoord voor release 4.4.0.
-   Keuzes: nieuwe naam voor Inhaal (Dacapo aanbevolen, internationaal en niet letterlijk), notitiemodel in Verbatim (nu Gemini), overkoepelende naam voor fase 6.
+   Keuzes: Inhaal wordt Sequo (keuze eigenaar, nog niet doorgevoerd); eventueel een Latijns klinkende naam voor Swiftskip (Velox aanbevolen, daarna beide samen hernoemen), notitiemodel in Verbatim (nu Gemini), overkoepelende naam voor fase 6.
 4. **Niet getest:** ronde hoeken van het echte Zen-venster, look op de echte Kaltura-speler, badges in de Inhaal-app zelf, Safari.
 5. **Volgende:** release 4.4.0, dan de slides-stroom (nog uit te werken), de LaTeX-skill als functie in Verbatim (wens van de eigenaar) en daarna fase 6.
 6. **Open:** menu's verder herwerken (eigenaar komt erop terug); Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
