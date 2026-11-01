@@ -2,11 +2,10 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 4 is gebouwd: vakcodes, inbox in `~/Downloads/Verbatim/<vakcode>/`, SwiftSkip 4.2.0, "notities klaar" naar de
-   hub, badge in Inhaal. Nog niet op de echte opstelling getest.
-3. **Volgende:** hub op de Mac herstarten (nieuwe API), Verbatim overschakelen naar `apps/verbatim` (`stt.mac.url` in de eigen
-   config, `scripts/install.sh`, worker herstarten), checklist fase 4. Daarna fase 5.
-4. **Wacht op de eigenaar:** toestemming voor die herstarts, hub-adres en koppelcode invullen in Verbatim.
+2. **Nu:** fase 4 is gebouwd en live: hub herstart, Verbatim draait uit `apps/verbatim`, SwiftSkip 4.2.0. De keten is nog niet
+   met een echte opname getest. Fase 2 en 3: de oude map `~/Documents/lecture-transcriber` blijft als terugvalweg.
+3. **Volgende:** checklist fase 4 door de eigenaar, daarna fase 5 (één look).
+4. **Wacht op de eigenaar:** hub-adres en koppelcode invullen in Verbatim, Vakken ophalen, de checklist.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
 
 ## 2026-11-01 — fase 4: Verbatim gekoppeld
