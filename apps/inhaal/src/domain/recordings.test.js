@@ -60,6 +60,11 @@ describe("findSession", () => {
     expect(plan.ticked).toEqual(["p", "q"]);
   });
 
+  it("brengt meerdere delen van dezelfde les bij die les", () => {
+    const list = sessions.map((s) => (s.id === "b" ? { ...s, recordings: [{ key: "ander deel" }] } : s));
+    expect(findSession(recording({ title: "Les 2, part 3", lectureNumber: 2 }), { ...context, sessions: list }).session.id).toBe("b");
+  });
+
   it("slaat een geschrapte les over", () => {
     const list = [session("a", "2026-09-23T08:00:00Z", { status: "cancelled" })];
     expect(findSession(recording({ recordedOn: "2026-09-23" }), { ...context, sessions: list }).session).toBeNull();

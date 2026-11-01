@@ -924,7 +924,7 @@ import { createDownloadControl } from "./download-control.js";
       if (!started || !settings.enabled || isRetired()) return;
       const { currentTime: time, duration } = v;
       const message = (type, payload) =>
-        chrome.runtime.sendMessage({ action: "inhaalReport", type, payload }, () => {
+        chrome.runtime.sendMessage({ action: "inhaalReport", type, payload, title: getPageTitle() }, () => {
           void chrome.runtime.lastError;
         });
       lastReport = Date.now();

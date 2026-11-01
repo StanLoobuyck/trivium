@@ -32,9 +32,14 @@ function changeQueue(change) {
   return queueWrites;
 }
 
-export async function reportToInhaal(type, payload, { context, url }) {
+export async function reportToInhaal(type, payload, { context, title, url }) {
   if (!(await getInhaalLink())) return;
-  const recording = buildRecording({ code: context?.code, lecture: context?.lecture, url });
+  const recording = buildRecording({
+    code: context?.code,
+    lecture: context?.lecture,
+    recording: title,
+    url,
+  });
   if (!recording) return;
   const event = createEvent(type, recording, payload, {
     id: crypto.randomUUID(),

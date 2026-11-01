@@ -219,7 +219,7 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
   reportToInhaal(
     "recording.downloaded",
     { fileName: `${resolvedTitle}.${response.type || "mp4"}` },
-    { context: state.context, url: state.pageUrl },
+    { context: state.context, title: title || state.title, url: state.pageUrl },
   ).catch(() => {});
 
   return setDownloadState(tabId, {
@@ -270,7 +270,7 @@ export function startBackground({ runDownload, cancelDownload, extraHandlers = {
     // From the frame with the video: how far this lecture got.
     async inhaalReport(msg, sender) {
       const { context, pageUrl } = getState(tabOf(msg, sender));
-      await reportToInhaal(msg.type, msg.payload, { context, url: pageUrl });
+      await reportToInhaal(msg.type, msg.payload, { context, title: msg.title, url: pageUrl });
       return { ok: true };
     },
 

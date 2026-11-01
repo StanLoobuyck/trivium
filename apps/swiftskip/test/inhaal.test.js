@@ -56,6 +56,15 @@ test("recording: date and number come from the Toledo title", () => {
   assert.equal(buildRecording({ code: "H01L6A", lecture: null }), null);
 });
 
+test("recording: without a Toledo title, the Kaltura name identifies it", () => {
+  assert.deepEqual(buildRecording({ code: "H06F2A", lecture: "", recording: "DEP Les7, deel2" }), {
+    courseCode: "H06F2A",
+    title: "DEP Les7, deel2",
+    lectureNumber: 7,
+  });
+  assert.equal(buildRecording({ code: "H06F2A", lecture: "Les 1", recording: "x" }).title, "Les 1");
+});
+
 test("queue keeps one position per recording, and none after watched", () => {
   let queue = addToQueue([], progress("a", 60));
   queue = addToQueue(queue, progress("b", 120));

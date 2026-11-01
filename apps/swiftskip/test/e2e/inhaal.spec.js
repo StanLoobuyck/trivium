@@ -102,3 +102,36 @@ test("the player script stays away from the Inhaal page; unlinking stops the bri
   await expect(settings.locator("#inhaal-text")).toContainText("Open the settings in Inhaal");
   await expect.poll(registered).toEqual([]);
 });
+
+test("without a Toledo lecture title, the recording's own name is passed on", async ({
+  context,
+  extensionId,
+  serviceWorker,
+}) => {
+  await link(context, extensionId);
+  const { frame } = await openLecture(context, { title: "" });
+  // On this test page the player shares the Toledo page's origin, so it reads that title.
+  const name = "LTI openen";
+  await video.play(frame);
+  await video.seek(frame, 45);
+  await video.pause(frame);
+  await expect.poll(async () => (await queue(serviceWorker))[0]?.payload.recording.title).toBe(name);
+});
+
+test("a finished download reaches Inhaal with its file name", async ({
+  context,
+  extensionId,
+  serviceWorker,
+}) => {
+  await link(context, extensionId);
+  const { frame } = await openLecture(context, { title: "" });
+  await frame.locator("#swiftskip-download").click();
+  await expect
+    .poll(async () => (await queue(serviceWorker)).find((e) => e.type === "recording.downloaded"), {
+      timeout: 30_000,
+    })
+    .toBeTruthy();
+  const event = (await queue(serviceWorker)).find((e) => e.type === "recording.downloaded");
+  expect(event.payload.fileName).toMatch(/\.mp4$|\.ts$/);
+  expect(event.payload.recording.title).toBe("LTI openen");
+});

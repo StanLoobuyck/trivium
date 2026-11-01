@@ -29,7 +29,8 @@ export function findSession(recording, { courses, sessions, numbers, now }) {
     if (session) return { course, session };
   }
   if (recording.lectureNumber) {
-    const session = free.find((s) => s.type === "lecture" && numbers.get(s.id) === recording.lectureNumber);
+    // Een les kan uit meerdere opnames bestaan ("Les 6, part 3"), dus hier telt een bestaande opname niet mee.
+    const session = own.find((s) => s.type === "lecture" && numbers.get(s.id) === recording.lectureNumber);
     if (session) return { course, session };
   }
   return { course, session: null };

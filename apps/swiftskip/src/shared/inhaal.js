@@ -45,11 +45,14 @@ export function inhaalMatch(address) {
   return `${protocol}//${hostname}${pathname}*`;
 }
 
-export function buildRecording({ code, lecture, url }) {
-  if (!code || !lecture) return null;
-  const recording = { courseCode: code, title: lecture };
-  const date = /\b(\d{4}-\d{2}-\d{2})\b/.exec(lecture)?.[1];
-  const number = /\b(?:les|lecture|college|hc)\s*(\d+)\b/i.exec(lecture)?.[1];
+// Toledo doesn't always give the lecture a title in its address; the name of
+// the Kaltura recording then identifies it instead.
+export function buildRecording({ code, lecture, recording: name, url }) {
+  const title = lecture || name;
+  if (!code || !title) return null;
+  const recording = { courseCode: code, title };
+  const date = /\b(\d{4}-\d{2}-\d{2})\b/.exec(title)?.[1];
+  const number = /\b(?:les|lecture|college|hc)\s*(\d+)\b/i.exec(title)?.[1];
   if (date) recording.recordedOn = date;
   if (number && Number(number) > 0) recording.lectureNumber = Number(number);
   if (url) recording.url = url;

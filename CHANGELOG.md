@@ -8,6 +8,12 @@
 4. **Wacht op de eigenaar:** de checklist van fase 3.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
 
+## 2026-11-01 — fix: opnames zonder Toledo-titel
+- Eigenaarstest: bekijken en downloaden kwamen niet aan. `Semiconductor Physics - Lecture - Recording2.mp4` toont waarom
+  dat kon: zonder `toolTitle` in het Toledo-adres stuurde SwiftSkip stil niets. De naam van de Kaltura-opname is nu de terugval.
+- Delen van dezelfde les ("Les 6, part 3") komen nu bij die les. Elk deel dat tot 90% bekeken is, vinkt de les af.
+- De echte Firefox-test kon niet: geckodriver downloaden en starten werd geweigerd. Blijft een test van de eigenaar.
+
 ## 2026-11-01 — fase 3: Koppel met Inhaal
 - SwiftSkip geeft bekeken (vanaf 90% van de positie), positie en downloads door. Zonder koppeling wordt niets bewaard.
 - Koppelen start in Inhaal. Een webpagina kan geen extensiepagina openen, dus de link gaat naar `www.kuleuven.be`, waar

@@ -3,6 +3,11 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.1.1
+
+**Fixed**
+- Link with Inhaal: recordings without a lecture title in Toledo now reach Inhaal too
+
 ## 4.1.0
 
 **New**
