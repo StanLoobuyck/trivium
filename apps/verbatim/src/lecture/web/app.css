@@ -259,6 +259,8 @@ a.tool:hover { border-color: var(--border-strong); background: var(--surface-2);
 .tr-part { margin-bottom: 20px; }
 .tr-part h3 { scroll-margin-top: calc(var(--topbar) + var(--tabs)); position: sticky; top: calc(var(--topbar) + var(--tabs)); padding: 10px 0; background: var(--bg); z-index: 1; }
 .tr-line { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 3px 8px; border-radius: 4px; }
+.tr-line { cursor: pointer; }
+.tr-line:hover { background: var(--surface-2); }
 .tr-line .ts { margin: 0; justify-self: start; }
 .tr-line.now { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accent); }
 mark { background: var(--hint-soft); color: inherit; border-radius: 3px; padding: 0 2px; }

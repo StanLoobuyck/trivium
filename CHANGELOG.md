@@ -2,11 +2,18 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 4 is gebouwd en live: hub herstart, Verbatim draait uit `apps/verbatim`, SwiftSkip 4.2.0. De keten is nog niet
-   met een echte opname getest. Fase 2 en 3: de oude map `~/Documents/lecture-transcriber` blijft als terugvalweg.
-3. **Volgende:** checklist fase 4 door de eigenaar, daarna fase 5 (één look).
-4. **Wacht op de eigenaar:** hub-adres en koppelcode invullen in Verbatim, Vakken ophalen, de checklist.
+2. **Nu:** fase 4 werkt: de eigenaar testte de keten. Transcriptregels zijn klikbaar.
+3. **Volgende:** beslissing over het dubbele actieve semester op de hub, daarna fase 5 (één look). Ideeën van de eigenaar:
+   slides vloeiend aan een opname koppelen (past in het hele ecosysteem, bv. knop in SwiftSkip), en later de LaTeX-skill in
+   Verbatim, pas nadat de eigenaar de skill zelf heeft verfijnd en alleen als de kwaliteit van de notities niet daalt.
+4. **Wacht op de eigenaar:** de keuze over het dubbele semester.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — Verbatim: klikbare transcriptregels
+- Een klik op een transcriptregel springt naar dat moment; tekst selecteren blijft werken. Op een echte les gemeten: doel
+  174,9 s, speler 175,6 s; na slepen over tekst bleef de speler staan.
+- De stap `stage_suggestions` heeft nu een leesbare naam in beide talen.
+- Gevonden: de hub heeft twee actieve semesters met dezelfde naam, elk met 7 vakken. Daarom gaf `/api/courses` dubbels.
 
 ## 2026-11-01 — fase 4: Verbatim gekoppeld
 - Verbatim: `codes` per vak, knop Vakken ophalen (koppelt op code of naam, wijzigt verder niets), inbox ook in

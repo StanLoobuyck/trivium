@@ -148,7 +148,10 @@ function seekAndPlay(player, time) {
 
 // timestamps anywhere on the page seek the video (registered once, on #view)
 view.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-ts]");
+  // A whole transcript line works like its timestamp, unless the user is selecting text (that opens the fix box).
+  const line = e.target.closest(".tr-line");
+  const inLine = line && !e.target.closest("button, a, input") && !String(getSelection()).trim();
+  const b = e.target.closest("[data-ts]") || (inLine ? line.querySelector("[data-ts]") : null);
   if (!b) return;
   const player = $("#player");
   const time = Number(b.dataset.ts);
