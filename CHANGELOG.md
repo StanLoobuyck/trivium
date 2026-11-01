@@ -4,7 +4,8 @@
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
 2. **Nu:** fase 1 af en goedgekeurd op iPhone en laptop (2026-11-01). Repo `studie-ecosysteem`, MIT, noreply-adres
    in deze repo, geen Claude-vermelding in commits. `PLAN.md` blijft lokaal (geen back-up via GitHub).
-3. **Volgende:** fase 2 (hub op de Mac). Daarvoor nodig: domein voor de tunnel.
+3. **Volgende:** fase 2 (hub op de Mac). Hub-adres wordt een subdomein van het Chiro-domein (gratis, alleen voor de
+   eigenaar, achter Cloudflare Access). Nog nodig: exacte domeinnaam en of die bij Cloudflare staat.
 4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
    vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
 
