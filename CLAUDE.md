@@ -1,4 +1,4 @@
-# Trivium (studie-ecosysteem) — notities voor Claude Code
+# Trivium — notities voor Claude Code
 
 Monorepo met drie apps, elk apart te downloaden en te gebruiken: **Sequo** (technisch `inhaal`, nieuw: welke lessen moet ik
 nog inhalen), **Velox** (technisch `swiftskip`, bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
@@ -115,6 +115,8 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Eén look: `packages/design` is de enige bron. Na een wijziging daar: `node scripts/sync-design.mjs` (kopie voor Verbatim; een test faalt anders).
   SwiftSkip kopieert bij het bouwen. De speler-overlay heeft de donkere waarden letterlijk in `style.css`; ook die bewaakt een test. Geen eigen tokens of knoppen in een app.
 - Popup testen in echte Zen kan zonder venster: `--headless --marionette -remote-allow-system-access` met een eigen profiel, `Addon:Install` en `browserActionFor(ext).openPopup`.
+- De repo heet `trivium`; de map op deze laptop bleef `studie-ecosysteem`. Velox tot en met 4.3.0 leest updates van `stanloobuyck.github.io/studie-ecosysteem`: de kleine repo
+  `studie-ecosysteem` houdt dat adres in leven. Bij elke release ook daar `swiftskip/updates.json` bijwerken, tot die oude versies weg zijn. Niet verwijderen zonder overleg.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
 - SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
   daar lokaal. De oude repo StanLoobuyck/SwiftSkip niet verwijderen of archiveren zonder overleg: oude installaties lezen er.

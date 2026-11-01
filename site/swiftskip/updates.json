@@ -19,32 +19,32 @@
         },
         {
           "version": "4.1.0",
-          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.1.0/swiftskip-firefox.xpi",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.1.0/swiftskip-firefox.xpi",
           "update_hash": "sha256:d16f41ec906643d11b0b015abaa75cc01ed219200bceaaa8e05ac61493f3ff1a"
         },
         {
           "version": "4.1.1",
-          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.1.1/swiftskip-firefox.xpi",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.1.1/swiftskip-firefox.xpi",
           "update_hash": "sha256:30c86128ab967f2dbb181e3ecc35dc1467525f309e9fea28cae38c9cc2f41952"
         },
         {
           "version": "4.1.2",
-          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.1.2/swiftskip-firefox.xpi",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.1.2/swiftskip-firefox.xpi",
           "update_hash": "sha256:be1e3b209612e67c75bafd9de827f51b5ea838a87a843b86732b967fe1a2156e"
         },
         {
           "version": "4.2.0",
-          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.2.0/swiftskip-firefox.xpi",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.2.0/swiftskip-firefox.xpi",
           "update_hash": "sha256:efb92e1038e8c959bc07edc5bf40edc90b1e258ff2b2c5767ddfedaaa9ee63ee"
         },
         {
           "version": "4.3.0",
-          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.3.0/swiftskip-firefox.xpi",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.3.0/swiftskip-firefox.xpi",
           "update_hash": "sha256:6561666d7399a9de9d70e1ab93dd0ad8e820e103408bf81c8373f2d992833cd5"
         },
         {
           "version": "4.4.0",
-          "update_link": "https://github.com/StanLoobuyck/studie-ecosysteem/releases/download/swiftskip-v4.4.0/swiftskip-firefox.xpi",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-firefox.xpi",
           "update_hash": "sha256:5e3f5aca3a66361209adb61b2978397ba6bb0a7f2f803e4f67cebf9c39ee15c7"
         }
       ]

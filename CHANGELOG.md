@@ -3,11 +3,14 @@
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
 2. **Klaar:** fase 0 t/m 5 gebouwd. Verbatim en SwiftSkip laden `packages/design`; zelfde blauwe logofamilie; SwiftSkip-instellingen per sectie met thema-keuze.
-3. **Wacht op de eigenaar:** release 4.4.0 en daarna hernoemen van de repo naar `trivium` (in die volgorde), herstart van de hub (nodig voor vakkleuren), SwiftSkip beoordelen via `about:debugging`, daarna akkoord voor release 4.4.0.
+3. **Wacht op de eigenaar:** herstart van de hub (nodig voor vakkleuren), test van Velox 4.4.0 in Zen.
    Keuzes: notitiemodel in Verbatim (nu Gemini), definitief adres voor fase 6.
 4. **Niet getest:** ronde hoeken van het echte Zen-venster, look op de echte Kaltura-speler, badges in de Inhaal-app zelf, Safari.
-5. **Volgende:** release 4.4.0, dan de slides-stroom (nog uit te werken), de LaTeX-skill als functie in Verbatim (wens van de eigenaar) en daarna fase 6.
+5. **Volgende:** de slides-stroom (nog uit te werken), de LaTeX-skill als functie in Verbatim (wens van de eigenaar) en daarna fase 6.
 6. **Open:** menu's verder herwerken (eigenaar komt erop terug); Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
+
+## 2026-11-02 — Velox 4.4.0 en repo Trivium
+- Velox 4.4.0 gereleased, met update-adres op `/trivium/`. Repo hernoemd naar `trivium`. De kleine repo `studie-ecosysteem` bewaart het oude update-adres voor versies t/m 4.3.0.
 
 ## 2026-11-02 — Verbatim en Sequo als tweeling
 - Bibliotheek heeft nu dezelfde opbouw als het overzicht: titel, keuzeknoppen en lijst links, getalkaart rechts. Rijen, velden en groepstitels op dezelfde maten.

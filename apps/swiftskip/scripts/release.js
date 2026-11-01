@@ -24,7 +24,7 @@ import { fileURLToPath } from "node:url";
 import { signFirefox } from "./sign.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REPO = "StanLoobuyck/studie-ecosysteem";
+const REPO = "StanLoobuyck/trivium";
 const TAG_PREFIX = "swiftskip-v";
 // Served by GitHub Pages; Pages deploys on every push to main.
 const UPDATES = join(ROOT, "..", "..", "site", "swiftskip", "updates.json");
