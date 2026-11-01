@@ -152,6 +152,7 @@
 :root[data-theme="light"] { color-scheme: light; }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #000000;
   --card: #1C1C1E;
   --fill: rgba(120, 120, 128, 0.24);

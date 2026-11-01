@@ -124,5 +124,11 @@
   "refresh": "Refresh",
   "online": "Online",
   "installSection": "Install",
-  "version": "Version"
+  "version": "Version",
+  "appearance": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "hcShort": "Lec",
+  "ozShort": "Ex"
 }

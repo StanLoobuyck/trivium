@@ -12,8 +12,8 @@ const isStandalone = () => matchMedia("(display-mode: standalone)").matches || n
 const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 
 const counts = (p) => [
-  p.lecture && `${p.lecture} ${t("hc")}`,
-  p.exercise && `${p.exercise} ${t("oz")}`,
+  p.lecture && `${p.lecture} ${t("hcShort")}`,
+  p.exercise && `${p.exercise} ${t("ozShort")}`,
   p.lab && `${p.lab} ${t("labShort")}`,
 ].filter(Boolean).join(" · ");
 
@@ -99,8 +99,12 @@ export function renderOverview(root, now) {
   root.innerHTML = `<main class="page">
     <h1 class="large-title">${esc(t("appTitle"))}</h1>
     ${notices(now)}
-    <div class="overview-top">${hero(summary)}${nextCard(summary)}</div>
-    <section class="stack-tight">${mode}${filter}</section>
-    ${view.mode === "course" ? courseList(summary) : chronological(summary, now)}
+    <div class="overview">
+      <div class="overview-side flow">${hero(summary)}${nextCard(summary)}</div>
+      <div class="overview-main flow">
+        <section class="stack-tight">${mode}${filter}</section>
+        ${view.mode === "course" ? courseList(summary) : chronological(summary, now)}
+      </div>
+    </div>
   </main>`;
 }

@@ -30,6 +30,8 @@ export function renderCourse(root, id, now) {
       <a class="btn btn-plain" href="#/" aria-label="${esc(t("overview"))}"><span class="flip-icon">${icon("chevron")}</span></a>
       ${courseView.selecting ? `<button class="btn btn-plain" data-action="select-cancel">${esc(t("cancel"))}</button>` : `<button class="btn btn-plain" data-action="select">${esc(t("select"))}</button>`}
     </div>
+    <div class="detail">
+    <div class="detail-side flow">
     <header class="course-head" data-course="${esc(course.colorKey)}">
       <div>
         <h1 class="title">${esc(course.name)}</h1>
@@ -39,6 +41,8 @@ export function renderCourse(root, id, now) {
     </header>
     <div class="segmented" role="group" aria-label="${esc(t("type"))}">${types.map(([key, label]) =>
       `<button aria-pressed="${courseView.filter === key}" data-filter="${key}">${esc(label)}</button>`).join("")}</div>
+    </div>
+    <div class="detail-main flow">
     ${open.length ? `<ul class="list">${open.map((s) => sessionRow(s, options)).join("")}</ul>`
       : `<div class="empty">${icon("check")}<span>${esc(t("allCaughtUp"))}</span></div>`}
     ${finished.length ? `<details class="finished" ${courseView.finishedOpen ? "open" : ""}>
@@ -46,5 +50,7 @@ export function renderCourse(root, id, now) {
       <ul class="list">${finished.map((s) => sessionRow(s, { numbers, now })).join("")}</ul>
     </details>` : ""}
     ${courseView.selecting?.size ? `<button class="btn btn-primary btn-block select-bar" data-action="tick-selected">${esc(t("tickSelected", { n: courseView.selecting.size }))}</button>` : ""}
+    </div>
+    </div>
   </main>`;
 }

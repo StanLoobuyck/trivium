@@ -1,6 +1,6 @@
 import { icon } from "@studie/design/icons.js";
 import { state } from "../db/store.js";
-import { langChoice, t } from "../i18n/index.js";
+import { langChoice, t, themeChoice } from "../i18n/index.js";
 import { esc } from "../ui/dom.js";
 
 const dateField = (key, label) => `<label class="row"><span class="row-main"><span>${esc(label)}</span></span>
@@ -14,6 +14,7 @@ export function renderSettings(root) {
   const exercise = state.courses[0]?.minutesPerExercise ?? 150;
   root.innerHTML = `<main class="page">
     <h1 class="large-title">${esc(t("settings"))}</h1>
+    <div class="settings-grid">
     ${semester ? `<section>
       <h2 class="group-title">${esc(semester.name)}</h2>
       <div class="list">${dateField("startDate", t("semesterStart"))}${dateField("endDate", t("semesterEnd"))}${dateField("examStart", t("examStart"))}</div>
@@ -45,11 +46,19 @@ export function renderSettings(root) {
       </ul>
     </section>
     <section>
+      <h2 class="group-title">${esc(t("appearance"))}</h2>
+      <div class="segmented" role="group" aria-label="${esc(t("appearance"))}">
+        ${[["system", t("themeSystem")], ["light", t("themeLight")], ["dark", t("themeDark")]].map(([key, label]) =>
+          `<button aria-pressed="${themeChoice() === key}" data-theme-choice="${key}">${esc(label)}</button>`).join("")}
+      </div>
+    </section>
+    <section>
       <h2 class="group-title">${esc(t("language"))}</h2>
       <div class="segmented" role="group" aria-label="${esc(t("language"))}">
         ${[["auto", t("languageAuto")], ["nl", "Nederlands"], ["en", "English"]].map(([key, label]) =>
           `<button aria-pressed="${langChoice() === key}" data-lang="${key}">${esc(label)}</button>`).join("")}
       </div>
     </section>
+    </div>
   </main>`;
 }

@@ -30,6 +30,27 @@ export function setLang(choice) {
   document.documentElement.lang = lang();
 }
 
+const THEME_KEY = "inhaal-theme";
+
+export function themeChoice() {
+  try {
+    return localStorage.getItem(THEME_KEY) ?? "system";
+  } catch {
+    return "system";
+  }
+}
+
+export function setTheme(choice) {
+  try {
+    if (choice === "system") localStorage.removeItem(THEME_KEY);
+    else localStorage.setItem(THEME_KEY, choice);
+  } catch {
+    // Privévenster: de keuze geldt dan alleen tot je de app sluit.
+  }
+  if (choice === "system") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = choice;
+}
+
 export function t(key, vars = {}) {
   const text = { nl, en }[lang()][key] ?? key;
   return text.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");

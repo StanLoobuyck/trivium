@@ -450,26 +450,8 @@ button.row:active, a.row:active { background: var(--fill); }
 .empty .icon { width: 32px; height: 32px; }
 .empty .title { color: var(--text); }
 
-/* ---- Kopbalk die verschijnt bij scrollen ---- */
-.topbar {
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--safe-top);
-  overflow: hidden;
-  background: var(--bar);
-  -webkit-backdrop-filter: var(--blur);
-  backdrop-filter: var(--blur);
-  font-size: var(--text-body);
-  font-weight: var(--weight-semibold);
-  white-space: nowrap;
-}
-.topbar > span { opacity: 0; padding-top: var(--safe-top); transition: opacity var(--dur-fast) var(--ease-out); }
-.topbar.is-collapsed { height: calc(var(--safe-top) + var(--row-min)); border-bottom: var(--hairline) solid var(--separator); }
-.topbar.is-collapsed > span { opacity: 1; }
+/* ---- Strook onder de statusbalk: de inhoud schuift eronder, niet achter de klok ---- */
+.topbar { position: absolute; inset: 0 0 auto 0; z-index: 10; height: var(--safe-top); background: var(--bg); }
 .view { min-width: 0; padding-top: var(--safe-top); padding-bottom: calc(var(--dock-height) + var(--space-8) + var(--safe-bottom)); }
 @media (min-width: 900px) {
   .topbar { display: none; }
@@ -500,18 +482,38 @@ button.row:active, a.row:active { background: var(--fill); }
 .side-add { margin-block: var(--space-1) var(--space-2); }
 .count { min-width: 24px; padding: 2px var(--space-2); border-radius: var(--radius-full); background: var(--fill); color: var(--text-2); font-size: var(--text-label); text-align: center; }
 
-/* Bovenaan het overzicht: op een groot scherm staan getal en Volgende naast elkaar. */
-.overview-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+/* Twee kolommen op een groot scherm; op de gsm gewoon onder elkaar. */
+.flow > * + * { margin-top: var(--space-5); }
+.flow > .segmented + .list, .flow > .stack-tight + .list, .flow > .stack-tight + .empty { margin-top: var(--space-3); }
+.page > .list:not(:first-child) { margin-top: var(--space-3); }
+.settings-grid > section + section { margin-top: var(--space-6); }
+.overview-main, .detail-main { margin-top: var(--space-5); }
 @media (min-width: 1100px) {
-  .overview-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: center; gap: var(--space-8); }
+  .overview-main, .detail-main { margin-top: 0; }
+  .overview, .detail { display: grid; gap: var(--space-8); align-items: start; }
+  .overview { grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); }
+  .overview-side { grid-column: 2; grid-row: 1; position: sticky; top: 0; }
+  .overview-main { grid-column: 1; grid-row: 1; }
+  .overview-side .hero { padding: var(--space-5); border-radius: var(--radius-card); background: var(--card); box-shadow: var(--shadow-card); }
+  .detail { grid-template-columns: 320px minmax(0, 1fr); }
+  .detail-side { position: sticky; top: 0; }
+  .settings-grid { columns: 2; column-gap: var(--space-8); }
+  .settings-grid > section { break-inside: avoid; margin-top: 0; margin-bottom: var(--space-6); }
+  .settings-grid > section + section { margin-top: 0; }
 }
 
-/* De app zelf scrolt binnen .view, zodat het scherm niet meer meetrekt aan de randen. */
-html:has(body.app), body.app { height: 100%; overflow: hidden; overscroll-behavior: none; }
-body.app .view { height: 100dvh; overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+/* De app vult het hele scherm in #stage en scrolt binnen .view. Alles zweeft binnen #stage, niet tegen de
+   browser: op iOS is het venster van een app op het beginscherm korter dan het scherm. */
+html:has(body.app) { height: 100%; background: var(--bg); overscroll-behavior: none; }
+body.app { height: 100%; min-height: 0; overscroll-behavior: none; }
+#stage { position: fixed; inset: 0 0 auto 0; height: var(--app-height, 100dvh); overflow: clip; }
+body.app #shell { height: 100%; min-height: 0; }
+body.app .view { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+body.app .tabbar, body.app .fab, body.app .sheet, body.app .scrim, body.app .toast, body.app .update-banner { position: absolute; }
 @media (min-width: 900px) {
   .app .fab { display: none; }
-  .app .page { max-width: 880px; }
+  .app .sidebar { position: static; height: calc(100% - var(--space-6)); }
+  .app .page { max-width: 1120px; padding-inline: var(--space-8); padding-top: var(--space-6); }
 }
 
 .course-nav { display: flex; justify-content: space-between; align-items: center; margin-inline: calc(var(--space-2) * -1); }

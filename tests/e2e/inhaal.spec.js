@@ -154,11 +154,51 @@ test("naar beneden vegen sluit de sheet", async ({ page, browserName }) => {
   await expect(sheet).toBeHidden();
 });
 
-test("de pagina zelf scrolt niet", async ({ page }) => {
+test("de pagina zelf scrolt niet, de lijst wel", async ({ page }) => {
   await start(page);
   const fits = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight);
   expect(fits).toBe(true);
-  expect(await page.evaluate(() => getComputedStyle(document.body).overscrollBehaviorY)).toBe("none");
+  expect(await page.evaluate(() => getComputedStyle(document.querySelector("#view")).overflowY)).toBe("auto");
+  await expect(page.locator(".topbar")).toHaveText("");
+});
+
+test("op een iPhone op het beginscherm vult de app het hele scherm", async ({ page }, info) => {
+  test.skip(info.project.name !== "iphone-chromium", "alleen op iPhone-formaat");
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "standalone", { value: true });
+    Object.defineProperty(navigator, "userAgent", { value: "iPhone" });
+    Object.defineProperty(screen, "height", { value: 932 });
+  });
+  await page.goto("/inhaal/");
+  const height = await page.evaluate(() => document.querySelector("#stage").getBoundingClientRect().height);
+  expect(height).toBe(932);
+});
+
+test("niets schuift de app uit beeld en onder de keuzeknop staat ruimte", async ({ page }) => {
+  await start(page);
+  await expect(page.locator("h1")).toBeVisible();
+  const gap = await page.evaluate(() => {
+    const control = document.querySelector("#view .segmented").getBoundingClientRect();
+    return document.querySelector("#view .list").getBoundingClientRect().top - control.bottom;
+  });
+  expect(gap).toBeGreaterThanOrEqual(12);
+  await courseLink(page, /Digitale signaalverwerking/).click();
+  await expect(page.getByRole("button", { name: "Selecteer" })).toBeVisible();
+  const top = await page.evaluate(() => [document.querySelector("#stage").scrollTop, document.querySelector("#view h1").getBoundingClientRect().top]);
+  expect(top[0]).toBe(0);
+  expect(top[1]).toBeGreaterThan(0);
+});
+
+test("weergave kiezen blijft bewaard", async ({ page }) => {
+  await start(page);
+  await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Donker" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: "Donker" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Systeem" }).click();
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme");
 });
 
 test("manueel toevoegen via de sheet", async ({ page }) => {

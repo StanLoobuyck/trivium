@@ -99,7 +99,7 @@ describe("tokens", () => {
 
   it("gebruikt in components.css enkel bestaande tokens", () => {
     const used = [...componentsCss.matchAll(/var\((--[\w-]+)/g)].map((m) => m[1]);
-    const local = new Set(["--tone", "--tone-tint", "--on-tone", "--value", "--size"]);
+    const local = new Set(["--tone", "--tone-tint", "--on-tone", "--value", "--size", "--app-height"]);
     const unknown = used.filter((name) => !(name in light) && !local.has(name));
     expect(unknown).toEqual([]);
   });

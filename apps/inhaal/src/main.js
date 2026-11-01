@@ -6,7 +6,7 @@ import { toBackup } from "./domain/backup.js";
 import { toNotes } from "./domain/notes.js";
 import { isOpen, summarize } from "./domain/sessions.js";
 import * as store from "./db/store.js";
-import { lang, setLang, t } from "./i18n/index.js";
+import { lang, setLang, setTheme, t } from "./i18n/index.js";
 import { renderCourse, courseView } from "./screens/course.js";
 import { renderOverview, view } from "./screens/overview.js";
 import { renderSettings } from "./screens/settings.js";
@@ -19,9 +19,9 @@ import { numbersNow, sessionLabel } from "./ui/rows.js";
 
 const { state } = store;
 const app = $("#app");
-app.innerHTML = `
+app.innerHTML = `<div id="stage">
   <div id="shell" class="split">
-    <div class="topbar" id="topbar" aria-hidden="true"><span id="topbar-title"></span></div>
+    <div class="topbar" aria-hidden="true"></div>
     <aside class="sidebar" id="sidebar"></aside>
     <div id="view" class="view"></div>
     <nav class="tabbar" id="tabbar"></nav>
@@ -32,7 +32,18 @@ app.innerHTML = `
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" tabindex="-1"></div>
   </div>
   <div class="toast" id="toast" role="status"></div>
-  <div class="update-banner" id="update" hidden></div>`;
+  <div class="update-banner" id="update" hidden></div>
+</div>`;
+
+// Op het beginscherm van een iPhone is het venster korter dan het scherm; de echte hoogte komt van screen.
+function fitScreen() {
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  if (!standalone || !/iphone/i.test(navigator.userAgent)) return;
+  const height = window.innerWidth < window.innerHeight ? screen.height : screen.width;
+  document.documentElement.style.setProperty("--app-height", `${height}px`);
+}
+fitScreen();
+window.addEventListener("resize", fitScreen);
 
 const route = () => {
   const [, page, id] = location.hash.split("/");
@@ -67,19 +78,6 @@ function renderChrome() {
   fab.hidden = !state.semester || page === "instellingen";
 }
 
-// iOS large title: zodra de grote titel wegscrollt, verschijnt ze klein in de kopbalk.
-const titleWatcher = new IntersectionObserver(([entry]) => {
-  $("#topbar").classList.toggle("is-collapsed", !entry.isIntersecting);
-}, { rootMargin: "-44px 0px 0px 0px" });
-
-function watchTitle() {
-  titleWatcher.disconnect();
-  const title = $("#view h1");
-  if (!title) return;
-  $("#topbar-title").textContent = title.textContent;
-  titleWatcher.observe(title);
-}
-
 function render() {
   const now = new Date();
   const { page, id } = route();
@@ -88,7 +86,6 @@ function render() {
   else if (page === "instellingen") renderSettings(root);
   else renderOverview(root, now);
   renderChrome();
-  watchTitle();
 }
 
 async function refresh({ flip = true } = {}) {
@@ -172,9 +169,9 @@ document.addEventListener("click", (e) => {
     e.preventDefault();
     return;
   }
-  const target = e.target.closest("[data-action],[data-tick],[data-pick],[data-options],[data-view],[data-filter],[data-edit-course],[data-lang]");
+  const target = e.target.closest("[data-action],[data-tick],[data-pick],[data-options],[data-view],[data-filter],[data-edit-course],[data-lang],[data-theme-choice]");
   if (!target || target.closest("#sheet")) return;
-  const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice } = target.dataset;
+  const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice, themeChoice } = target.dataset;
   if (action) actions[action]();
   else if (tickId) tick(tickId, e.target);
   else if (pick) {
@@ -188,6 +185,7 @@ document.addEventListener("click", (e) => {
   } else if (filter) { courseView.filter = filter; refresh({ flip: false }); }
   else if (editCourse) sheets.openCourse(editCourse);
   else if (choice) { setLang(choice); render(); }
+  else if (themeChoice) { setTheme(themeChoice); render(); }
 });
 
 document.addEventListener("toggle", (e) => {

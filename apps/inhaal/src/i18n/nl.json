@@ -124,5 +124,11 @@
   "refresh": "Vernieuwen",
   "online": "Online",
   "installSection": "Installeren",
-  "version": "Versie"
+  "version": "Versie",
+  "appearance": "Weergave",
+  "themeSystem": "Systeem",
+  "themeLight": "Licht",
+  "themeDark": "Donker",
+  "hcShort": "HC",
+  "ozShort": "OZ"
 }
