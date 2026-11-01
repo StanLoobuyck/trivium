@@ -11,6 +11,7 @@ import { loadSettings, saveSettings } from "../shared/storage.js";
 import { errorText, localizePage, phaseLabel, setLanguage, t } from "../shared/i18n.js";
 import { radioGroup } from "../shared/radio-group.js";
 import { getInhaalLink } from "../background/inhaal.js";
+import { applyTheme } from "../shared/theme.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -210,6 +211,7 @@ $("open-shortcuts").addEventListener("click", () => openSettings("#shortcuts"));
     tabUrl = devParams.get("url") || "";
   }
   settings = await loadSettings();
+  applyTheme(settings.theme);
   setLanguage(settings.language);
   localizePage();
   siteActive = await checkSiteActive();

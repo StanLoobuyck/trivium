@@ -143,11 +143,11 @@ def test_courses_of_the_active_semester_only(client):
     rows = [
         ("semesters", {"id": "s1", "updatedAt": time, "isActive": True}),
         ("semesters", {"id": "s0", "updatedAt": time, "isActive": False}),
-        ("courses", {"id": "c1", "updatedAt": time, "semesterId": "s1", "name": "SP", "codes": ["H06F2a"], "language": "en"}),
+        ("courses", {"id": "c1", "updatedAt": time, "semesterId": "s1", "name": "SP", "codes": ["H06F2a"], "language": "en", "colorKey": "indigo"}),
         ("courses", {"id": "c2", "updatedAt": time, "semesterId": "s0", "name": "Oud", "codes": ["H00"]}),
         ("courses", {"id": "c3", "updatedAt": time, "semesterId": "s1", "name": "Weg", "codes": ["H01"], "hidden": True}),
         ("courses", {"id": "c4", "updatedAt": time, "semesterId": "s1", "name": "Wis", "codes": ["H02"], "deletedAt": time}),
     ]
     client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
     assert client.get("/api/courses").status_code == 401
-    assert client.get("/api/courses", headers=AUTH).json()["courses"] == [{"name": "SP", "codes": ["H06F2a"], "language": "en"}]
+    assert client.get("/api/courses", headers=AUTH).json()["courses"] == [{"name": "SP", "codes": ["H06F2a"], "language": "en", "colorKey": "indigo"}]

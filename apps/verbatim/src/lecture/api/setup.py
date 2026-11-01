@@ -219,6 +219,17 @@ def import_from_hub():
         raise HTTPException(400, f"hub: {exc}") from None
 
 
+@router.get("/api/course-colors")
+def course_colors():
+    """Same colour per course as Inhaal. Empty without a hub: the page then keeps what it last knew."""
+    from .. import hub
+
+    try:
+        return hub.course_colors(cfgmod.load_config(), cfgmod.load_courses())
+    except (ValueError, httpx.HTTPError):
+        return {}
+
+
 @router.post("/api/setup/mac/test")
 def test_mac():
     from .. import models

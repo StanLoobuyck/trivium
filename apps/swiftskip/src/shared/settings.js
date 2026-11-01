@@ -7,9 +7,12 @@ import { LANGUAGE_OPTIONS } from "./i18n.js";
 export const SKIP_OPTIONS = [5, 10, 15, 30];
 export const SPEED_STEP_OPTIONS = [0.25, 0.1];
 
+export const THEME_OPTIONS = ["system", "light", "dark"];
+
 export const DEFAULT_SETTINGS = {
   enabled: true,
   language: "auto", // "auto" follows the browser; or "en" / "nl"
+  theme: "system", // applies to SwiftSkip's own pages; the player overlay is always dark
   skipSeconds: 10,
   speedStep: 0.25,
   rememberSpeed: true,
@@ -29,6 +32,7 @@ export function normalizeSettings(stored = {}) {
   return {
     enabled: bool(stored.enabled, d.enabled),
     language: oneOf(stored.language, LANGUAGE_OPTIONS, d.language),
+    theme: oneOf(stored.theme, THEME_OPTIONS, d.theme),
     skipSeconds: oneOf(stored.skipSeconds, SKIP_OPTIONS, d.skipSeconds),
     speedStep: oneOf(stored.speedStep, SPEED_STEP_OPTIONS, d.speedStep),
     rememberSpeed: bool(stored.rememberSpeed, d.rememberSpeed),

@@ -151,7 +151,7 @@ test("downloads go to Verbatim's folder when the setting is on", async ({
     };
   });
   const settings = await context.newPage();
-  await settings.goto(`chrome-extension://${extensionId}/options.html`);
+  await settings.goto(`chrome-extension://${extensionId}/options.html#links`);
   await settings.locator("#downloads-verbatim").check({ force: true });
   await expect(settings.locator("#downloads-verbatim")).toBeChecked();
 

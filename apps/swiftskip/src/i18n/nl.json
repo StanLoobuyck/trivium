@@ -138,5 +138,10 @@
   "downloadsToVerbatimDesc": "Bewaart opnames in Downloads/Verbatim/<vakcode>/, waar Verbatim ze vanzelf oppikt. Zonder vakcode blijft een download in Downloads.",
   "popupLinkedInhaal": "Gekoppeld met Inhaal",
   "popupToVerbatim": "downloads gaan naar Verbatim",
+  "theme": "Weergave",
+  "themeDesc": "Licht, donker of zoals je systeem. De overlay op de speler blijft donker.",
+  "themeSystem": "Systeem",
+  "themeLight": "Licht",
+  "themeDark": "Donker",
   "linksTitle": "Koppelingen"
 }

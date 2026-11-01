@@ -38,3 +38,9 @@ test("old 'keybinds' are migrated when there are no 'shortcuts' yet", () => {
     "new format wins",
   );
 });
+
+test("theme: system by default, unknown values fall back", () => {
+  assert.equal(normalizeSettings({}).theme, "system");
+  assert.equal(normalizeSettings({ theme: "dark" }).theme, "dark");
+  assert.equal(normalizeSettings({ theme: "blue" }).theme, "system");
+});

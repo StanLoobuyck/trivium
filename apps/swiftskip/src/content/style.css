@@ -59,7 +59,7 @@
 #swiftskip-download {
   position: fixed;
   top: 16px;
-  right: 16px;
+  left: 16px;
   z-index: 2147483647 !important;
   display: flex;
   flex-direction: column;
@@ -71,7 +71,7 @@
 }
 
 #swiftskip-download.is-collapsed {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 #swiftskip-download.is-idle {

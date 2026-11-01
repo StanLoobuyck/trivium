@@ -35,6 +35,21 @@ def fetch_courses(conf: Config) -> list[dict]:
     return response.json()["courses"]
 
 
+def course_colors(conf: Config, courses: list[Course]) -> dict[str, str]:
+    """Inhaal's colour per Verbatim course id, matched like settings.import_courses: same code, else same name."""
+    def key(name: str) -> str:
+        return " ".join(name.lower().split())
+
+    colors = {}
+    for entry in fetch_courses(conf):
+        wanted = {c.upper() for c in entry.get("codes") or []}
+        same = next((c for c in courses if wanted & {x.upper() for x in c.codes}), None) \
+            or next((c for c in courses if key(c.name) == key(entry.get("name") or "")), None)
+        if same and entry.get("colorKey"):
+            colors[same.id] = entry["colorKey"]
+    return colors
+
+
 def notes_event(job: dict, job_name: str, kind: str, course: Course) -> dict:
     title = job.get("title") or ""
     media = Path(job.get("input", {}).get("media", ""))

@@ -34,7 +34,7 @@ const ICONS = {
       ["path", { d: "M5 20h14" }],
     ],
   ],
-  collapse: ["svg", { viewBox: "0 0 24 24", ...stroke }, [["path", { d: "m9 6 6 6-6 6" }]]],
+  collapse: ["svg", { viewBox: "0 0 24 24", ...stroke }, [["path", { d: "m15 6-6 6 6 6" }]]],
   cancel: ["svg", { viewBox: "0 0 24 24", ...stroke }, [["path", { d: "M7 7l10 10M17 7 7 17" }]]],
   done: [
     "svg",

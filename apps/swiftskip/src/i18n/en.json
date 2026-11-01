@@ -138,5 +138,10 @@
   "downloadsToVerbatimDesc": "Saves recordings in Downloads/Verbatim/<course code>/, where Verbatim picks them up. Without a course code, a download stays in Downloads.",
   "popupLinkedInhaal": "Linked with Inhaal",
   "popupToVerbatim": "downloads go to Verbatim",
+  "theme": "Appearance",
+  "themeDesc": "Light, dark or like your system. The overlay on the player stays dark.",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
   "linksTitle": "Links"
 }

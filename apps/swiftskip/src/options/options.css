@@ -1,7 +1,8 @@
 /* Settings page: sidebar and grouped lists from packages/design, the same as Inhaal's settings. */
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: var(--space-5);
+@media (min-width: 900px) {
+  .pane:not(.is-active) {
+    display: none;
+  }
 }
 
 h2,

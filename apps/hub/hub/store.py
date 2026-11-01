@@ -73,7 +73,7 @@ class Store:
 
         active = {s["id"] for s in records("semesters") if s.get("isActive")}
         return [
-            {"name": c.get("name"), "codes": c.get("codes", []), "language": c.get("language")}
+            {"name": c.get("name"), "codes": c.get("codes", []), "language": c.get("language"), "colorKey": c.get("colorKey")}
             for c in records("courses")
             if c.get("semesterId") in active and not c.get("hidden")
         ]

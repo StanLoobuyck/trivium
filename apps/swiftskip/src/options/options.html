@@ -70,7 +70,7 @@
           <p class="sub" id="version-line"></p>
         </div>
 
-        <section id="general" aria-labelledby="general-title">
+        <section class="pane" id="general" aria-labelledby="general-title">
           <h2 class="group-title" id="general-title" data-i18n="general"></h2>
           <div class="list">
             <div class="row">
@@ -97,6 +97,19 @@
                 role="radiogroup"
                 aria-labelledby="language-label"
                 aria-describedby="language-desc"
+              ></div>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span id="theme-label" data-i18n="theme"></span>
+                <p class="label" id="theme-desc" data-i18n="themeDesc"></p>
+              </div>
+              <div
+                class="segmented segmented-compact"
+                id="theme-options"
+                role="radiogroup"
+                aria-labelledby="theme-label"
+                aria-describedby="theme-desc"
               ></div>
             </div>
             <div class="row">
@@ -157,7 +170,7 @@
           </div>
         </section>
 
-        <section id="shortcuts" aria-labelledby="shortcuts-title">
+        <section class="pane" id="shortcuts" aria-labelledby="shortcuts-title">
           <div class="section-head">
             <h2 class="group-title" id="shortcuts-title" data-i18n="keyboardShortcuts"></h2>
             <button
@@ -172,7 +185,7 @@
           <div id="shortcut-groups"></div>
         </section>
 
-        <section id="links" aria-labelledby="links-title">
+        <section class="pane" id="links" aria-labelledby="links-title">
           <h2 class="group-title" id="links-title" data-i18n="linksTitle"></h2>
           <div class="list">
             <div class="row" id="inhaal">
@@ -200,13 +213,13 @@
           </div>
         </section>
 
-        <section id="sites" aria-labelledby="sites-title">
+        <section class="pane" id="sites" aria-labelledby="sites-title">
           <h2 class="group-title" id="sites-title" data-i18n="sites"></h2>
           <p class="section-intro label" data-i18n="sitesIntro"></p>
           <ul class="list" id="site-list"></ul>
         </section>
 
-        <section id="about" aria-labelledby="about-title">
+        <section class="pane" id="about" aria-labelledby="about-title">
           <h2 class="group-title" id="about-title" data-i18n="about"></h2>
           <div class="card about">
             <p class="sub" data-i18n="aboutText"></p>

@@ -1,7 +1,7 @@
 // Settings page: general options + the keyboard shortcut editor.
 
 import { ext } from "../shared/ext.js";
-import { SKIP_OPTIONS, SPEED_STEP_OPTIONS } from "../shared/settings.js";
+import { SKIP_OPTIONS, SPEED_STEP_OPTIONS, THEME_OPTIONS } from "../shared/settings.js";
 import {
   ACTIONS,
   DEFAULT_SHORTCUTS,
@@ -16,6 +16,7 @@ import { patternHost } from "../shared/sites.js";
 import { enabledSites } from "../background/sites.js";
 import { getInhaalLink, removeInhaalLink, setInhaalLink } from "../background/inhaal.js";
 import { inhaalPermission, normalizeInhaalUrl } from "../shared/inhaal.js";
+import { applyTheme } from "../shared/theme.js";
 import {
   clearResumePositions,
   countResumePositions,
@@ -68,6 +69,13 @@ function renderGeneral() {
     settings.language,
     (l) => (l === "auto" ? t("languageAuto") : LANGUAGE_NAMES[l]),
     (language) => pick({ language }),
+  );
+  radioGroup(
+    $("theme-options"),
+    THEME_OPTIONS,
+    settings.theme,
+    (theme) => t({ system: "themeSystem", light: "themeLight", dark: "themeDark" }[theme]),
+    (theme) => pick({ theme }),
   );
   radioGroup(
     $("skip-options"),
@@ -330,10 +338,10 @@ async function renderInhaal() {
 }
 
 function render() {
+  applyTheme(settings.theme);
   setLanguage(settings.language);
   localizePage();
   document.title = t("settingsPageTitle");
-  watchSections();
   $("version-line").textContent = t("settingsVersion", { version: ext.runtime.getManifest().version });
   renderGeneral();
   renderShortcuts();
@@ -345,8 +353,6 @@ function render() {
 loadSettings().then((loaded) => {
   settings = loaded;
   render();
-  if (location.hash === "#shortcuts") $("shortcuts").scrollIntoView();
-  if (location.hash.startsWith("#link=")) $("inhaal").scrollIntoView();
 });
 
 // Changes from the popup, another settings tab, or a synced browser.
@@ -355,22 +361,22 @@ watchSettings((next) => {
   render();
 });
 
-// The sidebar marks the section you are reading, like the current page in Inhaal's.
-function watchSections() {
-  const links = [...document.querySelectorAll(".section-nav a")];
-  const mark = (id) => {
-    for (const a of links) {
-      if (a.hash === `#${id}`) a.setAttribute("aria-current", "page");
-      else a.removeAttribute("aria-current");
-    }
-  };
-  mark("general");
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const seen = entries.find((entry) => entry.isIntersecting);
-      if (seen) mark(seen.target.id);
-    },
-    { rootMargin: "-10% 0px -80% 0px" },
-  );
-  for (const a of links) observer.observe(document.getElementById(a.hash.slice(1)));
+// Laptop: one section at a time, opened from the sidebar like a page in Inhaal. A narrow window has no sidebar
+// and shows them all (options.css).
+function showPane() {
+  const hash = location.hash.slice(1);
+  const id = hash.startsWith("link=")
+    ? "links"
+    : document.querySelector(`.pane[id="${CSS.escape(hash)}"]`)
+      ? hash
+      : "general";
+  for (const pane of document.querySelectorAll(".pane")) pane.classList.toggle("is-active", pane.id === id);
+  for (const a of document.querySelectorAll(".section-nav a")) {
+    if (a.hash === `#${id}`) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  }
+  window.scrollTo(0, 0);
 }
+
+window.addEventListener("hashchange", showPane);
+showPane();

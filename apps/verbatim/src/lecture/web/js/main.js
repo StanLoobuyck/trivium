@@ -19,3 +19,11 @@ setLang(LANG);
 translateStatic();
 try { S.courses = await api("/api/courses"); } catch { S.courses = []; }
 route();
+
+// After the first paint: the hub may be slow or away, and then the remembered colours stay.
+api("/api/course-colors").then((colors) => {
+  if (!Object.keys(colors).length || JSON.stringify(colors) === JSON.stringify(S.colors)) return;
+  S.colors = colors;
+  try { localStorage.setItem("lt-colors", JSON.stringify(colors)); } catch { /* just not remembered */ }
+  route();
+}).catch(() => {});

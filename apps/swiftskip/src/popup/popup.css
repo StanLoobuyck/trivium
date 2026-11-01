@@ -169,16 +169,28 @@ body {
 }
 
 /* Dark: the same raised surface as Inhaal's sheets. The browser draws the popup's rounded panel in its own grey
-   (Zen: #1F1F1F) behind this page; on pure black that grey showed up as odd corners, on --card it doesn't. */
+   (Zen: #1F1F1F) behind this page; on pure black that grey showed up as odd corners, on --card it doesn't.
+   Twice, like tokens.css: once for the system setting, once for the choice in SwiftSkip's settings. */
 @media (prefers-color-scheme: dark) {
-  html,
-  body {
+  :root:not([data-theme="light"]),
+  :root:not([data-theme="light"]) body {
     background: var(--card);
   }
 
-  .list,
-  .dl-progress {
+  :root:not([data-theme="light"]) .list,
+  :root:not([data-theme="light"]) .dl-progress {
     background: var(--fill);
     box-shadow: none;
   }
+}
+
+:root[data-theme="dark"],
+:root[data-theme="dark"] body {
+  background: var(--card);
+}
+
+:root[data-theme="dark"] .list,
+:root[data-theme="dark"] .dl-progress {
+  background: var(--fill);
+  box-shadow: none;
 }
