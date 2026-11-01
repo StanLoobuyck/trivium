@@ -2,13 +2,21 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 2 gebouwd, live en door de eigenaar getest, op de reboot-test na. Fase 3 is begonnen: het updatebestand
-   staat op Pages (`site/swiftskip/updates.json`). De brugversie 4.0.2 staat onafgewerkt op de lokale tak
-   `bridge-update-url` in de SwiftSkip-repo, nog niet gecommit.
-3. **Volgende:** akkoord van de eigenaar op het adres, dan `npm run release 4.0.2` vanuit `main` in de SwiftSkip-repo en
-   dezelfde versie toevoegen aan `site/swiftskip/updates.json`. Niet zonder akkoord: het raakt echte gebruikers.
-4. **Wacht op de eigenaar:** reboot-test van hub en Funnel.
+2. **Nu:** de reboot-test van fase 2 is mislukt: na de herstart was de hub niet bereikbaar (TLS-fout via Funnel, geen
+   antwoord op `tailscale ping`). De iPhone vinkte alleen lokaal af. Oorzaak nog niet vastgesteld: FileVault, slaapstand
+   of Tailscale. Brugversie SwiftSkip 4.0.2 is gepubliceerd en staat op beide update-adressen.
+3. **Volgende:** de Mac onderzoeken (met toestemming, Mac wakker en aangemeld), oplossen, reboot-test herhalen. Daarna
+   controleren dat een installatie van 4.0.1 naar 4.0.2 gaat, en de code verhuizen naar `apps/swiftskip`.
+4. **Wacht op de eigenaar:** Mac open en aangemeld houden voor het onderzoek.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — SwiftSkip 4.0.2 gepubliceerd, reboot-test mislukt
+- 4.0.2 is de brugversie: update-adres `stanloobuyck.github.io/studie-ecosysteem/swiftskip/updates.json`. Gecontroleerd:
+  ondertekend, id en adres kloppen, sha256 van de download gelijk aan de waarde in beide manifesten.
+- Bedoeld was eerst een proefrun, maar `npm run release 4.0.2 --dry-run` publiceerde echt: npm slikt de vlag. De eigenaar
+  had de release wel toegestaan. De fout staat ook in `DEVELOPMENT.md` en `release.js`; aanpassen bij de verhuizing.
+- Reboot-test: hub onbereikbaar vanaf de laptop na de herstart. Hernoem je de repo in fase 6, dan moet er eerst nog een
+  brugversie uit, want dan valt dit update-adres weg.
 
 ## 2026-11-01 — fase 3: updatebestand van SwiftSkip op Pages
 - `site/swiftskip/updates.json` is een kopie van het bestand in de oude repo (4.0.0 en 4.0.1). Nog geen enkele installatie
