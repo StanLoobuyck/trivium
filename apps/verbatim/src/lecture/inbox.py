@@ -80,16 +80,25 @@ def ensure_folders(conf: Config, courses: list[Course]) -> None:
             (conf.paths.inbox_dir / c.id).mkdir(parents=True, exist_ok=True)
 
 
+def course_folders(conf: Config, courses: list[Course]) -> list[tuple[Path, str]]:
+    """(folder, course id): the inbox by course id, and SwiftSkip's Downloads folders by course code."""
+    ids = {c.id for c in courses}
+    codes = {code.upper(): c.id for c in courses for code in c.codes}
+    found = []
+    for root, course_of in ((conf.paths.inbox_dir, lambda name: name if name in ids else None),
+                            (conf.paths.downloads_inbox, lambda name: codes.get(name.upper()))):
+        for folder in sorted(root.iterdir()) if root.is_dir() else []:
+            if folder.is_dir() and course_of(folder.name):
+                found.append((folder, course_of(folder.name)))
+    return found
+
+
 def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[dict]:
     """New recordings in the course folders: {media, course, title, date, slides, why, ready}."""
     now = time.time() if now is None else now
-    ids = {c.id for c in courses}
     known = known_media(conf)
     out = []
-    root = conf.paths.inbox_dir
-    for folder in sorted(root.iterdir()) if root.is_dir() else []:
-        if not folder.is_dir() or folder.name not in ids:
-            continue
+    for folder, course_id in course_folders(conf, courses):
         files = [p for p in folder.iterdir() if p.is_file() and not p.name.startswith(".")]
         decks = [p for p in files if p.suffix.lower() in SLIDE_EXT]
         for video in sorted(p for p in files if p.suffix.lower() in VIDEO_EXT):
@@ -102,7 +111,7 @@ def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[
                 ready, why = False, "no slides in the course folder yet (waits 10 min)"
             elif slides is not None and not ready:
                 why = "still being copied or downloaded"
-            out.append({"media": str(video), "course": folder.name, "title": guess_title(video.stem),
+            out.append({"media": str(video), "course": course_id, "title": guess_title(video.stem),
                         "date": guess_date(video.stem, st.st_mtime), "slides": [str(s) for s in slides or []],
                         "why": why, "ready": ready})
     return out

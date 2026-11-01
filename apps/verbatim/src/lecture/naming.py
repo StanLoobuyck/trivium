@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
-VIDEO_EXT = {".mp4", ".mkv", ".mov", ".webm", ".m4a", ".mp3", ".wav", ".flac", ".ogg", ".opus", ".aac", ".m4v"}
+VIDEO_EXT = {".mp4", ".mkv", ".mov", ".webm", ".m4a", ".mp3", ".wav", ".flac", ".ogg", ".opus", ".aac", ".m4v", ".ts"}
 SLIDE_EXT = {".pdf", ".pptx"}
 MONTHS = {m: i for i, m in enumerate(
     ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober",

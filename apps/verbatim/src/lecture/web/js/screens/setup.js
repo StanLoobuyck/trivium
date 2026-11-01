@@ -61,6 +61,22 @@ export async function renderSetup(refresh = false) {
         <p class="muted small" id="mac-result" aria-live="polite"></p>
       </section>
 
+      <section class="card setup-section">
+        <h2>${t("s_hub")}</h2><p class="muted small">${t("s_hub_sub")}</p>
+        <div class="key-row">
+          <span><b>${t("mac_url")}</b></span>
+          <input type="text" id="hub-url" value="${esc(s.hub.url || "")}" autocomplete="off" spellcheck="false">
+          <span><button class="btn small" id="hub-save">${t("c_save")}</button></span>
+        </div>
+        <div class="key-row">
+          <span><b>${t("hub_code")}</b> <span class="pill ${s.hub.code ? "ok" : ""}">${s.hub.code ? t("k_set") : t("k_missing")}</span></span>
+          <input type="password" data-key="hub" autocomplete="off">
+          <span><button class="btn small" data-savekey="hub">${t("c_save")}</button></span>
+        </div>
+        <div><button class="btn small" id="hub-import" ${s.hub.url && s.hub.code ? "" : "disabled"}>${t("hub_import")}</button></div>
+        <p class="muted small" id="hub-result" aria-live="polite"></p>
+      </section>
+
       ${notesSectionHtml(s)}
 
       <section class="card setup-section">
@@ -109,6 +125,17 @@ export async function renderSetup(refresh = false) {
     if (input.value.trim()) apply("/api/setup/key", { name: b.dataset.savekey, value: input.value.trim() });
   }));
   $("#setup-start")?.addEventListener("click", startWorker);
+  $("#hub-save").addEventListener("click", () => apply("/api/setup/hub", { url: $("#hub-url").value.trim() }));
+  $("#hub-import").addEventListener("click", async (e) => {
+    const out = $("#hub-result");
+    e.currentTarget.disabled = true;
+    try {
+      const r = await post("/api/setup/hub/import");
+      out.textContent = t("hub_imported", { linked: r.linked, added: r.added });
+      drawCourses();
+    } catch (err) { out.textContent = err.message; }
+    e.currentTarget.disabled = false;
+  });
   $("#mac-save").addEventListener("click", () => apply("/api/setup/mac", { url: $("#mac-url").value.trim() }));
   $("#mac-test").addEventListener("click", async (e) => {
     const out = $("#mac-result");

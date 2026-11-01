@@ -77,5 +77,9 @@ export function addToQueue(queue, event) {
   return [...queue.filter((other) => !has(replaced)(other)), event].slice(-QUEUE_MAX);
 }
 
+// Downloads/Verbatim/<course code>/, where Verbatim picks recordings up.
+export const verbatimFolder = (code) =>
+  /^[A-Za-z0-9]+$/.test(code || "") ? `Verbatim/${code.toUpperCase()}` : null;
+
 export const isWatched = (time, duration) =>
   Number.isFinite(duration) && duration > 0 && time / duration >= WATCHED_FRACTION;

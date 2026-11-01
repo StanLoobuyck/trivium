@@ -161,5 +161,8 @@
   "swiftskipLink": "Koppel met SwiftSkip",
   "swiftskipLinkBody": "Bekeken opnames worden dan vanzelf afgevinkt. Vereist SwiftSkip 4.1 in deze browser; de link opent de instellingen van SwiftSkip via kuleuven.be.",
   "swiftskipLinked": "Gekoppeld. Wat je in SwiftSkip bekijkt, komt hier vanzelf binnen.",
-  "inProgress": "Halverwege · {time} bekeken"
+  "inProgress": "Halverwege · {time} bekeken",
+  "notesReady": "Notities klaar",
+  "transcriptReady": "Transcript klaar",
+  "openVerbatim": "Open in Verbatim"
 }

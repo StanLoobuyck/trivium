@@ -4,6 +4,7 @@ import os
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +20,16 @@ MAX_CHANGES = 5000
 class Change(BaseModel):
     table: str
     record: dict
+
+
+class Event(BaseModel, extra="allow"):
+    """Zie packages/contract/CONTRACT.md. De hub bewaart events; Inhaal beslist wat ze betekenen."""
+
+    id: str
+    type: Literal["notes.ready"]
+    source: Literal["verbatim"]
+    occurredAt: str
+    payload: dict
 
 
 class SyncRequest(BaseModel):
@@ -62,6 +73,20 @@ def create_app(*, code: str, db_path: str | Path, web_dir: str | None = None, ro
         store.apply(changes)
         records, cursor = store.since(request.cursor)
         return {"cursor": cursor, "records": records, "rooster": store.get_meta("rooster_hash")}
+
+    @app.post("/api/events", dependencies=[Depends(check_code)])
+    def add_event(event: Event) -> dict:
+        store.add_event(event.model_dump())
+        return {"ok": True}
+
+    @app.get("/api/events", dependencies=[Depends(check_code)])
+    def events(after: int = 0) -> dict:
+        found, cursor = store.events_since(after)
+        return {"events": found, "cursor": cursor}
+
+    @app.get("/api/courses", dependencies=[Depends(check_code)])
+    def courses() -> dict:
+        return {"courses": store.active_courses()}
 
     @app.get("/api/rooster", dependencies=[Depends(check_code)])
     def rooster() -> dict:

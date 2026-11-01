@@ -51,3 +51,28 @@ test("een foute code wordt gemeld", async ({ browser }) => {
   await page.getByRole("button", { name: "Koppelen" }).click();
   await expect(page.locator("#sync-status")).toContainText("klopt niet");
 });
+
+test("notities klaar van Verbatim verschijnen als badge, en de hub geeft de vakken", async ({ browser }) => {
+  const laptop = await device(browser);
+  await laptop.goto("/#/");
+  await expect(laptop.getByTestId("open-count")).toBeVisible({ timeout: 15000 });
+  const { day, code } = await laptop.evaluate(async () => {
+    const open = indexedDB.open("inhaal");
+    const db = await new Promise((resolve) => { open.onsuccess = () => resolve(open.result); });
+    const sessions = await new Promise((resolve) => { db.transaction("sessions").objectStore("sessions").getAll().onsuccess = (e) => resolve(e.target.result); });
+    const session = sessions.filter((s) => s.type === "lecture" && s.code && s.status === "upcoming" && new Date(s.end) < new Date()).sort((a, b) => a.start.localeCompare(b.start))[0];
+    return { day: new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Brussels" }).format(new Date(session.start)), code: session.code };
+  });
+
+  const headers = { Authorization: `Bearer ${CODE}` };
+  const courses = await (await laptop.request.get(`${HUB}/api/courses`, { headers })).json();
+  expect(courses.courses.some((c) => c.codes.includes(code))).toBe(true);
+  const sent = await laptop.request.post(`${HUB}/api/events`, { headers, data: {
+    id: "7f3c2a10-5b1e-4c7d-9a54-1f2e3d4c5b6a", type: "notes.ready", source: "verbatim", occurredAt: "2026-11-01T12:00:00+01:00",
+    payload: { recording: { courseCode: code, title: "Les", recordedOn: day }, kind: "notes", verbatimJob: "job-1" },
+  } });
+  expect(sent.ok()).toBe(true);
+
+  await laptop.getByRole("button", { name: "Lijst" }).click();
+  await expect(laptop.getByText("Notities klaar").first()).toBeVisible({ timeout: 8000 });
+});

@@ -10,6 +10,7 @@ import {
   isWatched,
   normalizeInhaalUrl,
   parseLinkHash,
+  verbatimFolder,
 } from "../src/shared/inhaal.js";
 
 const hash = (value) => LINK_HASH + encodeURIComponent(value);
@@ -98,6 +99,12 @@ test("queue stays bounded", () => {
     queue = addToQueue(queue, progress(`${i}`, 60, { ...recording, title: `${i}` }));
   assert.equal(queue.length, 200);
   assert.equal(queue.at(-1).id, "249");
+});
+
+test("Verbatim folder only for a clean course code", () => {
+  assert.equal(verbatimFolder("H06F2a"), "Verbatim/H06F2A");
+  assert.equal(verbatimFolder("../x"), null);
+  assert.equal(verbatimFolder(null), null);
 });
 
 test("watched from 90%", () => {

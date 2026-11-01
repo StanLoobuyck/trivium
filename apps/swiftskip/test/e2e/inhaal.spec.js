@@ -136,3 +136,28 @@ test("a finished download reaches Inhaal with its file name", async ({
   expect(event.payload.fileName).toMatch(/\.mp4$|\.ts$/);
   expect(event.payload.recording.title).toBe("LTI openen");
 });
+
+test("downloads go to Verbatim's folder when the setting is on", async ({
+  context,
+  extensionId,
+  serviceWorker,
+}) => {
+  await serviceWorker.evaluate(() => {
+    const original = chrome.downloads.download.bind(chrome.downloads);
+    globalThis.savedNames = [];
+    chrome.downloads.download = (options) => {
+      globalThis.savedNames.push(options.filename);
+      return original(options);
+    };
+  });
+  const settings = await context.newPage();
+  await settings.goto(`chrome-extension://${extensionId}/options.html`);
+  await settings.locator("#downloads-verbatim").check({ force: true });
+  await expect(settings.locator("#downloads-verbatim")).toBeChecked();
+
+  const { frame } = await openLecture(context);
+  await frame.locator("#swiftskip-download").click();
+  await expect
+    .poll(() => serviceWorker.evaluate(() => globalThis.savedNames), { timeout: 30_000 })
+    .toEqual([expect.stringMatching(/^Verbatim\/T01E5T\/.+\.mp4$/)]);
+});

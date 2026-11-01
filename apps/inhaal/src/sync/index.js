@@ -59,6 +59,20 @@ async function refreshRooster(hash) {
   onRooster(result);
 }
 
+// Berichten van Verbatim. Elk toestel haalt ze zelf op; de cursor blijft lokaal.
+async function fetchEvents() {
+  const after = await getMeta("eventCursor", 0);
+  const answer = await request(`events?after=${after}`).catch(() => null);
+  if (!answer) return; // een bericht dat niet aankomt, breekt niets: de gewone sync gaat gewoon door
+  const { events, cursor } = answer;
+  if (!events.length) return;
+  if (store.state.semester) {
+    await store.ingestRecordings(events);
+    onChange();
+  }
+  await setMeta("eventCursor", cursor);
+}
+
 function setStatus(status) {
   sync.status = status;
   onStatus();
@@ -82,6 +96,7 @@ async function run() {
       onChange();
     }
     await refreshRooster(result.rooster);
+    await fetchEvents();
     sync.pending = 0;
     sync.lastAt = new Date();
     setStatus("ok");

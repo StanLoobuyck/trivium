@@ -3,6 +3,11 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.2.0
+
+**New**
+- **Downloads to Verbatim** (optional): recordings go to `Downloads/Verbatim/<course code>/`, where Verbatim picks them up
+
 ## 4.1.2
 
 **Changed**

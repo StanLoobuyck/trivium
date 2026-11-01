@@ -133,5 +133,7 @@
   "inhaalLink": "Link",
   "inhaalLinked": "Linked with {site}. Watched lectures, your position and downloads reach Inhaal as soon as you open it.",
   "inhaalUnlink": "Unlink",
-  "inhaalDenied": "Not linked: the browser didn't get permission."
+  "inhaalDenied": "Not linked: the browser didn't get permission.",
+  "downloadsToVerbatim": "Downloads to Verbatim",
+  "downloadsToVerbatimDesc": "Saves recordings in Downloads/Verbatim/<course code>/, where Verbatim picks them up. Without a course code, a download stays in Downloads."
 }

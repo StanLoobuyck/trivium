@@ -24,7 +24,8 @@ export function findSession(recording, { courses, sessions, numbers, now }) {
   if (!course) return { course: null, session: null };
   const key = recordingKey(recording);
   const own = sessions.filter((s) => isAlive(s) && s.courseId === course.id && s.status !== "cancelled");
-  const known = own.find((s) => (s.recordings ?? []).some((r) => r.key === key));
+  const { fileName } = recording;
+  const known = own.find((s) => (s.recordings ?? []).some((r) => r.key === key || (fileName && r.fileName === fileName)));
   if (known) return { course, session: known };
   const free = own.filter((s) => !hasOtherRecording(s, key));
   if (recording.recordedOn) {
@@ -75,12 +76,20 @@ export function planRecordings(events, { courses, sessions, numbers, now, unmatc
     changes.set(session.id, { ...changes.get(session.id), ...fields });
   };
 
+  const noteMark = { transcript: 1, notes: 2 };
+
   for (const event of [...events].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))) {
     const { recording } = event.payload;
     const key = recordingKey(recording);
     const { course, session: found } = findSession(recording, { courses, sessions: working, numbers, now });
     const session = forced[key] ? working.find((s) => s.id === forced[key]) : found;
     if (!course) continue;
+    if (event.type === "notes.ready") {
+      // Elk toestel haalt dit bij de hub; zonder les is er geen badge, en dat is geen vraag aan de gebruiker waard.
+      const { kind, verbatimJob } = event.payload;
+      if (session && (noteMark[kind] ?? 0) >= (noteMark[session.notesKind] ?? 0)) change(session, { verbatimJob, notesKind: kind });
+      continue;
+    }
     if (!session) { waiting = addUnmatched(waiting, event, key, course); continue; }
 
     const recordings = withRecording(session, event, key);

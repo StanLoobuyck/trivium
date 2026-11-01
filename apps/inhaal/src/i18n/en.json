@@ -161,5 +161,8 @@
   "swiftskipLink": "Link with SwiftSkip",
   "swiftskipLinkBody": "Watched recordings are then ticked off by themselves. Needs SwiftSkip 4.1 in this browser; the link opens SwiftSkip's settings through kuleuven.be.",
   "swiftskipLinked": "Linked. What you watch in SwiftSkip arrives here by itself.",
-  "inProgress": "In progress · {time} watched"
+  "inProgress": "In progress · {time} watched",
+  "notesReady": "Notes ready",
+  "transcriptReady": "Transcript ready",
+  "openVerbatim": "Open in Verbatim"
 }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -39,6 +40,7 @@ class CourseIn(BaseModel):
     extra_terms: list[str] = []
     notes_language: str | None = None
     corrections: dict[str, str] = {}
+    codes: list[str] = []
     # must be listed here: fields missing from this model were silently dropped on every save (2026-10-20)
     semester: str | None = None
     archived: bool | None = None
@@ -109,6 +111,7 @@ def setup():
         "outputs": conf.notes.outputs.model_dump(),
         "keys": keys,
         "mac": {"url": conf.stt.mac.url if conf.stt.mac else None, "token": keys["mac"]},
+        "hub": {"url": conf.hub.url, "code": keys["hub"]},
         "worker": common.worker_running(),
         "notes_paused": snap["notes_paused"],
     }
@@ -196,6 +199,24 @@ def set_mac(body: MacIn):
     _apply(settings.set_mac_url, body.url)
     models._mac_cache["at"] = -1e9  # next status check asks the new address
     return {"url": cfgmod.load_config().stt.mac.url}
+
+
+@router.post("/api/setup/hub")
+def set_hub(body: MacIn):
+    from .. import settings
+
+    _apply(settings.set_hub_url, body.url)
+    return {"url": cfgmod.load_config().hub.url}
+
+
+@router.post("/api/setup/hub/import")
+def import_from_hub():
+    from .. import hub, settings
+
+    try:
+        return settings.import_courses(hub.fetch_courses(cfgmod.load_config()))
+    except (ValueError, httpx.HTTPError) as exc:
+        raise HTTPException(400, f"hub: {exc}") from None
 
 
 @router.post("/api/setup/mac/test")

@@ -23,7 +23,7 @@ from .config import Course
 from .util import find_claude, read_json, write_json, write_text
 
 STT_MODES = {"mac": ["mac", "local", "groq"], "local": ["local", "groq"], "cloud": ["groq"]}
-KEY_FIELDS = {"groq": "GROQ_API_KEY", "gemini": "GEMINI_API_KEY", "mac": "LECTURE_MAC_TOKEN"}
+KEY_FIELDS = {"groq": "GROQ_API_KEY", "gemini": "GEMINI_API_KEY", "mac": "LECTURE_MAC_TOKEN", "hub": "LECTURE_HUB_CODE"}
 
 
 def _read(path: Path) -> dict:
@@ -85,6 +85,14 @@ def set_mac_url(url: str) -> str:
     return url
 
 
+def set_hub_url(url: str) -> str:
+    url = url.strip().rstrip("/")
+    if url and not re.fullmatch(r"https?://[A-Za-z0-9.-]+(:\d{1,5})?(/[A-Za-z0-9._~/-]*)?", url):
+        raise ValueError("give an address like https://my-mac.example.ts.net")
+    update_settings({"hub": {"url": url}})
+    return url
+
+
 def set_outputs(outputs: dict[str, bool]) -> None:
     allowed = {"exam_hints", "quiz", "flashcards", "glossary"}
     if set(outputs) - allowed:
@@ -140,6 +148,33 @@ def save_course(course: dict[str, Any]) -> Course:
     courses.append(model.model_dump(exclude_none=True))
     _write_validated(path, {"courses": courses}, cfgmod.load_courses)
     return model
+
+
+def _name_key(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", name.lower()).strip()
+
+
+def import_courses(found: list[dict]) -> dict[str, int]:
+    """Inhaal's courses: an existing course (same code or name) gets the codes, an unknown one is added.
+
+    Nothing else about an existing course changes, and nothing is removed.
+    """
+    linked = added = 0
+    for entry in found:
+        codes = entry.get("codes") or []
+        wanted = {c.upper() for c in codes}
+        courses = cfgmod.load_courses()
+        same = next((c for c in courses if wanted & {x.upper() for x in c.codes}), None) \
+            or next((c for c in courses if _name_key(c.name) == _name_key(entry.get("name", ""))), None)
+        if same:
+            missing = [c for c in codes if c.upper() not in {x.upper() for x in same.codes}]
+            if missing:
+                save_course({**same.model_dump(), "codes": [*same.codes, *missing]})
+            linked += 1
+        else:
+            save_course({"name": entry["name"], "codes": codes, "language": entry.get("language") or "nl"})
+            added += 1
+    return {"linked": linked, "added": added}
 
 
 def delete_course(course_id: str) -> None:

@@ -50,7 +50,7 @@ def test_keys_from_env_file_and_environment(xdg, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "from-env")
     keys = cfg.load_keys()
     assert keys == {"GROQ_API_KEY": "from-file", "GEMINI_API_KEY": "spaced", "OPENROUTER_API_KEY": "from-env",
-                    "LECTURE_MAC_TOKEN": ""}
+                    "LECTURE_MAC_TOKEN": "", "LECTURE_HUB_CODE": ""}
 
 
 def test_env_file_permissions(xdg):

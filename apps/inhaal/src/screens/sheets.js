@@ -9,7 +9,7 @@ import * as store from "../db/store.js";
 import { chipDate, t } from "../i18n/index.js";
 import { $, $$, esc, pickFiles } from "../ui/dom.js";
 import { closeSheet, openSheet, toast } from "../ui/feedback.js";
-import { numbersNow, progressText, sessionLabel } from "../ui/rows.js";
+import { numbersNow, progressText, sessionLabel, verbatimLink } from "../ui/rows.js";
 
 const { state } = store;
 let refresh = () => {};
@@ -87,6 +87,7 @@ export function openOptions(id) {
     <p class="group-label"><label for="session-link">${esc(t("recordingLink"))}</label></p>
     <input class="field" id="session-link" type="url" inputmode="url" value="${esc(link)}">
     ${link ? `<a class="btn btn-block sheet-action" href="${esc(link)}" target="_blank" rel="noopener">${esc(t("openRecording"))}</a>` : ""}
+    ${session.verbatimJob ? `<a class="btn btn-block sheet-action only-wide" href="${esc(verbatimLink(session))}" target="_blank" rel="noopener">${esc(t("openVerbatim"))}</a>` : ""}
     ${recording?.fileName ? `<p class="sub">${esc(t("downloadedAs", { name: recording.fileName }))}</p>` : ""}
     <p class="group-label"><label for="session-date">${esc(t("date"))}</label></p>
     <input class="field" id="session-date" type="date" value="${dateValue(session.start)}">

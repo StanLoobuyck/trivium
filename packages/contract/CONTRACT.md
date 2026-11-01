@@ -41,7 +41,13 @@ Elk event heeft dezelfde envelop (`schema/event.schema.json`):
 | `notes.ready` | Hub | `kind` (`transcript` of `notes`), `verbatimJob` | Badge "notities" bij de les |
 
 Elke payload bevat `recording`: `courseCode`, en waar gekend `title`, `recordedOn` (`JJJJ-MM-DD`), `lectureNumber`,
-`part` (deel van een les) en `url`. `recording.watched` en `recording.progress` dragen ook `durationSec`. Tijden en posities staan in seconden.
+`part` (deel van een les), `fileName` en `url`. `recording.watched` en `recording.progress` dragen ook `durationSec`. Tijden en posities staan in seconden.
+
+## Hubroute (Verbatim → Inhaal)
+Optioneel en alleen met een eigen hub. Verbatim stuurt `notes.ready` met `POST /api/events` en de koppelcode; wat niet
+aankomt, wacht en wordt opnieuw gestuurd. Elk Inhaal-toestel leest `GET /api/events?after=<cursor>` en zet de badge bij de
+les: eerst op `fileName`, want die is gelijk aan de download van SwiftSkip, dan zoals bij opnames. Vindt Inhaal geen les,
+dan blijft de badge weg. `GET /api/courses` geeft Verbatim de vakken van het actieve semester: `name`, `codes`, `language`.
 
 ## Browserroute (SwiftSkip ↔ Inhaal)
 De koppeling is opt-in. Inhaal opent `https://www.kuleuven.be/#swiftskip-koppel=<eigen adres, URL-gecodeerd>`. SwiftSkip

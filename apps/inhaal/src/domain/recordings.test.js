@@ -71,6 +71,32 @@ describe("findSession", () => {
   });
 });
 
+describe("notes.ready", () => {
+  const notes = (rec, kind = "notes") => event("notes.ready", rec, { kind, verbatimJob: "job-1" });
+
+  it("zet de badge op de les met dezelfde bestandsnaam", () => {
+    const list = sessions.map((s) => (s.id === "b" ? { ...s, recordings: [{ key: "x", fileName: "les.mp4" }] } : s));
+    const plan = planRecordings([notes(recording({ title: "Andere titel", fileName: "les.mp4" }))], { ...context, sessions: list });
+    expect(plan.changes.get("b")).toEqual({ verbatimJob: "job-1", notesKind: "notes" });
+    expect(plan.ticked).toEqual([]);
+  });
+
+  it("vindt de les ook op datum", () => {
+    expect(planRecordings([notes(recording({ recordedOn: "2026-09-23" }))], context).changes.get("a").verbatimJob).toBe("job-1");
+  });
+
+  it("zet een transcript niet boven notities", () => {
+    const list = sessions.map((s) => (s.id === "a" ? { ...s, notesKind: "notes" } : s));
+    expect(planRecordings([notes(recording({ recordedOn: "2026-09-23" }), "transcript")], { ...context, sessions: list }).changes.size).toBe(0);
+  });
+
+  it("vraagt niets als geen les past", () => {
+    const plan = planRecordings([notes(recording({ recordedOn: "2025-01-01" }))], context);
+    expect(plan.changes.size).toBe(0);
+    expect(plan.unmatched).toEqual([]);
+  });
+});
+
 describe("delen van een les", () => {
   const list = [session("a", "2026-09-23T08:00:00Z")];
   const lesson = { ...courses[0], minutesPerLecture: 100, minutesPerExercise: 100 };

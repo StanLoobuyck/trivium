@@ -113,3 +113,41 @@ def test_rooster_is_op_te_halen(client):
     save_rooster(client.app.state.store, ICS)
     assert sync(client)["rooster"]
     assert client.get("/api/rooster", headers=AUTH).json()["text"] == ICS
+
+
+def notes_event(event_id="e1", kind="notes"):
+    return {
+        "id": event_id, "type": "notes.ready", "source": "verbatim", "occurredAt": "2026-11-01T12:00:00+01:00",
+        "payload": {"recording": {"courseCode": "H06F2A"}, "kind": kind, "verbatimJob": "job-1"},
+    }
+
+
+def test_events_are_kept_once_and_need_the_code(client):
+    assert client.post("/api/events", json=notes_event()).status_code == 401
+    assert client.post("/api/events", json=notes_event(), headers=AUTH).status_code == 200
+    assert client.post("/api/events", json=notes_event(), headers=AUTH).status_code == 200
+    client.post("/api/events", json=notes_event("e2"), headers=AUTH)
+    first = client.get("/api/events", headers=AUTH).json()
+    assert [e["id"] for e in first["events"]] == ["e1", "e2"]
+    assert first["events"][0]["payload"]["kind"] == "notes"
+    assert client.get(f"/api/events?after={first['cursor']}", headers=AUTH).json()["events"] == []
+
+
+def test_events_refuse_other_types(client):
+    event = {**notes_event(), "type": "recording.watched"}
+    assert client.post("/api/events", json=event, headers=AUTH).status_code == 422
+
+
+def test_courses_of_the_active_semester_only(client):
+    time = "2026-11-01T10:00:00.000Z"
+    rows = [
+        ("semesters", {"id": "s1", "updatedAt": time, "isActive": True}),
+        ("semesters", {"id": "s0", "updatedAt": time, "isActive": False}),
+        ("courses", {"id": "c1", "updatedAt": time, "semesterId": "s1", "name": "SP", "codes": ["H06F2a"], "language": "en"}),
+        ("courses", {"id": "c2", "updatedAt": time, "semesterId": "s0", "name": "Oud", "codes": ["H00"]}),
+        ("courses", {"id": "c3", "updatedAt": time, "semesterId": "s1", "name": "Weg", "codes": ["H01"], "hidden": True}),
+        ("courses", {"id": "c4", "updatedAt": time, "semesterId": "s1", "name": "Wis", "codes": ["H02"], "deletedAt": time}),
+    ]
+    client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
+    assert client.get("/api/courses").status_code == 401
+    assert client.get("/api/courses", headers=AUTH).json()["courses"] == [{"name": "SP", "codes": ["H06F2a"], "language": "en"}]

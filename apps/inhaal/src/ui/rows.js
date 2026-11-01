@@ -15,6 +15,11 @@ export function sessionTitle(session, numbers = computeNumbers(state.sessions)) 
 export const progressText = (session) => (session.status === "inProgress" && session.progressSec
   ? t("inProgress", { time: duration(session.progressSec / 60) }) : "");
 
+export const notesText = (session) => (session.verbatimJob ? t(session.notesKind === "transcript" ? "transcriptReady" : "notesReady") : "");
+
+// Verbatim draait op de eigen laptop.
+export const verbatimLink = (session) => `http://127.0.0.1:7861/#/lecture/${encodeURIComponent(session.verbatimJob)}`;
+
 export const sessionLabel = (session, numbers) => `${sessionTitle(session, numbers)} · ${shortDate(new Date(session.start))}`;
 
 export function sessionRow(session, { numbers, now, showCourse = false, selecting = null }) {
@@ -37,6 +42,7 @@ export function sessionRow(session, { numbers, now, showCourse = false, selectin
         <span>${esc(label)}</span>
         ${showCourse ? `<span class="sub">${esc(course.name)}</span>` : ""}
         ${progressText(session) ? `<span class="sub">${esc(progressText(session))}</span>` : ""}
+        ${notesText(session) ? `<span class="sub">${esc(notesText(session))}</span>` : ""}
       </button>
       <span class="row-trail">${esc(duration(sessionMinutes(session, course)))}</span>
     </div>

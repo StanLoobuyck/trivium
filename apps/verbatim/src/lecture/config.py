@@ -17,7 +17,7 @@ APP_NAME = "lecture-transcriber"
 # LECTURE_HOME overrides it, e.g. for tests.
 REPO_DIR = Path(os.environ.get("LECTURE_HOME", Path(__file__).resolve().parents[2]))
 
-KEY_NAMES = ("GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "LECTURE_MAC_TOKEN")
+KEY_NAMES = ("GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "LECTURE_MAC_TOKEN", "LECTURE_HUB_CODE")
 
 
 def config_dir() -> Path:
@@ -41,8 +41,10 @@ class _Strict(BaseModel):
 class Paths(_Strict):
     jobs_dir: Path
     inbox_dir: Path
+    # SwiftSkip can only save inside Downloads: <this folder>/<course code>/
+    downloads_inbox: Path = Field(default=Path("~/Downloads/Verbatim"), validate_default=True)
 
-    @field_validator("jobs_dir", "inbox_dir", mode="after")
+    @field_validator("jobs_dir", "inbox_dir", "downloads_inbox", mode="after")
     @classmethod
     def _expand(cls, v: Path) -> Path:
         return v.expanduser()
@@ -274,7 +276,12 @@ class ArchiveConfig(_Strict):
     remote: str = "mac:lecture-archive"
 
 
+class HubConfig(_Strict):
+    url: str = ""  # your own Inhaal hub; empty = Verbatim works alone
+
+
 class Config(_Strict):
+    hub: HubConfig = Field(default_factory=HubConfig)
     models: list[ModelEntry] = Field(default_factory=list)
     archive: ArchiveConfig = Field(default_factory=ArchiveConfig)
     paths: Paths
@@ -311,6 +318,8 @@ class Config(_Strict):
 class Course(_Strict):
     id: str
     name: str
+    # timetable codes shared with Inhaal and SwiftSkip (compared without regard to case)
+    codes: list[str] = Field(default_factory=list)
     language: Literal["nl", "en"]
     lecturer: str | None = None
     extra_terms: list[str] = Field(default_factory=list)

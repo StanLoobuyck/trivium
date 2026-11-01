@@ -2,11 +2,21 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 4 begonnen. Verbatim staat in `apps/verbatim` (opgeschoond, 221 tests). De draaiende worker gebruikt nog
-   `~/Documents/lecture-transcriber`; die map blijft tot de eigenaar overschakelt (install.sh + worker herstarten).
-3. **Volgende:** vakcodes in Verbatim, inbox in Downloads, SwiftSkip per vak, melding notities klaar, badge in Inhaal.
-4. **Wacht op de eigenaar:** keuzes per onderdeel.
+2. **Nu:** fase 4 is gebouwd: vakcodes, inbox in `~/Downloads/Verbatim/<vakcode>/`, SwiftSkip 4.2.0, "notities klaar" naar de
+   hub, badge in Inhaal. Nog niet op de echte opstelling getest.
+3. **Volgende:** hub op de Mac herstarten (nieuwe API), Verbatim overschakelen naar `apps/verbatim` (`stt.mac.url` in de eigen
+   config, `scripts/install.sh`, worker herstarten), checklist fase 4. Daarna fase 5.
+4. **Wacht op de eigenaar:** toestemming voor die herstarts, hub-adres en koppelcode invullen in Verbatim.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — fase 4: Verbatim gekoppeld
+- Verbatim: `codes` per vak, knop Vakken ophalen (koppelt op code of naam, wijzigt verder niets), inbox ook in
+  `~/Downloads/Verbatim/<vakcode>/`, `notes.ready` naar de hub met een wachtrij voor als de hub onbereikbaar is.
+- SwiftSkip 4.2.0: schakelaar Downloads naar Verbatim, standaard uit. Keuzes van de eigenaar.
+- Hub: `POST`/`GET /api/events`, `GET /api/courses`. Inhaal zoekt de les eerst op bestandsnaam: die is gelijk aan de
+  download van SwiftSkip. Geen les gevonden: geen badge, geen vraag.
+- De badge is een regel "Notities klaar" op de rij; op de laptop opent een knop de les in Verbatim.
+- Tests: 88 + 27 SwiftSkip, 227 Verbatim, 16 hub, 120 unit, 134 schermtests. Zonder echte download of Whisper-run.
 
 ## 2026-11-01 — fase 4: Verbatim verhuisd
 - De repo had één commit. In de monorepo zijn weggehaald: Mac-naam en -IP, thuispaden, plaatsen en weekritme, privémail,

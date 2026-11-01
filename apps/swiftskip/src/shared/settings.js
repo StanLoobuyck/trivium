@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS = {
   rememberSpeed: true,
   preferredSpeed: 1,
   resumePlayback: true,
+  downloadsToVerbatim: false,
   shortcuts: normalizeShortcuts(null),
 };
 
@@ -33,6 +34,7 @@ export function normalizeSettings(stored = {}) {
     rememberSpeed: bool(stored.rememberSpeed, d.rememberSpeed),
     preferredSpeed: speed >= 0.25 && speed <= 4 ? speed : d.preferredSpeed,
     resumePlayback: bool(stored.resumePlayback, d.resumePlayback),
+    downloadsToVerbatim: bool(stored.downloadsToVerbatim, d.downloadsToVerbatim),
     shortcuts: stored.shortcuts
       ? normalizeShortcuts(stored.shortcuts)
       : migrateLegacyKeybinds(stored.keybinds), // ≤ 3.2 stored "keybinds"

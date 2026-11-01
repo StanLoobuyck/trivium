@@ -5,7 +5,8 @@
 // `runDownload` and `cancelDownload`.
 
 import { buildLectureTitle, sanitizeFilename } from "../shared/filename.js";
-import { normalizeInhaalUrl } from "../shared/inhaal.js";
+import { normalizeInhaalUrl, verbatimFolder } from "../shared/inhaal.js";
+import { loadSettings } from "../shared/storage.js";
 import { forgetDelivered, reportToInhaal } from "./inhaal.js";
 import { ext } from "../shared/ext.js";
 import { describeError } from "../shared/errors.js";
@@ -130,12 +131,14 @@ export async function downloadFile({ url, filename, saveAs = false }) {
   return ext.downloads.download({ url, filename, saveAs });
 }
 
+// Where a running download goes (title → folder inside Downloads). Kept here
+// because in Chrome the file is saved from a separate document.
+const downloadFolders = new Map();
+
 export function saveFile(url, title, extension) {
-  return downloadFile({
-    url,
-    filename: `${sanitizeFilename(title)}.${extension}`,
-    saveAs: false,
-  });
+  const name = `${sanitizeFilename(title)}.${extension}`;
+  const folder = downloadFolders.get(title);
+  return downloadFile({ url, filename: folder ? `${folder}/${name}` : name, saveAs: false });
 }
 
 function createJobId() {
@@ -182,6 +185,10 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
     phase: "Preparing",
   });
 
+  const { downloadsToVerbatim } = await loadSettings();
+  const folder = downloadsToVerbatim ? verbatimFolder(state.context?.code) : null;
+  if (folder) downloadFolders.set(resolvedTitle, folder);
+
   let response;
   try {
     response = await runDownload({
@@ -193,6 +200,8 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
   } catch (error) {
     response = { ok: false, ...describeError(error) };
   }
+
+  downloadFolders.delete(resolvedTitle);
 
   if (response && response.canceled) {
     return setDownloadState(tabId, {

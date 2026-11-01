@@ -43,6 +43,7 @@
         "recordedOn": { "type": "string", "format": "date" },
         "lectureNumber": { "type": "integer", "minimum": 1 },
         "part": { "type": "integer", "minimum": 1 },
+        "fileName": { "type": "string" },
         "url": { "type": "string", "format": "uri" }
       }
     }
