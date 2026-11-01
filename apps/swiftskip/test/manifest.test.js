@@ -54,7 +54,7 @@ test("only dev builds run on localhost", () => {
 
 test("release Firefox builds point to the self-hosted update manifest; dev builds don't", () => {
   const release = buildManifest("firefox", opts).browser_specific_settings.gecko;
-  assert.equal(release.update_url, "https://stanloobuyck.github.io/studie-ecosysteem/swiftskip/updates.json");
+  assert.equal(release.update_url, "https://stanloobuyck.github.io/trivium/swiftskip/updates.json");
   assert.equal(
     buildManifest("firefox", { ...opts, dev: true }).browser_specific_settings.gecko.update_url,
     undefined,

@@ -3,6 +3,18 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.4.0
+
+**Changed**
+- SwiftSkip is now called **Velox**, part of Trivium, with Sequo (formerly Inhaal) and Verbatim
+- A new logo in the same blue as the other two apps
+- Menu, settings and welcome page use exactly the same styling as Sequo
+- The settings page opens one section at a time
+- The overlays on the player are one calm dark, in the same shapes as Sequo
+
+**New**
+- Appearance: choose system, light or dark for the menu and settings
+
 ## 4.3.0
 
 **Changed**
