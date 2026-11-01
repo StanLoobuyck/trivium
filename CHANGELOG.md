@@ -2,12 +2,18 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 4 werkt: de eigenaar testte de keten. Transcriptregels zijn klikbaar.
-3. **Volgende:** beslissing over het dubbele actieve semester op de hub, daarna fase 5 (één look). Ideeën van de eigenaar:
-   slides vloeiend aan een opname koppelen (past in het hele ecosysteem, bv. knop in SwiftSkip), en later de LaTeX-skill in
-   Verbatim, pas nadat de eigenaar de skill zelf heeft verfijnd en alleen als de kwaliteit van de notities niet daalt.
-4. **Wacht op de eigenaar:** de keuze over het dubbele semester.
+2. **Nu:** fase 4 is af. Verbatim meldt alle lessen aan de hub, ook oude; 8 van de 8 vonden hun les. Fase 5 is begonnen met
+   vergelijkbare ontwerpen in Claude Design.
+3. **Volgende:** de eigenaar kiest een richting per app; daarna bouwen. Ideeën: slides koppelen, LaTeX-skill in Verbatim.
+4. **Wacht op de eigenaar:** keuze uit de ontwerpen.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — Verbatim meldt alle lessen, dubbel semester weg
+- Eigenaarstest: geen enkele badge in Inhaal. De worker bewaarde de instellingen van bij het opstarten, dus de koppeling
+  bleef voor hem onbekend, en oude lessen werden nooit gemeld. Nu leest hij elke ronde de instellingen en vergelijkt hij alle
+  lessen met `hub_sent.json`. Dat vervangt de wachtrij. Gemeten op echte data: 9 berichten, 8 lessen, 0 zonder les.
+- Een datum die Verbatim alleen uit de bestandsleeftijd haalt, gaat niet mee: die zei niets over de les.
+- Hub: tweede actief semester zacht gewist met 7 vakken, 1 les verplaatst. Gecontroleerd: `/api/courses` geeft nu 6 vakken.
 
 ## 2026-11-01 — Verbatim: klikbare transcriptregels
 - Een klik op een transcriptregel springt naar dat moment; tekst selecteren blijft werken. Op een echte les gemeten: doel

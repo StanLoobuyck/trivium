@@ -283,7 +283,7 @@ def transcribe_item(queue: Queue, item: dict, conf: Config) -> None:
     if item["notes"] == "never":
         queue.update(item["id"], status="done", stage=None, progress=None)
         notify("Lecture transcribed", _title(item))
-        hub.tell_notes_ready(job.root, "transcript", conf)
+        hub.report_quietly()
     else:
         queue.update(item["id"], status="transcribed", stage=None, progress=None,
                      message="transcribed; notes " + ("tonight" if item["notes"] == "tonight" else "next"))
@@ -331,14 +331,14 @@ def notes_item(queue: Queue, item: dict, conf: Config) -> None:
         return
     queue.update(item["id"], status="done", stage=None, progress=None, message="notes ready")
     notify("Lecture notes ready", _title(item))
-    hub.tell_notes_ready(Path(item["job"]), "notes", conf)
+    hub.report_quietly()
 
 
 def watch_inbox(queue: Queue, conf: Config) -> bool:
     """Queue new recordings from ~/Lectures/inbox/<course>/ (inbox.py); True when something was added."""
     from . import inbox
 
-    hub.flush_quietly(conf)
+    hub.report_quietly()
     try:
         added = inbox.tick(queue, conf, lambda msg: print(msg, flush=True))
     except Exception as exc:  # noqa: BLE001 — a bad file in the inbox must not stop the worker

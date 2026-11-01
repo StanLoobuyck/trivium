@@ -1,7 +1,8 @@
 """The optional link with your own Inhaal hub (packages/contract/CONTRACT.md): courses in, "notes ready" out.
 
-Verbatim works alone: without an address nothing here does anything. A message that can't be delivered waits in
-an outbox next to the jobs; the worker retries it, and the hub ignores doubles.
+Verbatim works alone: without an address nothing here does anything. Which lectures Inhaal was told about is kept
+next to the jobs; the worker compares that with the jobs every idle round. So older lectures are reported too, what
+couldn't be delivered goes out later, and the settings are read fresh: a worker started before the link still sees it.
 """
 
 from __future__ import annotations
@@ -36,54 +37,60 @@ def fetch_courses(conf: Config) -> list[dict]:
 
 def notes_event(job: dict, job_name: str, kind: str, course: Course) -> dict:
     title = job.get("title") or ""
-    recording = {"courseCode": course.codes[0], "title": title, "recordedOn": job.get("date"),
-                 "fileName": Path(job.get("input", {}).get("media", "")).name or None,
-                 "lectureNumber": lecture_number(title)}
-    return {"id": str(uuid.uuid4()), "type": "notes.ready", "source": "verbatim",
-            "occurredAt": datetime.now().astimezone().isoformat(timespec="seconds"),
+    media = Path(job.get("input", {}).get("media", ""))
+    date = job.get("date") or ""
+    recording = {"courseCode": course.codes[0], "title": title,
+                 # a date Verbatim only guessed from the file's age says nothing about the lecture
+                 "recordedOn": date if date and date in media.stem else None,
+                 "fileName": media.name or None,
+                 "lectureNumber": lecture_number(title) or lecture_number(media.stem)}
+    return {"id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"verbatim/{job_name}/{kind}")), "type": "notes.ready",
+            "source": "verbatim", "occurredAt": datetime.now().astimezone().isoformat(timespec="seconds"),
             "payload": {"recording": {k: v for k, v in recording.items() if v}, "kind": kind,
                         "verbatimJob": job_name}}
 
 
-def _outbox(conf: Config) -> Path:
-    return conf.paths.jobs_dir / "hub_outbox.json"
+def _ready(job_root: Path) -> list[str]:
+    outputs = job_root / "outputs"
+    return [kind for kind, name in (("transcript", "transcript.md"), ("notes", "notes.md"))
+            if (outputs / name).exists()]
 
 
-def flush(conf: Config) -> None:
-    """Send what waits; what fails stays for the next round."""
-    path, link = _outbox(conf), _auth(conf)
-    if not link or not path.exists():
-        return
-    waiting = read_json(path) or []
-    left = list(waiting)
-    for event in waiting:
-        try:
-            httpx.post(f"{link[0]}/api/events", json=event, headers=link[1], timeout=TIMEOUT_S).raise_for_status()
-        except httpx.HTTPError:
-            break
-        left.remove(event)
-    write_json(path, left)
-
-
-def flush_quietly(conf: Config) -> None:
+def report() -> int:
+    """Tell the hub about every finished lecture it hasn't heard of. Returns how many messages went out."""
+    conf = cfgmod.load_config()
+    link = _auth(conf)
+    if not link or not conf.paths.jobs_dir.is_dir():
+        return 0
+    path = conf.paths.jobs_dir / "hub_sent.json"
+    sent = set(read_json(path) or []) if path.exists() else set()
+    courses = {c.id: c for c in cfgmod.load_courses()}
+    count = 0
     try:
-        flush(conf)
-    except Exception as exc:  # noqa: BLE001 — must not stop the worker
-        print(f"hub: {type(exc).__name__}: {exc}", flush=True)
+        for manifest in sorted(conf.paths.jobs_dir.glob("*/manifest.json")):
+            root = manifest.parent
+            for kind in _ready(root):
+                key = f"{root.name}/{kind}"
+                if key in sent:
+                    continue
+                job = read_json(manifest)
+                course = courses.get(job.get("course"))
+                if not course or not course.codes:
+                    continue
+                httpx.post(f"{link[0]}/api/events", json=notes_event(job, root.name, kind, course), headers=link[1],
+                           timeout=TIMEOUT_S).raise_for_status()
+                sent.add(key)
+                count += 1
+    except httpx.HTTPError as exc:
+        print(f"hub: {type(exc).__name__}: {exc}", flush=True)  # the next round tries again
+    if count:
+        write_json(path, sorted(sent))
+    return count
 
 
-def tell_notes_ready(job_root: Path, kind: str, conf: Config) -> None:
-    """Never fails a lecture: this is a courtesy to another app."""
+def report_quietly() -> None:
+    """Never fails a lecture or the worker: this is a courtesy to another app."""
     try:
-        if not _auth(conf):
-            return
-        job = read_json(job_root / "manifest.json")
-        course = next((c for c in cfgmod.load_courses() if c.id == job.get("course")), None)
-        if not course or not course.codes:
-            return
-        path = _outbox(conf)
-        write_json(path, [*((read_json(path) or []) if path.exists() else []),
-                          notes_event(job, job_root.name, kind, course)])
-        flush(conf)
+        report()
     except Exception as exc:  # noqa: BLE001
         print(f"hub: {type(exc).__name__}: {exc}", flush=True)

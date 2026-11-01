@@ -20,11 +20,14 @@ def linked(xdg, tmp_path, monkeypatch):
     return tmp_path
 
 
-def job_dir(root, media="Les 3 (2026-10-01).mp4", course="digitale-elektronica"):
-    folder = root / "jobs" / "2026-10-01_x"
-    folder.mkdir()
+def job_dir(root, media="Les 3 (2026-10-01).mp4", course="digitale-elektronica", name="2026-10-01_x", notes=False):
+    folder = root / "jobs" / name
+    (folder / "outputs").mkdir(parents=True)
     (folder / "manifest.json").write_text(json.dumps({
         "course": course, "title": "Les 3", "date": "2026-10-01", "input": {"media": f"/x/{media}"}}))
+    (folder / "outputs" / "transcript.md").write_text("x")
+    if notes:
+        (folder / "outputs" / "notes.md").write_text("x")
     return folder
 
 
@@ -66,42 +69,78 @@ def test_course_save_keeps_codes(linked):
     assert course.codes == ["H06F2a"]
 
 
-def test_notes_ready_is_sent_with_the_file_name(linked, monkeypatch):
-    with_code()
+def capture(monkeypatch):
     sent = []
     def post(url, json, headers, timeout):
         sent.append((url, json, headers))
         return httpx.Response(200, request=httpx.Request("POST", url))
     monkeypatch.setattr(httpx, "post", post)
-    hub.tell_notes_ready(job_dir(linked), "notes", cfg.load_config())
-    url, event, headers = sent[0]
+    return sent
+
+
+def test_finished_lectures_are_reported_once_with_the_file_name(linked, monkeypatch):
+    with_code()
+    sent = capture(monkeypatch)
+    job_dir(linked, notes=True)
+    assert hub.report() == 2
+    url, event, headers = sent[-1]
     assert url == "https://hub.example/api/events" and headers["Authorization"].startswith("Bearer ")
     assert event["type"] == "notes.ready" and event["payload"]["kind"] == "notes"
     assert event["payload"]["verbatimJob"] == "2026-10-01_x"
     assert event["payload"]["recording"] == {
         "courseCode": "H06F2a", "title": "Les 3", "recordedOn": "2026-10-01",
         "fileName": "Les 3 (2026-10-01).mp4", "lectureNumber": 3}
+    assert hub.report() == 0 and len(sent) == 2
 
 
-def test_undelivered_message_waits_and_goes_later(linked, monkeypatch):
+def test_notes_made_later_are_reported_too(linked, monkeypatch):
     with_code()
+    sent = capture(monkeypatch)
+    folder = job_dir(linked)
+    hub.report()
+    (folder / "outputs" / "notes.md").write_text("x")
+    assert hub.report() == 1 and sent[-1][1]["payload"]["kind"] == "notes"
+
+
+def test_a_guessed_date_is_not_passed_on(linked, monkeypatch):
+    with_code()
+    sent = capture(monkeypatch)
+    job_dir(linked, media="DEP Les11, part3 - 2024.mp4")
+    hub.report()
+    recording = sent[0][1]["payload"]["recording"]
+    assert "recordedOn" not in recording and recording["lectureNumber"] == 3
+
+
+def test_what_could_not_be_delivered_goes_out_later_with_the_same_id(linked, monkeypatch):
+    with_code()
+    job_dir(linked)
     def down(*args, **kwargs):
         raise httpx.ConnectError("no route")
     monkeypatch.setattr(httpx, "post", down)
-    conf = cfg.load_config()
-    hub.tell_notes_ready(job_dir(linked), "transcript", conf)
-    outbox = linked / "jobs" / "hub_outbox.json"
-    assert len(json.loads(outbox.read_text())) == 1
-    sent = []
-    monkeypatch.setattr(httpx, "post", lambda url, json, headers, timeout: (
-        sent.append(json), httpx.Response(200, request=httpx.Request("POST", url)))[1])
-    hub.flush(conf)
-    assert len(sent) == 1 and json.loads(outbox.read_text()) == []
+    assert hub.report() == 0
+    sent = capture(monkeypatch)
+    assert hub.report() == 1
+    assert sent[0][1]["id"] == hub.notes_event(json.loads((linked / "jobs/2026-10-01_x/manifest.json").read_text()),
+                                               "2026-10-01_x", "transcript", next(c for c in cfg.load_courses() if c.codes))["id"]
+
+
+def test_a_link_made_after_the_worker_started_is_seen(xdg, tmp_path, monkeypatch):
+    xdg.mkdir(parents=True)
+    (xdg / "config.yaml").write_text(f"paths:\n  jobs_dir: {tmp_path / 'jobs'}\n  inbox_dir: {tmp_path / 'in'}\n")
+    (tmp_path / "jobs").mkdir()
+    started_with = cfg.load_config()
+    assert started_with.hub.url == ""
+    with_code()
+    job_dir(tmp_path)
+    settings.set_hub_url("https://hub.example")
+    monkeypatch.setenv("LECTURE_HUB_CODE", "x" * 40)
+    sent = capture(monkeypatch)
+    hub.report_quietly()
+    assert len(sent) == 1
 
 
 def test_alone_nothing_happens(xdg, tmp_path, monkeypatch):
     xdg.mkdir(parents=True)
     (xdg / "config.yaml").write_text(f"paths:\n  jobs_dir: {tmp_path}\n  inbox_dir: {tmp_path}\n")
     monkeypatch.setattr(httpx, "post", lambda *a, **k: pytest.fail("no hub configured"))
-    hub.tell_notes_ready(tmp_path, "notes", cfg.load_config())
-    assert not (tmp_path / "hub_outbox.json").exists()
+    assert hub.report() == 0
