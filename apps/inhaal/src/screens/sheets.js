@@ -204,7 +204,7 @@ function openReview(cluster) {
   draw();
 }
 
-function openVanished(sessions) {
+export function openVanished(sessions) {
   const numbers = numbersNow();
   const sheet = openSheet(`<h2 class="title">${esc(t("vanishedTitle"))}</h2>
     <p class="sub">${esc(t("vanishedBody"))}</p>

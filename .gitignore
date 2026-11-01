@@ -11,3 +11,4 @@ test-results/
 playwright-report/
 CLAUDE.local.md
 PLAN.md
+*.sqlite*

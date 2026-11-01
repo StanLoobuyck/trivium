@@ -37,7 +37,7 @@ function sessionFromEvent(event, courseId, now) {
 export async function createSemester({ semester, courses, events }) {
   const now = new Date();
   await db.transaction("rw", db.semesters, db.courses, db.sessions, db.meta, async () => {
-    await db.semesters.toCollection().modify({ isActive: false });
+    await db.semesters.toCollection().modify({ isActive: false, updatedAt: now.toISOString() });
     const saved = stamp({ ...semester, isActive: true, roosterSource: "upload" }, now);
     await db.semesters.add(saved);
     const records = courses.map((c) => stamp({ ...c, semesterId: saved.id }, now));
@@ -163,12 +163,21 @@ export async function dumpAll() {
   return { semesters: await db.semesters.toArray(), courses: await db.courses.toArray(), sessions: await db.sessions.toArray() };
 }
 
+// Wissen en herstellen zijn zachte wijzigingen, zodat ze via de hub ook de andere toestellen bereiken.
+async function softDeleteAll(keep = new Set()) {
+  const time = nowIso();
+  await Promise.all([db.semesters, db.courses, db.sessions].map((table) =>
+    table.filter((r) => !r.deletedAt && !keep.has(r.id)).modify({ deletedAt: time, updatedAt: time })));
+}
+
 export async function restoreAll({ semesters, courses, sessions }) {
+  const time = nowIso();
+  const touch = (records) => records.map((r) => ({ ...r, updatedAt: time }));
   await db.transaction("rw", db.semesters, db.courses, db.sessions, async () => {
-    await Promise.all([db.semesters.clear(), db.courses.clear(), db.sessions.clear()]);
-    await db.semesters.bulkPut(semesters);
-    await db.courses.bulkPut(courses);
-    await db.sessions.bulkPut(sessions);
+    await softDeleteAll(new Set([...semesters, ...courses, ...sessions].map((r) => r.id)));
+    await db.semesters.bulkPut(touch(semesters));
+    await db.courses.bulkPut(touch(courses));
+    await db.sessions.bulkPut(touch(sessions));
   });
   await markBackup();
 }
@@ -184,6 +193,7 @@ export async function dismiss(key) {
 }
 
 export async function eraseAll() {
-  await Promise.all([db.semesters.clear(), db.courses.clear(), db.sessions.clear(), db.meta.clear()]);
+  await softDeleteAll();
+  await db.meta.bulkDelete(["firstUseAt", "lastBackupAt", "lastCourseId", "installDismissed", "weeksDismissed"]);
   await load();
 }

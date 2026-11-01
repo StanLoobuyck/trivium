@@ -1,12 +1,30 @@
 import { icon } from "@studie/design/icons.js";
 import { state } from "../db/store.js";
-import { langChoice, t, themeChoice } from "../i18n/index.js";
+import { sync } from "../sync/index.js";
+import { langChoice, t, themeChoice, timeOf } from "../i18n/index.js";
 import { esc } from "../ui/dom.js";
 
 const dateField = (key, label) => `<label class="row"><span class="row-main"><span>${esc(label)}</span></span>
   <input class="field field-compact" type="date" value="${esc(state.semester[key])}" data-semester="${key}"></label>`;
 
 const actionRow = (action, label, extra = "") => `<li><button class="row ${extra}" data-action="${action}"><span class="row-main"><span>${esc(label)}</span></span></button></li>`;
+
+export function syncStatusText() {
+  if (sync.status === "ok") return t("syncOk", { time: timeOf(sync.lastAt) });
+  if (sync.status === "offline") return t("syncOffline", { n: sync.pending });
+  if (sync.status === "badCode") return t("syncBadCode");
+  return t("syncNotConnected");
+}
+
+const syncSection = () => (sync.available ? `<section>
+      <h2 class="group-title">${esc(t("sync"))}</h2>
+      <div class="card flow-tight">
+        <p class="sub" id="sync-status" aria-live="polite">${esc(syncStatusText())}</p>
+        ${sync.status === "ok" ? "" : `<label class="group-label" for="sync-code">${esc(t("syncCode"))}</label>
+        <input class="field" id="sync-code" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="btn btn-primary btn-block" data-action="sync-connect">${esc(t("syncConnect"))}</button>`}
+      </div>
+    </section>` : "");
 
 export function renderSettings(root) {
   const semester = state.semester;
@@ -15,6 +33,7 @@ export function renderSettings(root) {
   root.innerHTML = `<main class="page">
     <h1 class="large-title">${esc(t("settings"))}</h1>
     <div class="settings-grid">
+    ${syncSection()}
     ${semester ? `<section>
       <h2 class="group-title">${esc(semester.name)}</h2>
       <div class="list">${dateField("startDate", t("semesterStart"))}${dateField("endDate", t("semesterEnd"))}${dateField("examStart", t("examStart"))}</div>

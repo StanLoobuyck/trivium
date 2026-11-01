@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - uses: astral-sh/setup-uv@v6
       - run: npm ci
       - run: npm test
       - run: npm run build
@@ -26,11 +27,18 @@ jobs:
         with:
           path: _site
 
+  hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --project apps/hub pytest apps/hub/tests -q
+
   # swiftskip (fase 3) en verbatim (fase 4) krijgen hier hun eigen job.
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: inhaal
+    needs: [inhaal, hub]
     runs-on: ubuntu-latest
     permissions:
       pages: write

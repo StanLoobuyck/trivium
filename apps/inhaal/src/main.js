@@ -9,7 +9,8 @@ import * as store from "./db/store.js";
 import { lang, setLang, setTheme, t } from "./i18n/index.js";
 import { renderCourse, courseView } from "./screens/course.js";
 import { renderOverview, view } from "./screens/overview.js";
-import { renderSettings } from "./screens/settings.js";
+import { renderSettings, syncStatusText } from "./screens/settings.js";
+import { connect, nudge, startSync } from "./sync/index.js";
 import * as sheets from "./screens/sheets.js";
 import { $, $$, download, esc } from "./ui/dom.js";
 import { initSheet, toast } from "./ui/feedback.js";
@@ -88,6 +89,7 @@ async function refresh({ flip = true } = {}) {
   const before = flip ? captureRects() : null;
   render();
   if (before) playFlip(before);
+  nudge();
 }
 
 sheets.setRefresh(refresh);
@@ -104,6 +106,7 @@ async function tick(id) {
   const undo = await store.setStatus([id], open ? "watched" : "upcoming");
   document.querySelectorAll(`.check[data-tick="${CSS.escape(id)}"]`).forEach((c) => c.setAttribute("aria-checked", open));
   navigator.vibrate?.(10);
+  nudge();
   clearTimeout(settle);
   settle = setTimeout(refresh, SETTLE_MS);
   if (!open) return;
@@ -134,6 +137,10 @@ function exportNotes() {
 }
 
 const actions = {
+  "sync-connect": async () => {
+    await connect($("#sync-code").value);
+    render();
+  },
   upload: sheets.uploadRooster,
   add: sheets.openAdd,
   notes: sheets.openNotes,
@@ -201,6 +208,20 @@ initGestures($("#view"), { onTick: tick, onOptions: sheets.openOptions });
 document.documentElement.lang = lang();
 await store.load();
 render();
+
+startSync({
+  onChange: () => { if (!$("#sheet-root").classList.contains("is-open")) refresh(); },
+  onRooster: ({ added, updated, vanished }) => {
+    refresh();
+    if (added || updated) toast(t("roosterChanged", { added, updated }));
+    if (vanished.length) sheets.openVanished(vanished);
+  },
+  onStatus: () => {
+    const status = $("#sync-status");
+    if (status) status.textContent = syncStatusText();
+    if (route().page === "instellingen" && !status) render();
+  },
+});
 
 const updateSW = registerSW({
   onNeedRefresh() {

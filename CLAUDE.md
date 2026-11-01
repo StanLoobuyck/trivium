@@ -56,7 +56,7 @@ Elke app blijft los te bouwen, testen en releasen; het enige wat ze delen is `pa
 | Tests | Vitest (domain, design) + Playwright (iPhone-viewport, WebKit) |
 | Hosting | GitHub Pages (statisch); geen server voor anderen |
 | Hub (fase 2) | Python 3.12 + FastAPI + SQLite met uv, als LaunchDaemon op de Mac, deploy met rsync |
-| Toegang (fase 2) | Cloudflare Tunnel + Access; laptop ↔ Mac via Tailscale |
+| Toegang (fase 2) | Tailscale Funnel (gratis `*.ts.net`) met koppelcode per toestel; geen eigen domein, niets extra op de iPhone |
 
 **Regel:** alle rekenlogica van Inhaal zit in `domain/` als pure, geteste functies zonder UI (herbruikbaar
 voor een latere iOS-app). Afgeleide waarden (aantallen, `number`, tempo) worden altijd berekend, nooit

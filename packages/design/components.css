@@ -501,6 +501,8 @@ button.row:active, a.row:active { background: var(--fill); }
 .flow > * + * { margin-top: var(--space-5); }
 .flow > .segmented + .list, .flow > .stack-tight + .list, .flow > .stack-tight + .empty { margin-top: var(--space-3); }
 .page > .list:not(:first-child) { margin-top: var(--space-3); }
+.flow-tight > * + * { margin-top: var(--space-2); }
+.flow-tight .group-label { display: block; padding-bottom: 0; }
 .settings-grid > section + section { margin-top: var(--space-6); }
 .overview-main, .detail-main { margin-top: var(--space-5); }
 @media (min-width: 1100px) {

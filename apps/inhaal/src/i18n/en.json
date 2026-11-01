@@ -130,5 +130,13 @@
   "themeLight": "Light",
   "themeDark": "Dark",
   "hcShort": "Lec",
-  "ozShort": "Ex"
+  "ozShort": "Ex",
+  "sync": "Sync",
+  "syncOk": "Synced · {time}",
+  "syncOffline": "Mac unreachable · {n} changes waiting",
+  "syncBadCode": "This pairing code is wrong",
+  "syncNotConnected": "Not connected yet",
+  "syncCode": "Pairing code",
+  "syncConnect": "Connect",
+  "roosterChanged": "Timetable updated: {added} new, {updated} changed"
 }
