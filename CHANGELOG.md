@@ -2,13 +2,15 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 1 af. Fase 2 bezig: hub en sync gebouwd en getest op de laptop, nog niet op de Mac. Repo
-   `studie-ecosysteem`, MIT. `PLAN.md` blijft lokaal (geen back-up via GitHub).
-3. **Volgende:** hub draait op de Mac als LaunchDaemon, Funnel staat aan. Lijst verhuizen, dan inhaalplan, grafiek,
-   sneltoetsen. Reboot-test van Funnel nog open (Tailscale draait als gewone app op de Mac).
-   Toegang: Funnel + koppelcode, geen eigen domein (eigenaar wil het Chiro-domein niet en wil niet betalen).
+2. **Nu:** fase 2 gebouwd: hub als LaunchDaemon op de Mac, Funnel aan, sync getest door de eigenaar, inhaalplan,
+   grafiek, sneltoetsen. Wacht op de laatste test. Repo `studie-ecosysteem`, MIT. `PLAN.md` blijft lokaal.
+3. **Volgende:** fase 3 (SwiftSkip). Reboot-test van hub en Funnel als de eigenaar thuis is.
 4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
    vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
+
+## 2026-11-01 — inhaalplan, grafiek, sneltoetsen
+- Inhaalplan met afspeelsnelheid (1×, 1,5×, 2×; bewaard op het semester), staafjes met open sessies per lesweek.
+- Sneltoetsen J/K, X/spatie, N, 1-9, Z. `/` en ⌘K nog niet: er is nog geen zoekfunctie of commandopalet.
 
 ## 2026-11-01 — afvinken is direct
 - Scherm en geheugen veranderen meteen, opslaan gebeurt erachter; geen wachttijd en geen animatie meer bij afvinken.

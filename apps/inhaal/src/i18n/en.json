@@ -138,5 +138,14 @@
   "syncNotConnected": "Not connected yet",
   "syncCode": "Pairing code",
   "syncConnect": "Connect",
-  "roosterChanged": "Timetable updated: {added} new, {updated} changed"
+  "roosterChanged": "Timetable updated: {added} new, {updated} changed",
+  "planTitle": "Catch-up plan",
+  "planLine": "{time} left at your speed, {weeks} weeks until exams: ± {week} per week.",
+  "planExams": "{time} left at your speed. Exams have started.",
+  "planSpeed": "Playback speed",
+  "decimal": ".",
+  "chartTitle": "Open sessions per teaching week",
+  "chartWeek": "Week of {week}: {n} open",
+  "shortcuts": "Keyboard shortcuts",
+  "shortcutsBody": "J and K: move · X or space: tick off · N: add · 1 to 9: pick a course · Z: undo"
 }

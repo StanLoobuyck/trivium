@@ -16,6 +16,7 @@ import { $, $$, download, esc } from "./ui/dom.js";
 import { initSheet, toast } from "./ui/feedback.js";
 import { captureRects, playFlip, playHero } from "./ui/flip.js";
 import { clickIgnored, initGestures } from "./ui/gestures.js";
+import { initShortcuts } from "./ui/shortcuts.js";
 import { numbersNow, sessionLabel } from "./ui/rows.js";
 
 const { state } = store;
@@ -163,9 +164,9 @@ document.addEventListener("click", (e) => {
     e.preventDefault();
     return;
   }
-  const target = e.target.closest("[data-action],[data-tick],[data-pick],[data-options],[data-view],[data-filter],[data-edit-course],[data-lang],[data-theme-choice]");
+  const target = e.target.closest("[data-action],[data-tick],[data-pick],[data-options],[data-view],[data-filter],[data-edit-course],[data-lang],[data-theme-choice],[data-speed]");
   if (!target || target.closest("#sheet")) return;
-  const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice, themeChoice } = target.dataset;
+  const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice, themeChoice, speed } = target.dataset;
   if (action) actions[action]();
   else if (tickId) tick(tickId);
   else if (pick) {
@@ -180,6 +181,7 @@ document.addEventListener("click", (e) => {
   else if (editCourse) sheets.openCourse(editCourse);
   else if (choice) { setLang(choice); render(); }
   else if (themeChoice) { setTheme(themeChoice); render(); }
+  else if (speed) store.updateSemester({ playbackSpeed: +speed }).then(() => refresh({ flip: false, quiet: true }));
 });
 
 document.addEventListener("change", async (e) => {
@@ -201,6 +203,13 @@ window.addEventListener("hashchange", () => {
 document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
 
 initSheet();
+initShortcuts({
+  onAdd: sheets.openAdd,
+  onCourse: (index) => {
+    const course = summarize(state.courses, state.sessions, new Date()).perCourse[index]?.course;
+    if (course) location.hash = `#/vak/${course.id}`;
+  },
+});
 initGestures($("#view"), { onTick: tick, onOptions: sheets.openOptions });
 document.documentElement.lang = lang();
 await store.load();

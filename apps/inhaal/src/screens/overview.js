@@ -1,8 +1,9 @@
 import { icon } from "@studie/design/icons.js";
+import { backlogByWeek, catchUpPlan } from "../domain/plan.js";
 import { missingWeeks } from "../domain/rooster.js";
-import { needsBackupReminder, summarize } from "../domain/sessions.js";
+import { needsBackupReminder, summarize, visibleSessions } from "../domain/sessions.js";
 import { courseById, state } from "../db/store.js";
-import { t } from "../i18n/index.js";
+import { chipDate, duration, t } from "../i18n/index.js";
 import { esc } from "../ui/dom.js";
 import { numbersNow, sessionLabel, sessionRow } from "../ui/rows.js";
 
@@ -58,6 +59,37 @@ function nextCard(summary) {
   </section>`;
 }
 
+function planCard(summary, now) {
+  const speed = state.semester.playbackSpeed ?? 1;
+  const plan = catchUpPlan({ minutes: summary.minutes, examStart: state.semester.examStart, speed, now });
+  const line = plan.perWeekMinutes === null ? t("planExams", { time: duration(plan.watchMinutes) })
+    : t("planLine", { time: duration(plan.watchMinutes), weeks: plan.weeks, week: duration(plan.perWeekMinutes) });
+  return `<section class="card flow-tight">
+    <h2 class="label">${esc(t("planTitle"))}</h2>
+    <p>${esc(line)}</p>
+    <div class="segmented" role="group" aria-label="${esc(t("planSpeed"))}">${[1, 1.5, 2].map((value) =>
+      `<button aria-pressed="${speed === value}" data-speed="${value}">${esc(String(value).replace(".", t("decimal")))}×</button>`).join("")}</div>
+  </section>`;
+}
+
+// Eén reeks, dus geen legende: de titel benoemt ze. Enkel de piek krijgt een getal; elke balk heeft zijn waarde in de tooltip.
+function backlogChart(now) {
+  const weeks = backlogByWeek(visibleSessions(state.courses, state.sessions), state.semester.startDate, now);
+  if (!weeks.length) return "";
+  const peak = Math.max(...weeks.map((w) => w.open));
+  const peakIndex = weeks.findIndex((w) => w.open === peak);
+  const describe = (w) => t("chartWeek", { week: chipDate(w.start), n: w.open });
+  return `<section class="card flow-tight">
+    <h2 class="label">${esc(t("chartTitle"))}</h2>
+    <ul class="bars" aria-label="${esc(t("chartTitle"))}">${weeks.map((w, i) => `<li class="bar-slot" title="${esc(describe(w))}">
+      ${i === peakIndex && peak ? `<span class="bar-value" aria-hidden="true">${peak}</span>` : ""}
+      <span class="bar" style="--value: ${peak ? w.open / peak : 0}"></span>
+      <span class="sr-only">${esc(describe(w))}</span>
+    </li>`).join("")}</ul>
+    <div class="bars-axis micro" aria-hidden="true"><span>${esc(chipDate(weeks[0].start))}</span><span>${esc(chipDate(weeks.at(-1).start))}</span></div>
+  </section>`;
+}
+
 function segmented(name, options, value) {
   return `<div class="segmented" role="group" aria-label="${esc(name)}">${options.map(([key, label]) =>
     `<button aria-pressed="${key === value}" data-view="${esc(name)}:${key}">${esc(label)}</button>`).join("")}</div>`;
@@ -105,6 +137,7 @@ export function renderOverview(root, now) {
         <section class="stack-tight">${mode}${filter}</section>
         ${view.mode === "course" ? courseList(summary) : chronological(summary, now)}
       </div>
+      <div class="overview-extra flow">${planCard(summary, now)}${backlogChart(now)}</div>
     </div>
   </main>`;
 }

@@ -71,6 +71,10 @@ export function renderSettings(root) {
           `<button aria-pressed="${themeChoice() === key}" data-theme-choice="${key}">${esc(label)}</button>`).join("")}
       </div>
     </section>
+    <section class="only-wide">
+      <h2 class="group-title">${esc(t("shortcuts"))}</h2>
+      <p class="sub">${esc(t("shortcutsBody"))}</p>
+    </section>
     <section>
       <h2 class="group-title">${esc(t("language"))}</h2>
       <div class="segmented" role="group" aria-label="${esc(t("language"))}">

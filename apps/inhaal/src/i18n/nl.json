@@ -138,5 +138,14 @@
   "syncNotConnected": "Nog niet gekoppeld",
   "syncCode": "Koppelcode",
   "syncConnect": "Koppelen",
-  "roosterChanged": "Rooster bijgewerkt: {added} nieuw, {updated} gewijzigd"
+  "roosterChanged": "Rooster bijgewerkt: {added} nieuw, {updated} gewijzigd",
+  "planTitle": "Inhaalplan",
+  "planLine": "Nog {time} aan je snelheid, {weeks} weken tot de examens: ± {week} per week.",
+  "planExams": "Nog {time} aan je snelheid. De examens zijn begonnen.",
+  "planSpeed": "Afspeelsnelheid",
+  "decimal": ",",
+  "chartTitle": "Open sessies per lesweek",
+  "chartWeek": "Week van {week}: {n} open",
+  "shortcuts": "Sneltoetsen",
+  "shortcutsBody": "J en K: bewegen · X of spatie: afvinken · N: toevoegen · 1 tot 9: vak kiezen · Z: ongedaan maken"
 }

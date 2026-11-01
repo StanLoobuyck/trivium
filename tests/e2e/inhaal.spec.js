@@ -142,6 +142,35 @@ test("razendsnel tikken vinkt elke tik een andere les af en telt juist", async (
   await expect(page.getByText("Afgewerkt (5)")).toBeVisible();
 });
 
+test("inhaalplan rekent met de afspeelsnelheid en de grafiek toont de weken", async ({ page }) => {
+  await start(page);
+  await expect(page.locator("#view")).toContainText("weken tot de examens");
+  const before = await page.getByText("per week").innerText();
+  await page.getByRole("button", { name: "2×" }).click();
+  await expect(page.getByRole("button", { name: "2×" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("per week")).not.toHaveText(before);
+  await expect(page.locator(".bar-slot").first()).toHaveAttribute("title", /Week van/);
+  expect(await page.locator(".bar-slot").count()).toBeGreaterThan(5);
+});
+
+test("sneltoetsen: vak kiezen, bewegen, afvinken, ongedaan maken", async ({ page }, info) => {
+  test.skip(info.project.name === "iphone-chromium", "alleen op de laptop");
+  await start(page);
+  await page.keyboard.press("3");
+  await expect(page.locator("h1")).toContainText("Digitale signaalverwerking");
+  await page.getByRole("checkbox").first().waitFor();
+  await page.keyboard.press("j");
+  await page.keyboard.press("j");
+  await page.keyboard.press("x");
+  await expect(page.getByText("Afgewerkt (1)")).toBeVisible();
+  await page.keyboard.press("x");
+  await expect(page.getByText("Afgewerkt (2)")).toBeVisible();
+  await page.keyboard.press("z");
+  await expect(page.getByText(/Afgewerkt/)).toHaveCount(0);
+  await page.keyboard.press("n");
+  await expect(page.getByRole("dialog")).toBeVisible();
+});
+
 test("de menubalk wordt breder als de + verdwijnt", async ({ page }, info) => {
   test.skip(info.project.name !== "iphone-chromium", "alleen op iPhone-formaat");
   await start(page);

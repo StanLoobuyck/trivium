@@ -504,13 +504,15 @@ button.row:active, a.row:active { background: var(--fill); }
 .flow-tight > * + * { margin-top: var(--space-2); }
 .flow-tight .group-label { display: block; padding-bottom: 0; }
 .settings-grid > section + section { margin-top: var(--space-6); }
-.overview-main, .detail-main { margin-top: var(--space-5); }
+.overview-main, .detail-main, .overview-extra { margin-top: var(--space-5); }
 @media (min-width: 1100px) {
-  .overview-main, .detail-main { margin-top: 0; }
+  .overview-main, .detail-main, .overview-extra { margin-top: 0; }
+  .overview-extra { grid-column: 2; grid-row: 2; }
   .overview, .detail { display: grid; gap: var(--space-8); align-items: start; }
   .overview { grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); }
-  .overview-side { grid-column: 2; grid-row: 1; position: sticky; top: 0; }
-  .overview-main { grid-column: 1; grid-row: 1; }
+  .overview { grid-template-rows: auto 1fr; row-gap: var(--space-5); }
+  .overview-side { grid-column: 2; grid-row: 1; }
+  .overview-main { grid-column: 1; grid-row: 1 / span 2; }
   .overview-side .hero { padding: var(--space-5); border-radius: var(--radius-card); background: var(--card); box-shadow: var(--shadow-card); }
   .detail { grid-template-columns: 320px minmax(0, 1fr); }
   .detail-side { position: sticky; top: 0; }
@@ -600,6 +602,16 @@ textarea.field { resize: vertical; }
   .fab[hidden] { display: none; }
 }
 .fab[hidden] { display: none; }
+
+/* ---- Staafjes per lesweek ---- */
+.bars { display: flex; align-items: flex-end; gap: 2px; height: 96px; margin: 0; padding: var(--space-4) 0 0; list-style: none; border-bottom: var(--hairline) solid var(--separator); }
+.bar-slot { position: relative; flex: 1; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
+.bar { display: block; width: 100%; height: calc(var(--value) * 100%); border-radius: var(--space-1) var(--space-1) 0 0; background: var(--accent); }
+.bar-value { position: absolute; left: 50%; top: calc(var(--space-4) * -1); transform: translateX(-50%); font-size: var(--text-label); color: var(--text-2); }
+.bars-axis { display: flex; justify-content: space-between; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.only-wide { display: none; }
+@media (min-width: 900px) { .only-wide { display: block; } }
 
 /* ---- Kleine animaties ---- */
 @keyframes page-in { from { opacity: 0; transform: translateY(var(--space-1)); } }
