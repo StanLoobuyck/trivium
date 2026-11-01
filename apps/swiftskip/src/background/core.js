@@ -283,6 +283,11 @@ export function startBackground({ runDownload, cancelDownload, extraHandlers = {
       return { ok: true };
     },
 
+    async openSettings() {
+      await ext.runtime.openOptionsPage();
+      return { ok: true };
+    },
+
     async inhaalDelivered(msg) {
       await forgetDelivered(msg.ids);
       return { ok: true };

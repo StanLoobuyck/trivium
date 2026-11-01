@@ -1,18 +1,61 @@
 body {
-  background: var(--surface);
-  font-size: 14px;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #141417;
-  }
+  background: var(--bg);
+  font-size: 15px;
 }
 
 .page {
   max-width: 680px;
   margin: 0 auto;
-  padding: 40px 20px 64px;
+  padding: 32px 16px 64px;
+}
+
+.section-nav {
+  display: none;
+}
+
+/* Wide: a fixed list of sections beside the settings, like Inhaal's sidebar. */
+@media (min-width: 900px) {
+  .page {
+    max-width: 960px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: start;
+  }
+
+  .page-header {
+    grid-column: 1 / -1;
+  }
+
+  .section-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 16px;
+    grid-row: 2 / span 6;
+    padding: 8px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+  }
+
+  .section-nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: var(--radius);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .section-nav a:hover {
+    background: var(--bg);
+  }
+
+  .page > .card {
+    grid-column: 2;
+  }
 }
 
 .page-header {
@@ -24,15 +67,14 @@ body {
 
 h1 {
   margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 34px;
+  font-weight: 600;
 }
 
 h2 {
-  margin: 0 0 6px;
-  font-size: 15px;
-  font-weight: 650;
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
 }
 
 h3 {
@@ -61,9 +103,8 @@ a:hover {
 .card {
   margin-bottom: 16px;
   padding: 20px 22px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 

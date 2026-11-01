@@ -2,11 +2,19 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 4 is af. Verbatim meldt alle lessen aan de hub, ook oude; 8 van de 8 vonden hun les. Fase 5 is begonnen met
-   vergelijkbare ontwerpen in Claude Design.
-3. **Volgende:** de eigenaar kiest een richting per app; daarna bouwen. Ideeën: slides koppelen, LaTeX-skill in Verbatim.
-4. **Wacht op de eigenaar:** keuze uit de ontwerpen.
+2. **Nu:** fase 5 is gebouwd: Verbatim en SwiftSkip gebruiken stijl A, keuze van de eigenaar op de ontwerpcanvas.
+3. **Volgende:** de eigenaar test de look. Daarna fase 6 of de slides-stroom. Later: LaTeX-skill in Verbatim, nadat de eigenaar de
+   skill heeft verfijnd en alleen als de kwaliteit van de notities niet daalt.
+4. **Wacht op de eigenaar:** oordeel over de look, overkoepelende naam, en een eigen naam voor Inhaal.
 5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — fase 5: één look
+- Keuze: richting A (blauw zoals Inhaal), met het modellenblok uit C en het app-icoon uit B. Canvas: privé, in de sessie gelinkt.
+- Verbatim: tokens en lettertype volgen stijl A (Inter i.p.v. Geist), zwevende zijbalk, vakkenlijst scrolt, modellen blijven zichtbaar.
+- Inhaal: icoon linksboven in de zijbalk. Op de gsm is er geen zijbalk, dus daar staat het niet.
+- SwiftSkip 4.3.0: stijl A in menu, instellingen en overlay. Instellingen via een knop bovenaan het menu en in het `?`-venster op
+  de speler. Instellingenpagina gegroepeerd, met sectielijst vanaf 900 px en Koppelingen als eigen groep.
+- Bekeken op schermafbeeldingen in licht en donker; niet in Safari.
 
 ## 2026-11-01 — Verbatim meldt alle lessen, dubbel semester weg
 - Eigenaarstest: geen enkele badge in Inhaal. De worker bewaarde de instellingen van bij het opstarten, dus de koppeling

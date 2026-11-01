@@ -13,6 +13,19 @@
           <img src="icons/icon48.png" alt="" width="18" height="18" />
           <span>SwiftSkip</span>
         </div>
+        <button
+          class="icon-btn bar-settings"
+          id="open-settings"
+          type="button"
+          data-i18n-title="settings"
+          data-i18n-aria-label="settings"
+        >
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+            <circle cx="16" cy="7" r="2" />
+            <circle cx="8" cy="17" r="2" />
+          </svg>
+        </button>
         <label class="switch" data-i18n-title="popupToggleTitle">
           <input type="checkbox" id="enabled" role="switch" data-i18n-aria-label="swiftskipOn" />
           <span class="switch-track"><span class="switch-thumb"></span></span>
@@ -119,15 +132,6 @@
             <path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10" />
           </svg>
           <span data-i18n="shortcuts"></span>
-        </button>
-        <button class="footer-link" id="open-settings" type="button">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
-            />
-          </svg>
-          <span data-i18n="settings"></span>
         </button>
       </footer>
     </main>

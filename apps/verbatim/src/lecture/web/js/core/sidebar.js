@@ -76,10 +76,12 @@ function drawStatus() {
   const s = S.setup;
   if (!s) return;
   const sttOk = s.stt.active_ok, fallback = s.stt.fallback;  // fallback: the first choice doesn't answer
-  const html = `
-    <a href="#/setup" title="${esc(t("side_stt"))}"><span class="dot ${!sttOk ? "bad" : fallback ? "wait" : ""}"></span>${esc(s.stt.active)}</a>
-    <a href="#/setup" title="${esc(t("side_notes"))}"><span class="dot ${s.notes_paused ? "wait" : s.notes.ok ? "" : "bad"}"></span>${esc(s.notes.label)}${s.notes_paused ? ` · ${t("notes_paused")}` : ""}</a>
-    ${s.termfix?.enabled ? `<a href="#/setup" title="${esc(t("side_suggest"))}${s.termfix.ok ? "" : ": " + esc(s.termfix.detail)}"><span class="dot ${s.termfix.ok ? "" : "bad"}"></span>${esc(s.termfix.model)}</a>` : ""}
-    ${s.worker ? "" : `<a href="#/setup"><span class="dot bad"></span>${t("worker_off")}</a>`}`;
+  const row = (label, state, tone, title = label) =>
+    `<a href="#/setup" title="${esc(title)}"><span>${esc(label)}</span><span class="state ${tone}">${esc(state)}</span></a>`;
+  const html = `<div class="side-label">${t("side_models")}</div>
+    ${row(t("side_stt"), s.stt.active, !sttOk ? "bad" : fallback ? "wait" : "ok")}
+    ${row(t("side_notes"), s.notes.label, s.notes_paused ? "wait" : s.notes.ok ? "ok" : "bad")}
+    ${s.termfix?.enabled ? row(t("side_terms"), t(s.termfix.ok ? "side_ready" : "side_unreachable"), s.termfix.ok ? "ok" : "bad", s.termfix.ok ? t("side_suggest") : s.termfix.detail) : ""}
+    ${s.worker ? "" : row(t("side_worker"), t("worker_off"), "bad")}`;
   paint($("#side-status"), html);
 }

@@ -7,8 +7,8 @@
    carries the border and shadow. */
 
 :where(#swiftskip-osd, #swiftskip-download, .swiftskip-sheet, .swiftskip-toast) {
-  --ss-bg: rgba(24, 24, 28, 0.82);
-  --ss-bg-hover: rgba(40, 40, 46, 0.88);
+  --ss-bg: rgba(28, 28, 30, 0.8);
+  --ss-bg-hover: rgba(44, 44, 46, 0.88);
   --ss-border: rgba(255, 255, 255, 0.12);
   --ss-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
   --ss-shadow: 0 10px 30px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -16,9 +16,9 @@
   --ss-muted: rgba(255, 255, 255, 0.66);
   --ss-faint: rgba(255, 255, 255, 0.4);
   --ss-track: rgba(255, 255, 255, 0.18);
-  --ss-accent: #6ea8ff;
-  --ss-success: #6fdc8c;
-  --ss-danger: #ff8a80;
+  --ss-accent: #409cff;
+  --ss-success: #5dbb85;
+  --ss-danger: #f0786d;
   --ss-font:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
 
@@ -409,7 +409,7 @@
 
 .swiftskip-sheet {
   --ss-radius: 18px;
-  --ss-bg: rgba(24, 24, 28, 0.9);
+  --ss-bg: rgba(28, 28, 30, 0.92);
   position: fixed;
   top: 50%;
   left: 50%;
@@ -434,6 +434,29 @@
 .swiftskip-sheet-title {
   font-size: 15px;
   font-weight: 650;
+}
+
+.swiftskip-sheet-header-end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.swiftskip-sheet-settings {
+  all: unset;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--ss-accent);
+  font: 500 13px/1.2 var(--ss-font);
+  cursor: pointer;
+}
+
+.swiftskip-sheet-settings:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.swiftskip-sheet-settings:focus-visible {
+  outline: 2px solid var(--ss-accent);
 }
 
 .swiftskip-sheet-close {

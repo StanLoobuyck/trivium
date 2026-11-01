@@ -3,6 +3,13 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.3.0
+
+**Changed**
+- A calmer new look, the same as Inhaal: popup, settings page and the overlays on the player
+- Settings are one click away: a button at the top of the menu, and in the shortcut overview (`?`) on the player
+- The settings page is grouped, with a list of sections on wide screens
+
 ## 4.2.0
 
 **New**

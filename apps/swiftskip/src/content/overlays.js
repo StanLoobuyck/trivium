@@ -46,7 +46,14 @@ export function openShortcutSheet({ parent, place, shortcuts, skipSeconds }) {
   close.type = "button";
   close.setAttribute("aria-label", t("close"));
   close.addEventListener("click", closeShortcutSheet);
-  header.append(close);
+  const settings = el("button", "swiftskip-sheet-settings", t("settings"));
+  settings.type = "button";
+  settings.addEventListener("click", () => {
+    chrome.runtime.sendMessage({ action: "openSettings" }, () => void chrome.runtime.lastError);
+  });
+  const end = el("div", "swiftskip-sheet-header-end");
+  end.append(settings, close);
+  header.append(end);
   sheetEl.append(header);
 
   const grid = el("div", "swiftskip-sheet-grid");

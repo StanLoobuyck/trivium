@@ -4,26 +4,28 @@
 :root {
   color-scheme: light dark;
 
-  --bg: #ffffff;
-  --surface: #f4f4f6;
-  --surface-hover: #ebebef;
-  --border: rgba(0, 0, 0, 0.08);
-  --text: #16161a;
-  --muted: #6c6c75;
-  --faint: #80808a; /* ≥ 3:1 on white: OK for icons/controls, not body text */
-  --accent: #1a73e8;
-  --accent-hover: #1765cc;
+  /* Style A: the values of packages/design/tokens.css. */
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface-hover: #e5e5ea;
+  --border: rgba(60, 60, 67, 0.12);
+  --text: #000000;
+  --muted: #5e5e63;
+  --faint: #7c7c82; /* ≥ 3:1 on white: OK for icons/controls, not body text */
+  --accent: #0066d6;
+  --accent-hover: #0058ba;
   --accent-text: #ffffff;
-  --accent-soft: rgba(26, 115, 232, 0.1);
-  --danger: #d93025;
-  --success: #188038;
-  --focus: rgba(26, 115, 232, 0.45);
-  --kbd-bg: #ffffff;
-  --kbd-border: rgba(0, 0, 0, 0.14);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --accent-soft: #e5effb;
+  --danger: #b42318;
+  --success: #1b7a36;
+  --focus: rgba(0, 102, 214, 0.45);
+  --kbd-bg: #f2f2f7;
+  --kbd-border: rgba(60, 60, 67, 0.2);
+  --shadow: none;
 
   --radius: 10px;
-  --radius-sm: 7px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
   --font:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Text", Inter, Roboto, "Helvetica Neue", Arial,
     sans-serif;
@@ -31,22 +33,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1b1b1f;
-    --surface: #26262b;
-    --surface-hover: #2f2f35;
-    --border: rgba(255, 255, 255, 0.08);
-    --text: #ececf1;
-    --muted: #a0a0aa;
-    --faint: #6e6e78;
-    --accent: #5b9dff;
-    --accent-hover: #74acff;
-    --accent-text: #0b1526;
-    --accent-soft: rgba(91, 157, 255, 0.14);
-    --danger: #ff7b72;
-    --success: #5fd07a;
-    --focus: rgba(91, 157, 255, 0.5);
-    --kbd-bg: #2f2f35;
-    --kbd-border: rgba(255, 255, 255, 0.12);
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface-hover: #2c2c2e;
+    --border: rgba(235, 235, 245, 0.12);
+    --text: #ffffff;
+    --muted: #a5a5ac;
+    --faint: #8e8e93;
+    --accent: #409cff;
+    --accent-hover: #6fb5ff;
+    --accent-text: #00224d;
+    --accent-soft: #123355;
+    --danger: #f0786d;
+    --success: #5dbb85;
+    --focus: rgba(64, 156, 255, 0.5);
+    --kbd-bg: #2c2c2e;
+    --kbd-border: rgba(235, 235, 245, 0.2);
     --shadow: none;
   }
 }

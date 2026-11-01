@@ -18,7 +18,15 @@
         </div>
       </header>
 
-      <section class="card" aria-labelledby="general-title">
+      <nav class="section-nav" data-i18n-aria-label="settings">
+        <a href="#general" data-i18n="general"></a>
+        <a href="#shortcuts" data-i18n="keyboardShortcuts"></a>
+        <a href="#links" data-i18n="linksTitle"></a>
+        <a href="#sites" data-i18n="sites"></a>
+        <a href="#about" data-i18n="about"></a>
+      </nav>
+
+      <section class="card" id="general" aria-labelledby="general-title">
         <h2 id="general-title" data-i18n="general"></h2>
 
         <div class="setting">
@@ -100,8 +108,31 @@
         </div>
       </section>
 
-      <section class="card" aria-labelledby="verbatim-title">
-        <h2 id="verbatim-title">Verbatim</h2>
+      <section class="card" id="shortcuts" aria-labelledby="shortcuts-title">
+        <div class="card-head">
+          <h2 id="shortcuts-title" data-i18n="keyboardShortcuts"></h2>
+          <button
+            class="btn btn-secondary btn-small"
+            id="reset-shortcuts"
+            type="button"
+            data-i18n="resetDefaults"
+          ></button>
+        </div>
+        <p class="subtle card-intro" data-i18n="shortcutsIntro"></p>
+        <p class="notice" id="shortcut-notice" role="status" aria-live="polite" hidden></p>
+        <div id="shortcut-groups"></div>
+      </section>
+
+      <section class="card" id="links" aria-labelledby="links-title">
+        <h2 id="links-title" data-i18n="linksTitle"></h2>
+        <div id="inhaal">
+          <h3 id="inhaal-title">Inhaal</h3>
+          <p class="subtle card-intro" id="inhaal-text"></p>
+          <p class="notice" id="inhaal-notice" role="status" aria-live="polite" hidden></p>
+          <button class="btn btn-primary btn-small" id="inhaal-link" type="button" hidden></button>
+          <button class="btn btn-secondary btn-small" id="inhaal-unlink" type="button" hidden></button>
+        </div>
+        <h3>Verbatim</h3>
         <div class="setting">
           <div class="setting-text">
             <label class="setting-label" for="downloads-verbatim" data-i18n="downloadsToVerbatim"></label>
@@ -121,36 +152,13 @@
         </div>
       </section>
 
-      <section class="card" id="shortcuts" aria-labelledby="shortcuts-title">
-        <div class="card-head">
-          <h2 id="shortcuts-title" data-i18n="keyboardShortcuts"></h2>
-          <button
-            class="btn btn-secondary btn-small"
-            id="reset-shortcuts"
-            type="button"
-            data-i18n="resetDefaults"
-          ></button>
-        </div>
-        <p class="subtle card-intro" data-i18n="shortcutsIntro"></p>
-        <p class="notice" id="shortcut-notice" role="status" aria-live="polite" hidden></p>
-        <div id="shortcut-groups"></div>
-      </section>
-
       <section class="card" id="sites" aria-labelledby="sites-title">
         <h2 id="sites-title" data-i18n="sites"></h2>
         <p class="subtle card-intro" data-i18n="sitesIntro"></p>
         <ul class="site-list" id="site-list"></ul>
       </section>
 
-      <section class="card" id="inhaal" aria-labelledby="inhaal-title">
-        <h2 id="inhaal-title" data-i18n="inhaalTitle"></h2>
-        <p class="subtle card-intro" id="inhaal-text"></p>
-        <p class="notice" id="inhaal-notice" role="status" aria-live="polite" hidden></p>
-        <button class="btn btn-primary btn-small" id="inhaal-link" type="button" hidden></button>
-        <button class="btn btn-secondary btn-small" id="inhaal-unlink" type="button" hidden></button>
-      </section>
-
-      <section class="card about" aria-labelledby="about-title">
+      <section class="card about" id="about" aria-labelledby="about-title">
         <h2 id="about-title" data-i18n="about"></h2>
         <p class="subtle" data-i18n="aboutText"></p>
         <p class="links">
