@@ -13,8 +13,9 @@ blijft alleen bruikbaar; een bericht dat niet aankomt, breekt niets.
 - Sessie uit het rooster: `id` is de iCal-`UID`, bv. `1234567-7654321-0@timeedit.com`.
 - Manueel toegevoegde sessie: `id` is een UUID.
 - Het lesnummer is nooit een id: het wordt berekend en verschuift als een les geschrapt wordt.
-- **Nog te controleren in fase 1:** dat de `UID` gelijk blijft tussen twee exports. Het middelste getal is in
-  de huidige export overal hetzelfde en hoort misschien bij de export zelf.
+- De `UID` bleef gelijk tussen twee exports: alle 154 gedeelde sessies, geen enkele verplaatst. De export is wel een
+  schuivend venster: oude weken vallen eraf en nieuwe komen erbij. Een les die uit het bestand valt, is dus niet
+  geschrapt; alleen wat binnen de periode van het bestand ontbreekt, wordt als geschrapt voorgesteld.
 
 ## Opname koppelen aan een les
 Op volgorde: (1) vakcode + datum uit de Toledo-titel, (2) vakcode + lesnummer, (3) de gebruiker kiest, en Inhaal

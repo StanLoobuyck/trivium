@@ -2,11 +2,16 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md` (laadt vanzelf). Daarna `npm test`; `npm run build && npm run test:e2e` voor schermen.
-2. **Nu:** fase 2 gebouwd: hub als LaunchDaemon op de Mac, Funnel aan, sync getest door de eigenaar, inhaalplan,
-   grafiek, sneltoetsen. Wacht op de laatste test. Repo `studie-ecosysteem`, MIT. `PLAN.md` blijft lokaal.
-3. **Volgende:** fase 3 (SwiftSkip). Reboot-test van hub en Funnel als de eigenaar thuis is.
-4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
-   vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
+2. **Nu:** fase 2 gebouwd en live: hub als LaunchDaemon op de Mac, Funnel aan, sync door de eigenaar getest, inhaalplan,
+   grafiek, sneltoetsen. Niet getest door de eigenaar: tikken op balkjes op de iPhone.
+3. **Volgende:** fase 3 (SwiftSkip), te beginnen met de brugversie. Vraag eerst: het raakt echte gebruikers.
+4. **Wacht op de eigenaar:** echte examendatum invullen, reboot-test van hub en Funnel als hij thuis is.
+5. **Open:** Lighthouse niet gemeten, overkoepelende naam (fase 6).
+
+## 2026-11-01 — sessie-id's zijn stabiel
+- Nieuwe download vergeleken met de vorige: 154 gedeelde sessies, 0 gewijzigd, 0 lessen met een nieuwe id. Wel een
+  schuivend venster: 39 oude sessies vielen eraf, 40 uit april 2027 kwamen erbij. De hub heeft 0 dubbele lessen.
+- Een dag verschil, dus sterk bewijs maar geen garantie op lange termijn.
 
 ## 2026-11-01 — plan telt komende lessen mee
 - Het tempo per week rekent nu met open lessen plus lessen die nog komen tot de examens.
