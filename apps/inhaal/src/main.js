@@ -16,7 +16,7 @@ import { $, $$, download, esc } from "./ui/dom.js";
 import { initSheet, toast } from "./ui/feedback.js";
 import { captureRects, playFlip, playHero } from "./ui/flip.js";
 import { clickIgnored, initGestures } from "./ui/gestures.js";
-import { initShortcuts } from "./ui/shortcuts.js";
+import { initChart, initShortcuts } from "./ui/shortcuts.js";
 import { numbersNow, sessionLabel } from "./ui/rows.js";
 
 const { state } = store;
@@ -203,6 +203,7 @@ window.addEventListener("hashchange", () => {
 document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
 
 initSheet();
+initChart($("#view"));
 initShortcuts({
   onAdd: sheets.openAdd,
   onCourse: (index) => {

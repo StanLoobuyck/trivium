@@ -8,6 +8,10 @@
 4. **Open:** `UID`-stabiliteit over exports nog niet bewezen: over enkele dagen de roosterlink opnieuw downloaden en
    vergelijken (eerste getal = TimeEdit-id, goed teken). Lighthouse nog niet gedraaid. Overkoepelende naam (fase 6).
 
+## 2026-11-01 — plan telt komende lessen mee
+- Het tempo per week rekent nu met open lessen plus lessen die nog komen tot de examens.
+- Staafjes tonen de week bij hover, tik en slepen met de vinger.
+
 ## 2026-11-01 — inhaalplan, grafiek, sneltoetsen
 - Inhaalplan met afspeelsnelheid (1×, 1,5×, 2×; bewaard op het semester), staafjes met open sessies per lesweek.
 - Sneltoetsen J/K, X/spatie, N, 1-9, Z. `/` en ⌘K nog niet: er is nog geen zoekfunctie of commandopalet.

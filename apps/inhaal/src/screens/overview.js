@@ -1,5 +1,5 @@
 import { icon } from "@studie/design/icons.js";
-import { backlogByWeek, catchUpPlan } from "../domain/plan.js";
+import { backlogByWeek, catchUpPlan, comingWork } from "../domain/plan.js";
 import { missingWeeks } from "../domain/rooster.js";
 import { needsBackupReminder, summarize, visibleSessions } from "../domain/sessions.js";
 import { courseById, state } from "../db/store.js";
@@ -61,12 +61,14 @@ function nextCard(summary) {
 
 function planCard(summary, now) {
   const speed = state.semester.playbackSpeed ?? 1;
-  const plan = catchUpPlan({ minutes: summary.minutes, examStart: state.semester.examStart, speed, now });
+  const coming = comingWork(visibleSessions(state.courses, state.sessions), state.courses, state.semester.examStart, now);
+  const plan = catchUpPlan({ minutes: summary.minutes, comingMinutes: coming.minutes, examStart: state.semester.examStart, speed, now });
   const line = plan.perWeekMinutes === null ? t("planExams", { time: duration(plan.watchMinutes) })
     : t("planLine", { time: duration(plan.watchMinutes), weeks: plan.weeks, week: duration(plan.perWeekMinutes) });
   return `<section class="card flow-tight">
     <h2 class="label">${esc(t("planTitle"))}</h2>
     <p>${esc(line)}</p>
+    <p class="sub">${esc(t("planParts", { open: summary.open, coming: coming.count }))}</p>
     <div class="segmented" role="group" aria-label="${esc(t("planSpeed"))}">${[1, 1.5, 2].map((value) =>
       `<button aria-pressed="${speed === value}" data-speed="${value}">${esc(String(value).replace(".", t("decimal")))}×</button>`).join("")}</div>
   </section>`;
@@ -81,12 +83,13 @@ function backlogChart(now) {
   const describe = (w) => t("chartWeek", { week: chipDate(w.start), n: w.open });
   return `<section class="card flow-tight">
     <h2 class="label">${esc(t("chartTitle"))}</h2>
-    <ul class="bars" aria-label="${esc(t("chartTitle"))}">${weeks.map((w, i) => `<li class="bar-slot" title="${esc(describe(w))}">
+    <ul class="bars" aria-label="${esc(t("chartTitle"))}">${weeks.map((w, i) => `<li class="bar-slot" title="${esc(describe(w))}" data-tip="${esc(describe(w))}">
       ${i === peakIndex && peak ? `<span class="bar-value" aria-hidden="true">${peak}</span>` : ""}
       <span class="bar" style="--value: ${peak ? w.open / peak : 0}"></span>
       <span class="sr-only">${esc(describe(w))}</span>
     </li>`).join("")}</ul>
     <div class="bars-axis micro" aria-hidden="true"><span>${esc(chipDate(weeks[0].start))}</span><span>${esc(chipDate(weeks.at(-1).start))}</span></div>
+    <p class="sub bars-readout" id="bars-readout" aria-hidden="true">${esc(t("chartHint"))}</p>
   </section>`;
 }
 

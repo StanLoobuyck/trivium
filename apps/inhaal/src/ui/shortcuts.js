@@ -27,3 +27,16 @@ export function initShortcuts({ onAdd, onCourse }) {
     else if (/^[1-9]$/.test(key)) onCourse(+key - 1);
   });
 }
+
+// Staafjes: met de muis erover of je vinger erop (ook slepend) zie je welke week het is.
+export function initChart(root) {
+  const show = (x, y) => {
+    const slot = document.elementFromPoint(x, y)?.closest(".bar-slot");
+    if (!slot) return;
+    $$(".bar-slot.is-active", root).forEach((s) => s.classList.remove("is-active"));
+    slot.classList.add("is-active");
+    $("#bars-readout", root).textContent = slot.dataset.tip;
+  };
+  root.addEventListener("pointerdown", (e) => { if (e.target.closest(".bars")) show(e.clientX, e.clientY); });
+  root.addEventListener("pointermove", (e) => { if (e.target.closest(".bars")) show(e.clientX, e.clientY); });
+}

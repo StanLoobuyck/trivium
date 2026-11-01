@@ -1,12 +1,20 @@
 // Inhaalplan en achterstand per lesweek. Pure functies; niets hiervan wordt opgeslagen.
-import { isOpen } from "./sessions.js";
+import { effectiveStatus, isOpen, sessionMinutes } from "./sessions.js";
 
 const DAY = 86400000;
 
-export function catchUpPlan({ minutes, examStart, speed = 1, now }) {
+// Lessen die nog komen, tot de examens: ook die moet je nog zien of bijwonen.
+export function comingWork(sessions, courses, examStart, now) {
+  const exam = new Date(`${examStart}T00:00:00`);
+  const byId = new Map(courses.map((c) => [c.id, c]));
+  const coming = sessions.filter((s) => effectiveStatus(s, now) === "upcoming" && new Date(s.start) < exam);
+  return { count: coming.length, minutes: coming.reduce((sum, s) => sum + sessionMinutes(s, byId.get(s.courseId)), 0) };
+}
+
+export function catchUpPlan({ minutes, comingMinutes = 0, examStart, speed = 1, now }) {
   const exam = new Date(`${examStart}T00:00:00`);
   const days = Math.ceil((exam - now) / DAY);
-  const watchMinutes = minutes / speed;
+  const watchMinutes = (minutes + comingMinutes) / speed;
   if (days <= 0) return { watchMinutes, weeks: 0, perWeekMinutes: null };
   const weeks = Math.ceil(days / 7);
   return { watchMinutes, weeks, perWeekMinutes: watchMinutes / weeks };

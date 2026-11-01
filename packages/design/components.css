@@ -608,6 +608,10 @@ textarea.field { resize: vertical; }
 .bar-slot { position: relative; flex: 1; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
 .bar { display: block; width: 100%; height: calc(var(--value) * 100%); border-radius: var(--space-1) var(--space-1) 0 0; background: var(--accent); }
 .bar-value { position: absolute; left: 50%; top: calc(var(--space-4) * -1); transform: translateX(-50%); font-size: var(--text-label); color: var(--text-2); }
+.bars { touch-action: pan-y; cursor: pointer; }
+.bars:has(.is-active) .bar { opacity: 0.45; }
+.bar-slot.is-active .bar { opacity: 1; }
+.bars-readout { text-align: center; }
 .bars-axis { display: flex; justify-content: space-between; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .only-wide { display: none; }

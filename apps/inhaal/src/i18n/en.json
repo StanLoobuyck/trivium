@@ -147,5 +147,7 @@
   "chartTitle": "Open sessions per teaching week",
   "chartWeek": "Week of {week}: {n} open",
   "shortcuts": "Keyboard shortcuts",
-  "shortcutsBody": "J and K: move · X or space: tick off · N: add · 1 to 9: pick a course · Z: undo"
+  "shortcutsBody": "J and K: move · X or space: tick off · N: add · 1 to 9: pick a course · Z: undo",
+  "planParts": "{open} to catch up + {coming} lectures still to come",
+  "chartHint": "Tap a bar to see the week"
 }

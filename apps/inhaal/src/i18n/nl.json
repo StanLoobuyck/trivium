@@ -147,5 +147,7 @@
   "chartTitle": "Open sessies per lesweek",
   "chartWeek": "Week van {week}: {n} open",
   "shortcuts": "Sneltoetsen",
-  "shortcutsBody": "J en K: bewegen · X of spatie: afvinken · N: toevoegen · 1 tot 9: vak kiezen · Z: ongedaan maken"
+  "shortcutsBody": "J en K: bewegen · X of spatie: afvinken · N: toevoegen · 1 tot 9: vak kiezen · Z: ongedaan maken",
+  "planParts": "{open} in te halen + {coming} lessen die nog komen",
+  "chartHint": "Tik op een balkje om de week te zien"
 }

@@ -151,6 +151,11 @@ test("inhaalplan rekent met de afspeelsnelheid en de grafiek toont de weken", as
   await expect(page.getByText("per week")).not.toHaveText(before);
   await expect(page.locator(".bar-slot").first()).toHaveAttribute("title", /Week van/);
   expect(await page.locator(".bar-slot").count()).toBeGreaterThan(5);
+  await expect(page.locator("#view")).toContainText("lessen die nog komen");
+  await page.locator(".bar-slot").nth(4).dispatchEvent("pointerdown");
+  await page.locator(".bar-slot").last().click();
+  await expect(page.locator("#bars-readout")).toContainText("Week van");
+  await expect(page.locator(".bar-slot.is-active")).toHaveCount(1);
 });
 
 test("sneltoetsen: vak kiezen, bewegen, afvinken, ongedaan maken", async ({ page }, info) => {
