@@ -12,9 +12,13 @@ import { drawLibrary, setLibrarySel } from "./library.js";
 export async function renderDashboard(sel = "", focus = null) {
   setLibrarySel(sel);
   view.innerHTML = `
-    <section id="lib-head"></section>
-    <section id="jobs-wrap"></section>
-    <section id="lib-wrap"></section>`;
+    <h1 class="large-title" id="lib-title"></h1>
+    <nav class="chips narrow-only" id="lib-chips" aria-label="${t("nav_courses")}"></nav>
+    <div class="overview">
+      <div class="overview-side flow"><section id="lib-hero"></section><section id="jobs-wrap"></section></div>
+      <div class="overview-main flow"><section class="stack-tight" id="lib-tools"></section><section id="lib-wrap"></section></div>
+      <div class="overview-extra flow" id="lib-actions"></div>
+    </div>`;
   await refreshDashboard();
   if (focus === "progress") $("#jobs-wrap")?.scrollIntoView({ block: "start" });
   poll(refreshDashboard, 3000);

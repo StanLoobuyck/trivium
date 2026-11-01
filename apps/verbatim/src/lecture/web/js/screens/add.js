@@ -4,7 +4,7 @@ import { drawUpload } from "./upload.js";
 
 export function renderAdd() {
   view.innerHTML = `
-    <div><h1 class="large-title">${t("add_title")}</h1><p class="muted" style="margin-top:4px">${t("add_sub")}</p></div>
-    <section class="card upload fade-in" id="upload"></section>`;
+    <h1 class="large-title">${t("add_title")}</h1>
+    <section class="card upload page-enter" id="upload"></section>`;
   drawUpload();
 }

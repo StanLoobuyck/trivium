@@ -83,7 +83,7 @@ export async function renderSetup(refresh = false) {
       <section class="setup-section">
         <h2>${t("s_outputs")}</h2><p class="muted small">${t("s_outputs_sub")}</p>
         <div class="list">${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
-          <label class="row toggle-row"><span class="row-text"><b>${t("o_" + k)}</b><span class="label">${t("o_" + k + "_d")}</span></span>
+          <label class="row toggle-row"><span class="row-text"><b>${t("o_" + k)}</b><span class="sub">${t("o_" + k + "_d")}</span></span>
             <input type="checkbox" class="switch" data-out="${k}" ${s.outputs[k] ? "checked" : ""}></label>`).join("")}</div>
       </section>
 
@@ -192,7 +192,7 @@ function drawCourses() {
   box.innerHTML = S.courses.map((c) => editingCourse === c.id ? form(c) : `
     <div class="row course-row" data-course="${courseKey(c.id)}">
       <span class="dot"></span>
-      <span class="row-text"><b>${esc(c.name)}</b><span class="label">${c.language === "en" ? "English" : "Nederlands"}${c.lecturer ? ` · ${esc(c.lecturer)}` : ""}${c.extra_terms?.length ? ` · ${esc(c.extra_terms.join(", "))}` : ""}${Object.keys(c.corrections || {}).length ? ` · ${t("c_fixes_n", { n: Object.keys(c.corrections).length })}` : ""}</span></span>
+      <span class="row-text"><b>${esc(c.name)}</b><span class="sub">${c.language === "en" ? "English" : "Nederlands"}${c.lecturer ? ` · ${esc(c.lecturer)}` : ""}${c.extra_terms?.length ? ` · ${esc(c.extra_terms.join(", "))}` : ""}${Object.keys(c.corrections || {}).length ? ` · ${t("c_fixes_n", { n: Object.keys(c.corrections).length })}` : ""}</span></span>
       <button class="btn btn-small btn-plain" data-edit="${esc(c.id)}">${t("c_edit")}</button>
       <button class="icon-btn" data-del="${esc(c.id)}" title="${t("c_delete")}">${ICON.trash}</button>
     </div>`).join("") + (editingCourse === "new" ? form({}) : `<div class="row"><button class="btn btn-small" id="c-add">${t("c_add")}</button></div>`);

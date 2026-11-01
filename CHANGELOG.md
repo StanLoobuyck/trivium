@@ -3,11 +3,17 @@
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
 2. **Klaar:** fase 0 t/m 5 gebouwd. Verbatim en SwiftSkip laden `packages/design`; zelfde blauwe logofamilie; SwiftSkip-instellingen per sectie met thema-keuze.
-3. **Wacht op de eigenaar:** herstart van de hub (nodig voor vakkleuren), SwiftSkip beoordelen via `about:debugging`, daarna akkoord voor release 4.4.0.
+3. **Wacht op de eigenaar:** release 4.4.0 en daarna hernoemen van de repo naar `trivium` (in die volgorde), herstart van de hub (nodig voor vakkleuren), SwiftSkip beoordelen via `about:debugging`, daarna akkoord voor release 4.4.0.
    Keuzes: notitiemodel in Verbatim (nu Gemini), definitief adres voor fase 6.
 4. **Niet getest:** ronde hoeken van het echte Zen-venster, look op de echte Kaltura-speler, badges in de Inhaal-app zelf, Safari.
 5. **Volgende:** release 4.4.0, dan de slides-stroom (nog uit te werken), de LaTeX-skill als functie in Verbatim (wens van de eigenaar) en daarna fase 6.
 6. **Open:** menu's verder herwerken (eigenaar komt erop terug); Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
+
+## 2026-11-02 — Verbatim en Sequo als tweeling
+- Bibliotheek heeft nu dezelfde opbouw als het overzicht: titel, keuzeknoppen en lijst links, getalkaart rechts. Rijen, velden en groepstitels op dezelfde maten.
+- Gemeten op 1440 px: overzicht 234 van 252 waarden gelijk, instellingen 162 van 168, de zijbalk volledig. De rest komt door de inhoud (meldingen, rijen met drie regels).
+- Sequo: titel is nu Overzicht, en "Inhaalplan" hersteld (de hernoeming had er Sequoplan van gemaakt).
+- Repo blijft voorlopig `studie-ecosysteem`: het update-adres van Velox staat vast in elke installatie en Pages stuurt niet door. Eerst release 4.4.0 met het nieuwe adres.
 
 ## 2026-11-02 — vakkleuren, logo's en Swiftskip-instellingen
 - Namen (keuze eigenaar): het geheel heet Trivium, Inhaal wordt Sequo, SwiftSkip wordt Velox, in alles wat je ziet. Mappen, id's, opslag en adressen blijven `inhaal`/`swiftskip`. Logo A gekozen.

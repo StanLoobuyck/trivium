@@ -1,5 +1,5 @@
 {
-  "appTitle": "Inhalen",
+  "appTitle": "Overzicht",
   "overview": "Overzicht",
   "settings": "Instellingen",
   "courses": "Vakken",
@@ -139,7 +139,7 @@
   "syncCode": "Koppelcode",
   "syncConnect": "Koppelen",
   "roosterChanged": "Rooster bijgewerkt: {added} nieuw, {updated} gewijzigd",
-  "planTitle": "Sequoplan",
+  "planTitle": "Inhaalplan",
   "planLine": "Nog {time} aan je snelheid, {weeks} weken tot de examens: ± {week} per week.",
   "planExams": "Nog {time} aan je snelheid. De examens zijn begonnen.",
   "planSpeed": "Afspeelsnelheid",

@@ -11,7 +11,8 @@ import { setCourseArchived } from "../shared/actions.js";
 let moveMedia = true;
 
 export async function renderArchive() {
-  view.innerHTML = `<div><h1 class="large-title">${t("arch_title")}</h1><p class="muted" style="margin-top:4px">${t("arch_sub")}</p></div>
+  view.innerHTML = `<h1 class="large-title">${t("arch_title")}</h1>
+    <p class="card sub">${t("arch_sub")}</p>
     <section id="arch-progress"></section><section id="arch-body"></section>
     <p class="muted small">${t("arch_originals")}</p>`;
   await refresh();

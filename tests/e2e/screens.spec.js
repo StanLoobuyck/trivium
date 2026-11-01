@@ -75,7 +75,7 @@ for (const scheme of ["light", "dark"]) {
   });
 }
 
-for (const [locale, title] of [["nl-BE", "Inhalen"], ["en-GB", "Catch up"]]) {
+for (const [locale, title] of [["nl-BE", "Overzicht"], ["en-GB", "Overview"]]) {
   test.describe(locale, () => {
     test.use({ locale });
 

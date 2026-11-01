@@ -350,7 +350,7 @@ test("taal wisselen naar Engels", async ({ page }) => {
   await page.getByRole("button", { name: "English" }).click();
   await expect(page.locator("h1")).toHaveText("Settings");
   await page.goto("/inhaal/#/");
-  await expect(page.locator("h1")).toHaveText("Catch up");
+  await expect(page.locator("h1")).toHaveText("Overview");
 });
 
 test("data blijft beschikbaar zonder netwerk", async ({ page, context, browserName }) => {

@@ -37,43 +37,54 @@ export function drawLibrary() {
 }
 
 function drawHead() {
-  const head = $("#lib-head");
-  if (document.activeElement && head.contains(document.activeElement)) return;  // typing in the search box
   const name = selName();
   if (!name) { location.hash = "#/"; return; }  // folder was deleted
   const list = S.lectures.filter((l) => l.id && inSel(l));
   const total = list.reduce((a, l) => a + (l.duration_s || 0), 0);
+  const ready = list.filter((l) => l.has_notes).length;
   const kind = libSel.slice(0, 1);
-  if (!paint(head, `<div class="lib-head">
-      <div><h1 class="large-title" id="lib-title">${esc(name)}</h1>
-        <p class="muted">${list.length === 1 ? t("lib_summary_1", { dur: fmtLong(total) }) : t("lib_summary", { n: list.length, dur: fmtLong(total) })}</p></div>
-      <div class="lib-tools">
-        <label class="sr-only" for="lib-q">${t("search")}</label>
-        <input type="search" id="lib-q" placeholder="${t("search")}" value="${esc(libQ)}">
-        <label class="sr-only" for="lib-sort">Sort</label>
-        <select id="lib-sort">${["new", "old", "title"].map((v) => `<option value="${v}" ${libSort === v ? "selected" : ""}>${t("sort_" + v)}</option>`).join("")}</select>
-        ${libSel ? `<button class="btn btn-small" id="rename-sel">${t("rename")}</button>` : ""}
-        ${kind === "c" ? `<button class="btn btn-small" id="archive-sel">${isArchived(libSel.slice(2)) ? t("arch_course_back") : t("arch_course")}</button>` : ""}
-        ${kind === "f" ? `<button class="btn btn-small btn-plain btn-danger" id="del-folder">${t("delete_folder")}</button>` : ""}
-      </div></div>
-      ${S.courses.length ? `<nav class="chips narrow-only" aria-label="${t("nav_courses")}">
-        <a class="chip" href="#/" ${libSel ? "" : 'aria-current="page"'}>${t("nav_library")}</a>
-        ${S.courses.filter((c) => !isArchived(c.id)).map((c) => `<a class="chip" href="#/c/${encodeURIComponent(c.id)}" ${libSel === `c:${c.id}` ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}
-      </nav>` : ""}`)) return;
+  $("#lib-title").textContent = name;
+  paint($("#lib-hero"), `<div class="hero">
+    <span class="hero-number">${list.length}</span>
+    <span class="sub">${t(list.length === 1 ? "lib_hero_1" : "lib_hero", { dur: fmtLong(total) })}</span>
+    <div class="progress" role="img" aria-label="${t("lib_with_notes", { n: ready })}"><span style="--value: ${list.length ? ready / list.length : 0}"></span></div>
+  </div>`);
+  paint($("#lib-chips"), S.courses.length ? `<a class="chip" href="#/" ${libSel ? "" : 'aria-current="page"'}>${t("nav_library")}</a>
+    ${S.courses.filter((c) => !isArchived(c.id)).map((c) => `<a class="chip" href="#/c/${encodeURIComponent(c.id)}" ${libSel === `c:${c.id}` ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}` : "");
+  drawTools();
+  const action = (id, label, extra = "") => `<li><button class="row ${extra}" id="${id}"><span class="row-main"><span>${label}</span></span></button></li>`;
+  if (paint($("#lib-actions"), libSel ? `<ul class="list">
+      ${action("rename-sel", t("rename"))}
+      ${kind === "c" ? action("archive-sel", isArchived(libSel.slice(2)) ? t("arch_course_back") : t("arch_course")) : ""}
+      ${kind === "f" ? action("del-folder", t("delete_folder"), "row-danger") : ""}
+    </ul>` : "")) bindActions(kind);
+}
+
+function drawTools() {
+  const box = $("#lib-tools");
+  if (box.contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;  // typing in the search box
+  if (!paint(box, `<div class="segmented" role="group" aria-label="${t("sort_label")}">
+      ${["new", "old", "title"].map((v) => `<button aria-pressed="${libSort === v}" data-sort="${v}">${t("sort_short_" + v)}</button>`).join("")}
+    </div>
+    <label class="sr-only" for="lib-q">${t("search")}</label>
+    <input class="field" type="search" id="lib-q" placeholder="${t("search")}" value="${esc(libQ)}">`)) return;
   $("#lib-q").addEventListener("input", (e) => { libQ = e.target.value; drawRows(); });
-  $("#lib-sort").addEventListener("change", (e) => { libSort = e.target.value; drawRows(); });
+  $$("[data-sort]", box).forEach((b) => b.addEventListener("click", () => { libSort = b.dataset.sort; drawTools(); drawRows(); }));
+}
+
+function bindActions(kind) {
+  const redraw = () => { $("#lib-actions")._html = null; $("#side-nav")._html = null; refreshDashboard(); };
   $("#rename-sel")?.addEventListener("click", () => {
     const id = libSel.slice(2);
     inlineEdit($("#lib-title"), $("#lib-title").textContent, kind === "c"
       ? async (name) => { await post("/api/courses", { ...S.courses.find((c) => c.id === id), name }); S.courses = await api("/api/courses"); }
       : async (name) => { await saveFolders({ ...S.folders, folders: S.folders.folders.map((f) => (f.id === id ? { ...f, name } : f)) }); },
-    "", () => { $("#lib-head")._html = null; $("#side-nav")._html = null; refreshDashboard(); });
+    "", redraw);
   });
   $("#archive-sel")?.addEventListener("click", async () => {
     const id = libSel.slice(2);
     try { await setCourseArchived(id, !isArchived(id)); } catch (e) { toast(e.message, true); }
-    $("#lib-head")._html = null;
-    refreshDashboard();
+    redraw();
   });
   $("#del-folder")?.addEventListener("click", async () => {
     const id = libSel.slice(2);
@@ -83,10 +94,10 @@ function drawHead() {
   });
 }
 
-function notesCell(l) {
-  if (l.has_notes) return `<span>${t("notes_ready")}</span>`;
-  if (l.queue && l.status !== "done") return `<span class="muted">${esc(statusText({ ...l.queue, status: l.status }))}</span>`;
-  return `<span class="muted">${t("notes_none")}</span>`;
+function notesText(l) {
+  if (l.has_notes) return t("notes_ready");
+  if (l.queue && l.status !== "done") return statusText({ ...l.queue, status: l.status });
+  return t("notes_none");
 }
 
 function drawRows() {
@@ -112,14 +123,13 @@ function drawRows() {
       isArchived(l.course) ? t("archived") : ""].filter(Boolean).join(" · ");
     return `<li class="lecture" draggable="true" data-id="${esc(l.id)}"><div class="row" ${data}>
       <span class="dot"></span>
-      <span class="row-main"><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>${sub ? `<span class="label">${esc(sub)}</span>` : ""}</span>
-      <span class="lecture-col lecture-date">${esc(fmtDate(l.date))}</span>
-      <span class="lecture-col lecture-len">${esc(fmtHm(l.duration_s))}</span>
-      <span class="lecture-col lecture-notes">${notesCell(l)}</span>
-      <button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${icon("more")}</button>
+      <span class="row-main"><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>
+        ${sub ? `<span class="sub">${esc(sub)}</span>` : ""}<span class="sub">${esc(notesText(l))}</span></span>
+      <span class="row-trail">${esc(fmtDate(l.date))} · ${esc(fmtHm(l.duration_s))}
+        <button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${icon("more")}</button></span>
     </div></li>`;
   }).join("");
-  if (!paint(wrap, `${libSel ? "" : `<h2 class="group-title">${t("lectures")}</h2>`}<ul class="list lectures">${rows}</ul>`)) return;
+  if (!paint(wrap, `<ul class="list lectures">${rows}</ul>`)) return;
   $$(".lecture", wrap).forEach((r) => {
     r.addEventListener("click", (e) => { if (!e.target.closest("button, a, input")) location.hash = `#/lecture/${encodeURIComponent(r.dataset.id)}`; });
     r.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/lecture", r.dataset.id); r.classList.add("dragging"); });

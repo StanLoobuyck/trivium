@@ -15,6 +15,7 @@ export async function drawUpload() {
   const box = $("#upload");
   if (!box) return;
   box.innerHTML = `
+    <p class="sub">${t("add_sub")}</p>
     <div class="drop" id="drop">
       <span class="drop-icon">${ICON.upload}</span>
       <div>

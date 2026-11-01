@@ -14,7 +14,6 @@ h1, h2, h3, h4 { font-size: inherit; font-weight: var(--weight-semibold); }
 .flat { padding: 0; overflow: hidden; }
 .page:focus { outline: none; }
 #view > section:empty { display: none; }
-.narrow-only { display: flex; }
 .chip { display: inline-flex; align-items: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
 .chip[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
 
@@ -27,7 +26,7 @@ input[type="text"], input[type="search"], input[type="password"], input[type="da
   border: 0;
   border-radius: var(--radius-row);
   background: var(--fill);
-  font-size: var(--text-sub);
+  font-size: var(--text-body);
 }
 input::placeholder, textarea::placeholder { color: var(--text-2); opacity: 1; }
 textarea { resize: vertical; }
@@ -40,7 +39,7 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .icon-btn:focus-visible { border-radius: var(--radius-full); }
 
 /* ---- Zijbalk: dezelfde rijen als Inhaal; de lijst scrolt, modellen en Instellingen blijven staan ---- */
-.side-scroll { flex: 1 1 0; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.side-scroll { flex: 1 1 0; display: flex; flex-direction: column; gap: var(--space-1); min-height: 0; overflow-y: auto; scrollbar-width: none; }
 .side-scroll::-webkit-scrollbar { display: none; }
 .sidebar .list-side > li > button.row { width: 100%; color: var(--text-2); }
 .sidebar .side-scroll .icon { color: var(--text-2); }
@@ -57,25 +56,17 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .status-dot.wait { background: var(--course-yellow); }
 .status-dot.off { background: none; box-shadow: inset 0 0 0 1.5px var(--text-2); }
 
-/* ---- Bibliotheek ---- */
-.lib-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
-.lib-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
-.lib-tools input[type="search"] { width: 240px; }
-.lib-tools select { width: auto; }
-#lib-head .chips { margin-top: var(--space-3); }
+/* ---- Bibliotheek: dezelfde opbouw als het overzicht van Sequo (.overview) ---- */
+.flow > :empty { display: none; }
 .lectures { overflow: visible; }
 .lectures > li:first-child .row { border-radius: var(--radius-row) var(--radius-row) 0 0; }
 .lectures > li:last-child .row { border-radius: 0 0 var(--radius-row) var(--radius-row); }
 .lecture { cursor: pointer; }
 .lecture.dragging { opacity: 0.5; }
-.lecture .row { padding-block: var(--space-2); padding-right: var(--space-2); }
-.lecture:hover .row { background: var(--fill); }
-.row-title { color: var(--text); font-size: var(--text-sub); font-weight: var(--weight-medium); }
-.lecture .label { white-space: nowrap; }
-.lecture-col { display: none; flex: none; font-size: var(--text-label); color: var(--text-2); white-space: nowrap; }
-.lecture-notes { color: var(--text); }
-.lecture-notes .group-title { font-weight: var(--weight-regular); }
-.muted { color: var(--text-2); }
+.lecture .row { padding-right: var(--space-2); }
+.lecture .row-trail { margin-block: calc(var(--space-2) * -1); }
+.lecture .row-trail .icon { width: 20px; height: 20px; }
+.row-title { color: var(--text); }
 .empty-line { padding: var(--space-5); text-align: center; color: var(--text-2); }
 
 /* ---- Bezig ---- */
@@ -83,8 +74,8 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .prog-row + .prog-row { border-top: var(--hairline) solid var(--separator); }
 .prog-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
 .prog-what { flex: 1 1 220px; min-width: 0; }
-.prog-title { font-size: var(--text-sub); font-weight: var(--weight-medium); }
-.prog-sub, .prog-state { font-size: var(--text-label); color: var(--text-2); }
+.prog-title { font-weight: var(--weight-regular); }
+.prog-sub, .prog-state { font-size: var(--text-sub); color: var(--text-2); }
 .prog-state { text-align: right; }
 .prog-actions { display: flex; align-items: center; gap: var(--space-1); }
 .prog-bar { height: 4px; overflow: hidden; border-radius: var(--radius-full); background: var(--fill-strong); }
@@ -116,15 +107,16 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .uploading { font-size: var(--text-label); color: var(--text-2); }
 
 /* ---- Instellingen: secties als in Inhaal ---- */
-.setup-section > h2 { padding: 0 var(--space-4) var(--space-1); font-size: var(--text-label); font-weight: var(--weight-regular); color: var(--text-2); }
+.setup-section > h2 { padding: 0 var(--space-4) var(--space-2); font-size: var(--text-label); font-weight: var(--weight-regular); color: var(--text-2); }
 .setup-section > p { padding: 0 var(--space-4) var(--space-2); }
 .setup-section > .list + *, .setup-section > div + .list, .setup-section > .card + * { margin-top: var(--space-3); }
 .setup-section .group-title { font-weight: var(--weight-regular); }
 .setup-section > [id$="-result"]:empty { display: none; }
 .row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.row-text b { font-size: var(--text-sub); font-weight: var(--weight-regular); }
+.row-text b { font-weight: var(--weight-regular); }
 .toggle-row { cursor: pointer; }
-.key-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); padding: var(--space-3) var(--space-4); font-size: var(--text-sub); }
+.upload > .sub { margin-bottom: calc(var(--space-2) * -1); }
+.key-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); padding: var(--space-2) var(--space-4); }
 .key-row + .key-row::before { content: ""; position: absolute; inset: 0 0 auto var(--space-4); border-top: var(--hairline) solid var(--separator); }
 .key-row b { font-weight: var(--weight-regular); }
 .key-row > span:last-child { display: flex; gap: var(--space-1); }
@@ -132,9 +124,9 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .rank-row + .rank-row::before { content: ""; position: absolute; inset: 0 0 auto var(--space-4); border-top: var(--hairline) solid var(--separator); }
 .rank-row.on { background: var(--accent-tint); }
 .rank-n { width: var(--space-3); font-size: var(--text-label); color: var(--text-2); }
-.rank-what { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: var(--text-sub); text-align: left; }
+.rank-what { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; }
 .rank-what b { font-weight: var(--weight-regular); }
-.rank-what > .muted { display: flex; align-items: center; gap: var(--space-2); }
+.rank-what > .muted { font-size: var(--text-sub); display: flex; align-items: center; gap: var(--space-2); }
 .rank-pick { padding: 0; border: 0; background: none; cursor: pointer; }
 .rank-actions { display: flex; align-items: center; gap: 2px; }
 .rank-actions .btn { min-width: 32px; padding-inline: var(--space-2); }
@@ -199,7 +191,7 @@ body[data-page="lecture"] .page { max-width: 1680px; }
 .chapters-head h4 { font-size: var(--text-label); font-weight: var(--weight-regular); color: var(--text-2); }
 .chapters-head label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-label); color: var(--text-2); cursor: pointer; }
 .chapters-head .switch { transform: scale(0.7); transform-origin: right center; margin-left: calc(var(--space-3) * -1); }
-.chapter { display: grid; grid-template-columns: 48px 1fr; gap: var(--space-2); width: 100%; padding: var(--space-2); border: 0; border-radius: var(--radius-row); background: none; color: var(--text); font-size: var(--text-sub); text-align: left; cursor: pointer; }
+.chapter { display: grid; grid-template-columns: 48px 1fr; gap: var(--space-2); width: 100%; padding: var(--space-2); border: 0; border-radius: var(--radius-row); background: none; color: var(--text); text-align: left; cursor: pointer; }
 .chapter:hover { background: var(--fill); }
 .chapter .t { font-size: var(--text-label); color: var(--text-2); }
 .chapter.now { background: var(--accent-tint); }
@@ -209,9 +201,9 @@ body[data-page="lecture"] .page { max-width: 1680px; }
 .lec-tabs { position: sticky; top: 56px; z-index: 5; padding: var(--space-2); border-radius: var(--radius-card) var(--radius-card) 0 0; background: var(--card); }
 .lec-tabs .segmented { overflow-x: auto; scrollbar-width: none; }
 .lec-tabs .segmented::-webkit-scrollbar { display: none; }
-.lec-tabs button { flex: 1 0 auto; min-height: 32px; padding-inline: var(--space-3); color: var(--text); white-space: nowrap; }
+.lec-tabs button { flex: 1 0 auto; padding-inline: var(--space-3); color: var(--text); white-space: nowrap; }
 .lec-tabs .count { margin-left: var(--space-1); padding-inline: var(--space-1); background: none; }
-#tab-body { padding: var(--space-3) var(--space-4) var(--space-6); font-size: var(--text-sub); line-height: 1.5; }
+#tab-body { padding: var(--space-3) var(--space-4) var(--space-6); line-height: 1.4; }
 #tab-body > * { max-width: 720px; }
 #tab-body .empty h2 { color: var(--text); font-size: var(--text-title); }
 .fade-in { animation: page-in var(--dur-fast) var(--ease-out); }
@@ -243,7 +235,7 @@ mark { padding-inline: 2px; border-radius: 3px; background: var(--course-yellow-
 .tr-tools { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
 .tr-hint { margin-bottom: var(--space-3); }
 .tr-part { margin-bottom: var(--space-4); }
-.tr-part h3 { position: sticky; top: 108px; z-index: 1; padding-block: var(--space-2); background: var(--card); font-size: var(--text-sub); scroll-margin-top: 108px; }
+.tr-part h3 { position: sticky; top: 112px; z-index: 1; padding-block: var(--space-2); background: var(--card); font-size: var(--text-sub); scroll-margin-top: 112px; }
 .tr-line { display: grid; grid-template-columns: 56px 1fr; gap: var(--space-2); padding: var(--space-1) var(--space-2); border-radius: var(--radius-row); cursor: pointer; }
 .tr-line:hover { background: var(--fill); }
 .tr-line .ts { justify-self: start; }
@@ -308,10 +300,6 @@ mark { padding-inline: 2px; border-radius: 3px; background: var(--course-yellow-
 /* Laptop: meer kolommen, dezelfde breekpunten als Inhaal. */
 @media (min-width: 900px) {
   .narrow-only { display: none; }
-  .lecture-col { display: block; }
-  .lecture-date { width: 92px; }
-  .lecture-len { width: 48px; }
-  .lecture-notes { width: 150px; overflow: hidden; text-overflow: ellipsis; }
   .add-row { grid-template-columns: minmax(0, 1fr) 150px minmax(0, 1.2fr) 130px 44px; }
   .key-row { grid-template-columns: 96px minmax(0, 1fr) auto; align-items: center; }
   .key-row:has(> span:last-child > :nth-child(2)) { grid-template-columns: 96px minmax(0, 1fr); }
