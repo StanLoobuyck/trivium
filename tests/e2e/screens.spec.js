@@ -142,3 +142,10 @@ for (const scheme of ["light", "dark"]) {
     });
   });
 }
+
+for (const [name, path] of screens) {
+  test(`${name} staat niet in zoekmachines`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  });
+}
