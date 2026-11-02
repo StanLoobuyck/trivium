@@ -11,6 +11,11 @@
           "version": "5.1.0",
           "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/velox-v5.1.0/velox-firefox.xpi",
           "update_hash": "sha256:34f3138ab8a5be206c190f97776aa93d87e38f59b105fade1ec839c9b1fa5f3a"
+        },
+        {
+          "version": "5.2.0",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/velox-v5.2.0/velox-firefox.xpi",
+          "update_hash": "sha256:b6d31c619d0a9d026a94ac4474b9a55d4a6350c10da7f68c87fc9c239a35815c"
         }
       ]
     }
