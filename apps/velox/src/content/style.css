@@ -340,11 +340,18 @@
   will-change: opacity, transform;
 }
 
+/* The end states are set here too, not only in the animations: a page may switch
+   animations off altogether (Trivium's own pages do, with "reduce motion" on), and
+   the overlay must still show. The animations are only the way in and out. */
 #velox-osd.velox-bump {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
   animation: ss-osd-in 0.2s ease-out forwards;
 }
 
 #velox-osd.velox-fade-out {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.97);
   animation: ss-osd-out 0.2s ease-in forwards !important;
 }
 

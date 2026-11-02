@@ -3,6 +3,11 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.2.1
+
+**Fixed**
+- The on-screen display (speed, skip, volume) stayed invisible on pages that switch all animations off, such as Verbatim and Sequo when your system asks for less motion
+
 ## 5.2.0
 
 **New**

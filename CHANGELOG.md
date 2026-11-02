@@ -8,6 +8,12 @@
 5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — Velox-overlay onzichtbaar in Verbatim
+- Eigenaar: in Verbatim werken de sneltoetsen, maar het overlay (1,25× enz.) is onzichtbaar. Oorzaak: het systeem heeft animaties uit (`gtk-enable-animations=false`), dus Zen vraagt "minder beweging"; `packages/design` zet dan `* { animation: none !important }`, en het overlay werd alleen via zijn animatie zichtbaar (basis opacity 0). Op Toledo bestaat die regel niet.
+- Velox 5.2.1: de eindtoestanden staan nu ook in de gewone stijl; de animatie is alleen in- en uitgang. Nagekeken in headless Zen met `ui.prefersReducedMotion`: 5.2.0 opacity 0, 5.2.1 opacity 1, midden op de video.
+- Onderweg twee verkeerde sporen: versie/toestemming (in orde: 5.2.0 met localhost) en "headless toont het niet" (in headless Zen lopen animaties helemaal niet; enkel met minder beweging aan is het een eerlijke test). Headless-schermafbeeldingen van Zen tonen soms een oude positie: vertrouw `getBoundingClientRect`.
+- Getest: 101 Velox, 33 e2e, lint schoon.
+
 ## 2026-11-02 — delen van een les in Sequo
 - Keuze eigenaar: in het venster van een les een lijst "Delen": per deel hoe ver je bent (bekeken / x van y / nog niet), knop naar de opname en (laptop) naar de Verbatim-les van dat deel. Bij delen geen los linkveld meer; opslaan raakt de opnames dan niet aan.
 - `domain/recordings.js`: `partNumber`, `lectureParts`, `partState` (afgeleid, niet opgeslagen); `reconcileNotes` zet de Verbatim-les per deel op bestandsnaam. Delen komen samen via het lesnummer (op datum koppelt Sequo maar één opname per les).
