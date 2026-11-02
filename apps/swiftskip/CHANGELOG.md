@@ -3,7 +3,7 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
-## Unreleased
+## 4.5.0
 
 **New**
 - With downloads to Verbatim on, PDF and PPTX files on Toledo get a button that saves them to the course folder
