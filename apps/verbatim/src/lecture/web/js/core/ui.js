@@ -20,6 +20,16 @@ export function scroller() {
   return getComputedStyle(el).overflowY === "auto" ? el : document.scrollingElement;
 }
 
+// The lecture bar is see-through while nothing is under it; once the page scrolls under it, it gets material and
+// a hairline (as on iOS). Scroll events don't bubble, so listen in the capture phase for #scroller and the document.
+export function watchBarEdge() {
+  const bar = $("#lecture-bar");
+  const update = () => bar.classList.toggle("is-scrolled", scroller().scrollTop > 0);
+  document.addEventListener("scroll", update, { capture: true, passive: true });
+  window.addEventListener("hashchange", () => requestAnimationFrame(update));
+  update();
+}
+
 // Polled parts are only rebuilt when their HTML changed: rebuilding unchanged DOM every few seconds made the
 // page flicker (hover states, focus and animations reset). Returns false when nothing changed.
 export function paint(el, html) {

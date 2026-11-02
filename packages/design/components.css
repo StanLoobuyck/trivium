@@ -553,7 +553,8 @@ body.app .topbar { position: fixed; }
 }
 @media (min-width: 900px) {
   .app .fab { display: none; }
-  .app .sidebar { position: static; height: calc(100% - var(--space-6)); }
+  /* Boven de kopbalk (z-index 10): anders snijdt die de schaduw van de zijbalk recht af. */
+  .app .sidebar { position: relative; z-index: 11; height: calc(100% - var(--space-6)); }
   .app .page { max-width: 1120px; padding-inline: var(--space-8); padding-top: var(--space-6); }
 }
 

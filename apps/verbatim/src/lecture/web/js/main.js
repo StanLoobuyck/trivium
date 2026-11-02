@@ -5,7 +5,7 @@ import { api } from "./core/api.js";
 import { $$ } from "./core/dom.js";
 import { route } from "./core/router.js";
 import { S } from "./core/state.js";
-import { closeMenus } from "./core/ui.js";
+import { closeMenus, watchBarEdge } from "./core/ui.js";
 
 function translateStatic() {
   $$("[data-t]").forEach((el) => { el.textContent = t(el.dataset.t); });
@@ -19,6 +19,7 @@ setLang(LANG);
 translateStatic();
 try { S.courses = await api("/api/courses"); } catch { S.courses = []; }
 route();
+watchBarEdge();
 
 // After the first paint: the hub may be slow or away, and then the remembered colours stay.
 api("/api/course-colors").then((colors) => {
