@@ -100,7 +100,10 @@ def download(name: str, file: str):
 
 @router.post("/api/lectures/{name}/open-folder")
 def open_folder(name: str):
-    subprocess.Popen(["xdg-open", str(job_dir(name) / "outputs")], stdout=subprocess.DEVNULL,
+    d = job_dir(name)
+    # A lecture still running has no outputs yet: show its folder rather than nothing.
+    target = d / "outputs" if (d / "outputs").is_dir() else d
+    subprocess.Popen(["xdg-open", str(target)], stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL, start_new_session=True)
     return {"ok": True}
 

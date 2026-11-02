@@ -175,6 +175,18 @@ def test_upload_rejects_broken_files_and_skips_duplicates(env, tmp_path):
     assert sorted(p.name for p in (tmp_path / "inbox" / "uploads").iterdir()) == ["les.pdf"]
 
 
+def test_open_folder_falls_back_while_a_lecture_runs(env, monkeypatch):
+    client, _, _, job = env
+    opened = []
+    monkeypatch.setattr("lecture.api.lectures.subprocess.Popen", lambda cmd, **kw: opened.append(cmd[1]))
+    headers = {"x-lecture-ui": "1"}
+    assert client.post(f"/api/lectures/{job.name}/open-folder", headers=headers).status_code == 200
+    (job / "outputs" / "review.md").unlink()
+    (job / "outputs").rmdir()
+    assert client.post(f"/api/lectures/{job.name}/open-folder", headers=headers).status_code == 200
+    assert opened == [str(job / "outputs"), str(job)]
+
+
 def test_delete_lecture_removes_job_and_folder_entry(env):
     client, queue, video, job = env
     client.post("/api/folders", headers=W, json={"folders": [{"id": "f1", "name": "Examen"}],

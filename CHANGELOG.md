@@ -13,6 +13,7 @@
 - Eigenaar vond de voortgang onduidelijk. Oorzaken: percentage alleen bij transcriberen, stap "termen" ontbrak (scherm toonde dan Audio), bij minder animatie was de balk vol.
 - Nu: statusregel met stap, percentage en deel ("Termen nakijken · 28% · deel 12 van 40"), vijf stappen, zachte puls bij minder animatie, oude `stepsHtml` weg.
 - Bekeken op 375 en 1440 px, licht en donker, met nagebootste taken: 0 px horizontale overloop, geen JS-fouten.
+- Knop Bestanden: opende niets bij een les die nog bezig is (map `outputs` bestaat dan niet) en meldde toch ok; opent nu de lesmap. Op een afgewerkte les bevestigd: venster `outputs` ging open.
 
 ## 2026-11-02 — Velox 4.5.0 uit
 - Dubbele opname verwijderd, Verbatim geïnstalleerd, worker herstart (daemon-reload nodig).
