@@ -36,6 +36,11 @@
           "version": "4.4.1",
           "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.1/swiftskip-firefox.xpi",
           "update_hash": "sha256:00682593ceeaf675b8436b3691a325ff41e2dbc596e6fc5f0aa7fe9f209ce87e"
+        },
+        {
+          "version": "4.5.0",
+          "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.5.0/swiftskip-firefox.xpi",
+          "update_hash": "sha256:1f371a7effddd39bb67b1865f3b54bfb35cbc2c5acb03bc82476df90d71289d0"
         }
       ]
     }
