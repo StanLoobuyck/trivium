@@ -1,7 +1,7 @@
 // Lecture page: big video + parts on the left, notes / transcript / … tabs on the right.
 import { api, post } from "../core/api.js";
 import { $, $$, view } from "../core/dom.js";
-import { esc, fmtDate, fmtLong, fmtTs, parseTs } from "../core/format.js";
+import { esc, fmtDate, fmtDuration, fmtTs, parseTs } from "../core/format.js";
 import { ICON } from "../core/icons.js";
 import { S } from "../core/state.js";
 import { closeMenus, inlineEdit, poll, scroller, setBarTitle, toast } from "../core/ui.js";
@@ -15,7 +15,7 @@ export async function renderLecture(id, tab) {
   catch (e) { view.innerHTML = `<div class="empty"><h2>${t("not_found")}</h2><p>${esc(e.message)}</p></div>`; return; }
   if (!S.courses.length) S.courses = await api("/api/courses").catch(() => []);
   lecTab = tab || (lec.notes ? "notes" : "transcript");
-  const meta = [fmtDate(lec.date), lec.duration_s ? fmtLong(lec.duration_s) : "", lec.sections ? t("sections_n", { n: lec.sections }) : ""].filter(Boolean);
+  const meta = [fmtDate(lec.date), lec.duration_s ? fmtDuration(lec.duration_s) : "", lec.sections ? t("sections_n", { n: lec.sections }) : ""].filter(Boolean);
   const canNotes = ["transcribed", "done", "failed", "notes_pending"].includes(lec.status);
   // actions + path live in the slim top bar (index.html .pagebar); the router clears them on every page change
   $("#bar-actions").innerHTML = `

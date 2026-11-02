@@ -3,7 +3,7 @@
 import { icon } from "/static/design/icons.js";
 import { api, post } from "../core/api.js";
 import { $, $$ } from "../core/dom.js";
-import { esc, fmtDate, fmtHm, fmtLong } from "../core/format.js";
+import { esc, fmtDate, fmtDuration } from "../core/format.js";
 import { ICON } from "../core/icons.js";
 import { S, courseKey, courseName, isArchived, sortedCourses } from "../core/state.js";
 import { drawSidebar } from "../core/sidebar.js";
@@ -46,7 +46,7 @@ function drawHead() {
   $("#lib-title").textContent = name;
   paint($("#lib-hero"), `<div class="hero">
     <span class="hero-number">${list.length}</span>
-    <span class="sub">${t(list.length === 1 ? "lib_hero_1" : "lib_hero", { dur: fmtLong(total) })}</span>
+    <span class="sub">${t(list.length === 1 ? "lib_hero_1" : "lib_hero", { dur: fmtDuration(total) })}</span>
     <div class="progress" role="img" aria-label="${t("lib_with_notes", { n: ready })}"><span style="--value: ${list.length ? ready / list.length : 0}"></span></div>
   </div>`);
   paint($("#lib-chips"), S.courses.length ? `<a class="chip" href="#/" ${libSel ? "" : 'aria-current="page"'}>${t("nav_library")}</a>
@@ -125,7 +125,7 @@ function drawRows() {
       <span class="dot"></span>
       <span class="row-main"><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>
         ${sub ? `<span class="sub">${esc(sub)}</span>` : ""}<span class="sub">${esc(notesText(l))}</span></span>
-      <span class="row-trail">${esc(fmtDate(l.date))} · ${esc(fmtHm(l.duration_s))}
+      <span class="row-trail">${esc(fmtDate(l.date))} · ${esc(fmtDuration(l.duration_s))}
         <button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${icon("more")}</button></span>
     </div></li>`;
   }).join("");

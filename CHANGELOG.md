@@ -8,6 +8,9 @@
 5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — één notatie voor duur
+- Keuze: `1u 55` (en: `1h 55`) in Sequo en Verbatim. Verbatim had `1:55` en `1 h 55 min`. Posities in een opname blijven `m:ss`.
+
 ## 2026-11-02 — LaTeX-notities in Verbatim
 - Correctie: de eerste aanpassing vertrok van de oudere lokale kopie (18 okt). De gesyncte versie (25 okt) had al dichtheidsregels; die zijn nu overgenomen. De gesyncte kopie heeft geen scripts en blijft los van de repo.
 - Uit een review: paden via `<skill>`, `tectonic` zonder `cd`, maximaal 3 pogingen per crop, standaardopmerkingen in de taal van de les. Verbatim geeft het aantal pagina's vooraf mee voor het paginabudget.

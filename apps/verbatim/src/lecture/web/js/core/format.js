@@ -26,14 +26,11 @@ export const when = (iso) => {
     : d.toLocaleString(locale(), { weekday: "short", hour: "2-digit", minute: "2-digit" });
 };
 // "1:58" (hours:minutes) for list columns, "7 h 56 min" for totals
-export const fmtHm = (s) => {
+// A duration, written as in Sequo: "1u 55" (en: "1h 55"). A position in a recording stays m:ss (fmtTs).
+export const fmtDuration = (s) => {
   if (!s) return "";
   const m = Math.round(s / 60);
-  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
-};
-export const fmtLong = (s) => {
-  const m = Math.round((s || 0) / 60), h = Math.floor(m / 60);
-  return h ? `${h} h ${m % 60} min` : `${m} min`;
+  return t("duration", { h: Math.floor(m / 60), m: String(m % 60).padStart(2, "0") });
 };
 // "2026-27 S1" → "2026–27 · semester 1"
 export const fmtSem = (s) => (s ? `${s.slice(0, 4)}–${s.slice(5, 7)} · ${t("semester")} ${s.slice(-1)}` : "");

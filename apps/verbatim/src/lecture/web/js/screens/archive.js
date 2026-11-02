@@ -2,7 +2,7 @@
 // Backend: /api/semesters, /api/courses/<id>/archived, /api/archive/* (src/lecture/api/archive.py).
 import { api, post } from "../core/api.js";
 import { $, $$, view } from "../core/dom.js";
-import { esc, fmtDate, fmtHm, fmtSem, fmtSize } from "../core/format.js";
+import { esc, fmtDate, fmtDuration, fmtSem, fmtSize } from "../core/format.js";
 import { S } from "../core/state.js";
 import { drawSidebar } from "../core/sidebar.js";
 import { paint, poll, toast } from "../core/ui.js";
@@ -56,7 +56,7 @@ function courseHtml(c, busy) {
   return `<div class="arch-course ${c.archived ? "" : "active"}">
     <div class="arch-course-head">
       <div><a href="#/c/${encodeURIComponent(c.id)}" class="row-title">${esc(c.name)}</a>
-        <div class="row-sub">${t(c.lectures.length === 1 ? "lectures_1" : "lectures_n", { n: c.lectures.length })}${total ? ` · ${fmtHm(total)}` : ""}
+        <div class="row-sub">${t(c.lectures.length === 1 ? "lectures_1" : "lectures_n", { n: c.lectures.length })}${total ? ` · ${fmtDuration(total)}` : ""}
           · ${c.archived ? t("archived") : t("arch_in_list")}</div></div>
       <div class="arch-media muted small">${mediaLine(c.lectures)}</div>
       <div class="arch-actions">
@@ -67,7 +67,7 @@ function courseHtml(c, busy) {
     </div>
     ${c.lectures.length ? `<ul class="arch-lectures">${c.lectures.sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((l) => `
       <li><a href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>
-        <span class="muted small">${esc(fmtDate(l.date))}${l.duration_s ? ` · <span class="mono">${fmtHm(l.duration_s)}</span>` : ""}</span></li>`).join("")}</ul>` : ""}
+        <span class="muted small">${esc(fmtDate(l.date))}${l.duration_s ? ` · <span class="mono">${fmtDuration(l.duration_s)}</span>` : ""}</span></li>`).join("")}</ul>` : ""}
   </div>`;
 }
 
