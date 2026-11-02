@@ -130,3 +130,6 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Eigen rooster testen: upload `fixtures/private/rooster.ics` en `rooster-aanvulling.ics` samen. De aanvulling komt
   uit schermafbeeldingen, omdat TimeEdit niets vóór 12 oktober exporteert. Verwacht op 2026-11-01: 63 open.
 - `fixtures/rooster-anon.ics` hermaken: `node scripts/anonymize-rooster.mjs`.
+- LaTeX-notities staan standaard **naast de slides** (geen code of figuren van de slide; `\kernpunt`, `\valkuil`); per vak `notes_without_slides` voor zelfstandige notities. `check.py` bewaakt dat.
+- Landingspagina: `%%VELOX_*%%` vult `scripts/build-site.mjs` in uit `updates.json`. Downloadlinks in READMEs wijzen naar de Trivium-pagina, nooit naar een versie.
+- Snel na elkaar pushen laat de Pages-deploy soms falen ("in progress deployment"): onschuldig als de site niet veranderde, anders de run opnieuw starten.
