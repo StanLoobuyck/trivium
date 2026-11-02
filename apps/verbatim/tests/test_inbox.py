@@ -29,7 +29,7 @@ def test_pick_slides():
     assert inbox.pick_slides(v, per_lecture) == ([Path("les 4 extra.pptx"), Path("les 4.pdf")], "lecture 4")
     slides, why = inbox.pick_slides(Path("DEP les 5.mp4"), per_lecture)
     assert slides is None and "lecture 5" in why             # its deck isn't on the shelf yet: wait
-    assert inbox.pick_slides(Path("random.mp4"), per_lecture)[0] is None
+    assert inbox.pick_slides(Path("random.mp4"), per_lecture) == (sorted(per_lecture), "all decks of the course")
     assert inbox.pick_slides(Path("x.mp4"), [Path("x.pdf"), *big]) == ([Path("x.pdf")], "same name")
     assert inbox.pick_slides(v, []) == ([], "no slides")
 

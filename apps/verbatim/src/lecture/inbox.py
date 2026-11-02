@@ -6,8 +6,8 @@ in others). The worker queues a recording once it has stopped changing for STABL
 pick_slides():
   1. a deck with the same file name, or with the same lecture number ("les 4", "lecture 4", "HC 4", "week 4")
      → only those;
-  2. else, when the shelf holds numbered decks (one file per lecture) → wait: the slides of this lecture
-     aren't there yet (the Add page lists it, so the user can add it by hand);
+  2. else, when the recording has a number and the shelf holds numbered decks (one file per lecture) → wait:
+     the slides of this lecture aren't there yet (the Add page lists it, so the user can add it by hand);
   3. else every deck on the shelf: the slide ↔ transcript alignment picks the slides that were shown.
      An empty shelf waits EMPTY_SHELF_WAIT_S first, so slides moved in just after the video are still used.
 Recordings stay where they are (the job keeps their path); a recording already in a job or the queue is skipped.
@@ -47,9 +47,9 @@ def pick_slides(video: Path, decks: list[Path]) -> tuple[list[Path] | None, str]
     numbers = {d: lecture_number(d.stem) for d in decks}
     if n is not None and (hits := sorted(d for d, k in numbers.items() if k == n)):
         return hits, f"lecture {n}"
-    if any(k is not None for k in numbers.values()):
-        return None, (f"waiting for the slides of lecture {n}" if n is not None
-                      else "no lecture number in the name; can't tell which slides")
+    if n is not None and any(k is not None for k in numbers.values()):
+        return None, f"waiting for the slides of lecture {n}"
+    # No number on the recording: waiting wouldn't change that, so the alignment decides.
     return sorted(decks), "all decks of the course" if decks else "no slides"
 
 

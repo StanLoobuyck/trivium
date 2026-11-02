@@ -2,11 +2,16 @@
 
 ## ▶ Start here (volgende sessie)
 1. **Klaar:** fase 0 t/m 5; Velox 4.4.1 uit, oude repo's en mappen weg. Geverifieerd: `.xpi` en updatefeed van 4.4.1 online gelezen, 128 unit, 134 schermtests, 89 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** tabbalk op een echte iPhone (alleen gesimuleerde safe area), update naar 4.4.1 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
+2. **Niet getest:** update naar 4.4.1 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
-4. **Volgende stap:** de slides-knop op echt Toledo testen (`apps/swiftskip/dist/firefox` als tijdelijke add-on), dan Velox 4.5.0 uitbrengen. Daarna de LaTeX-skill in Verbatim, dan fase 6.
-5. **Wacht op eigenaar:** test van de slides-knop in Zen, één vak met PPTX om dat label te zien; de twee vrienden de link naar 4.4.1 sturen; tabbalk op de iPhone beoordelen.
-6. **Open:** beschikbaarheid van de namen, notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+4. **Volgende stap:** Velox 4.5.0 uitbrengen; de Verbatim-fix installeren met `apps/verbatim/scripts/install.sh` en de worker herstarten. Daarna de LaTeX-skill in Verbatim, dan fase 6.
+5. **Wacht op eigenaar:** akkoord voor release en herstart; de dubbele opname uit de vakmap verwijderen vóór de herstart; de twee vrienden de link naar 4.5.0 sturen.
+6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — slides-knop getest, Verbatim wacht niet meer zonder lesnummer
+- Eigenaarstest in Zen: knop werkt op echt Toledo, ook met PPTX. Tabbalk op de iPhone is goed. Namen: volgens de eigenaar klaar.
+- Verbatim bleef wachten bij een opname zonder lesnummer naast genummerde slides, en dat veranderde nooit. Nu krijgt zo'n opname alle slides en kiest de uitlijning. Een opname met een nummer wacht nog wel op zijn eigen slides.
+- De test-opname bleek byte-gelijk aan een les die al in de bibliotheek staat; na de herstart zou ze opnieuw verwerkt worden. Tests: 233 Verbatim.
 
 ## 2026-11-02 — slides-knop in Velox
 - Keuze eigenaar, na de tests: een knop op de Toledo-rij in plaats van de keuzelijst. Elk vak heeft een andere indeling, dus Velox kan niet betrouwbaar raden wat slides zijn. De eerdere keuzelijst en de aanvinkregel hieronder vervallen.
