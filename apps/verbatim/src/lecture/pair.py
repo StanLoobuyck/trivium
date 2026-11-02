@@ -7,9 +7,11 @@ right, centred, never overlapping. The combined video takes the slides' name, so
 Sequo still matches it on that file name; the originals stay next to it as "<title>.slides.mp4" and
 "<title>.webcam.mp4", which the inbox skips.
 
-Encoding: on the laptop's AMD chip when there is one (VA-API, as player.py), else libx264. Runs in a thread per
-pair, so the worker isn't blocked for the minutes it takes. A pair that can't be combined is marked, and the
-inbox then takes the slides alone.
+Where (user's choice, 2026-11-02: the laptop stays cool): on the Mac at home when it answers (mac/server.py,
+libx264 on its 8 fast cores, ~11x real time; sending both files and getting the result back took ~30 s for a
+19 min lecture), else the laptop's AMD chip (VA-API, as player.py), and only as a last resort the laptop's CPU.
+Runs in a thread per pair, so the worker isn't blocked for the minutes it takes. A pair that can't be combined is
+marked, and the inbox then takes the slides alone.
 """
 
 from __future__ import annotations
@@ -17,6 +19,8 @@ from __future__ import annotations
 import subprocess
 import threading
 from pathlib import Path
+
+import httpx
 
 from .naming import VIDEO_EXT
 from .player import BROWSER_AUDIO, KEYFRAME_EVERY, _codecs, amd_render_node
@@ -34,8 +38,19 @@ def is_part(video: Path) -> bool:
     return video.stem.lower().endswith((WEBCAM, SLIDES))
 
 
+def _sibling(video: Path, tag: str) -> Path | None:
+    for ext in sorted(VIDEO_EXT):
+        candidate = video.with_name(f"{video.stem}{tag}{ext}")
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def webcam_of(video: Path) -> Path | None:
-    """The webcam picture that goes with this recording, if Velox saved one."""
+    """The webcam picture that goes with this recording, if Velox saved one and it wasn't combined yet: a combined
+    recording keeps its slides beside it as "<title>.slides.<ext>", and must never be combined again."""
+    if _sibling(video, SLIDES):
+        return None
     for ext in sorted(VIDEO_EXT):
         candidate = video.with_name(f"{video.stem}{WEBCAM}{ext}")
         if candidate.is_file():
@@ -78,18 +93,59 @@ def command(slides: Path, webcam: Path, out: Path, audio_from: int | None, audio
     return cmd + ["-g", str(KEYFRAME_EVERY), "-movflags", "+faststart", "-use_editlist", "0", "-f", "mp4", str(out)]
 
 
-def combine(video: Path, webcam: Path) -> bool:
+def on_mac(video: Path, webcam: Path, part: Path, audio: str) -> str | None:
+    """Combine on the Mac's model server. None when done, else why not (not set up, not reachable, failed)."""
+    from . import config as cfgmod
+
+    try:
+        mac = cfgmod.load_config().stt.mac
+        token = cfgmod.load_keys()["LECTURE_MAC_TOKEN"]
+    except Exception as exc:  # noqa: BLE001 - no Mac configured is a normal case
+        return f"no Mac configured ({type(exc).__name__})"
+    if not (mac and mac.url and token):
+        return "no Mac configured"
+    try:
+        with httpx.Client(base_url=mac.url, headers={"Authorization": f"Bearer {token}"},
+                          timeout=httpx.Timeout(3600.0, connect=mac.health_timeout_s)) as client:
+            client.get("/health").raise_for_status()
+            with video.open("rb") as s, webcam.open("rb") as w, client.stream(
+                    "POST", "/v1/video/side-by-side",
+                    files={"slides": (video.name, s, "video/mp4"), "webcam": (webcam.name, w, "video/mp4")},
+                    data={"height": str(HEIGHT), "webcam_width": str(WEBCAM_WIDTH), "audio": audio}) as r:
+                if r.status_code != 200:
+                    return f"Mac answered {r.status_code}: {r.read()[:200].decode(errors='replace')}"
+                with part.open("wb") as f:
+                    for chunk in r.iter_bytes(1 << 20):
+                        f.write(chunk)
+    except httpx.HTTPError as exc:
+        part.unlink(missing_ok=True)
+        return f"Mac not reachable ({type(exc).__name__})"
+    return None if part.exists() and part.stat().st_size > 0 else "Mac sent an empty file"
+
+
+def combine(video: Path, webcam: Path, rep=None, use_mac: bool = True) -> bool:
     """Combine now (minutes). On success `video` is the combined picture and the originals are kept beside it."""
+    say = rep or (lambda _msg: None)
+    if _sibling(video, SLIDES):  # combined before: the originals must stay as they are
+        say(f"inbox: {video.name} was combined before; not again")
+        return False
     part = video.with_name(f".{video.stem}.combining.mp4")
     _, slides_audio = _codecs(video)
     _, webcam_audio = _codecs(webcam)
     audio_from, audio_codec = (0, slides_audio) if slides_audio else ((1, webcam_audio) if webcam_audio else (None, None))
-    ok = False
-    for node in ([amd_render_node()] if amd_render_node() else []) + [None]:  # AMD chip first, else the CPU
-        cmd = command(video, webcam, part, audio_from, audio_codec, node)
-        if subprocess.run(cmd, capture_output=True, check=False).returncode == 0 and part.stat().st_size > 0:
-            ok = True
+    why = on_mac(video, webcam, part, {0: "slides", 1: "webcam"}.get(audio_from, "none")) if use_mac else "off"
+    ok = why is None
+    if not ok:
+        say(f"inbox: combining {video.name} on the laptop (Mac: {why})")
+    node = amd_render_node()
+    for hw in ([node] if node else []) + [None]:  # the laptop's AMD chip, the CPU only as a last resort
+        if ok:
             break
+        cmd = command(video, webcam, part, audio_from, audio_codec, hw)
+        done = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        ok = done.returncode == 0 and part.exists() and part.stat().st_size > 0
+        if not ok:
+            say(f"inbox: combining on {'the AMD chip' if hw else 'the CPU'} failed: {done.stderr.strip()[-300:]}")
     if not ok:
         part.unlink(missing_ok=True)
         _failed_marker(video).touch()
@@ -107,7 +163,7 @@ def start(video: Path, webcam: Path, rep=None) -> None:
             return
 
         def run():
-            ok = combine(video, webcam)
+            ok = combine(video, webcam, rep)
             if rep:
                 rep(f"inbox: {'combined' if ok else 'could not combine'} slides and webcam of {video.name}")
 

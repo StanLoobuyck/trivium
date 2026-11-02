@@ -46,6 +46,18 @@ def test_parts_are_not_lectures_and_the_pair_waits_until_both_are_complete(box, 
     assert not f["ready"] and f["combine"].endswith("DEP les 11.webcam.mp4") and "combining" in f["why"]
 
 
+def test_a_combined_recording_is_queued_and_not_combined_again(box, monkeypatch):
+    conf, root, queue, tick = box
+    monkeypatch.setattr(q, "Queue", lambda: queue)
+    dep = root / "digitale-elektronica"
+    put(dep / "les 7.slides.mp4", 3600)
+    put(dep / "les 7.webcam.mp4", 3600)
+    put(dep / "les 7.mp4", 120)                            # the combined picture
+    put(dep / "les 7.pdf", 3600)
+    (f,) = inbox.scan(conf, load_courses())
+    assert f["ready"] and "combine" not in f and Path(f["media"]).name == "les 7.mp4"
+
+
 def test_a_pair_that_cannot_be_combined_goes_on_as_slides(box, monkeypatch):
     conf, root, queue, tick = box
     monkeypatch.setattr(q, "Queue", lambda: queue)
@@ -63,7 +75,7 @@ def test_combine_puts_both_pictures_side_by_side(tmp_path, monkeypatch, sound_on
     monkeypatch.setattr(pair, "amd_render_node", lambda: None)   # the CPU path, the same on every machine
     slides = clip(tmp_path / "les 4.mp4", "1280x720", audio=sound_on == "slides")
     webcam = clip(tmp_path / "les 4.webcam.mp4", "640x480", audio=sound_on == "webcam")
-    assert pair.combine(slides, webcam)
+    assert pair.combine(slides, webcam, use_mac=False)
 
     out = streams(tmp_path / "les 4.mp4")
     video = next(s for s in out if s["codec_type"] == "video")
@@ -72,11 +84,15 @@ def test_combine_puts_both_pictures_side_by_side(tmp_path, monkeypatch, sound_on
     assert [s["codec_name"] for s in out if s["codec_type"] == "audio"] == ["aac"]
     assert (tmp_path / "les 4.slides.mp4").is_file() and webcam.is_file()
     assert not list(tmp_path.glob(".*"))                          # no leftovers
+    # Combined once is enough: the result and the webcam beside it are no pair any more (this looped once).
+    assert pair.webcam_of(tmp_path / "les 4.mp4") is None
+    assert not pair.combine(tmp_path / "les 4.mp4", webcam, use_mac=False)
+    assert streams(tmp_path / "les 4.slides.mp4")[0]["width"] == 1280   # the original slides, untouched
 
 
 def test_combine_failure_is_marked_and_keeps_the_originals(tmp_path, monkeypatch):
     monkeypatch.setattr(pair, "amd_render_node", lambda: None)
     slides = put(tmp_path / "les 5.mp4", 0, b"not a video")
     webcam = put(tmp_path / "les 5.webcam.mp4", 0, b"not a video")
-    assert not pair.combine(slides, webcam)
+    assert not pair.combine(slides, webcam, use_mac=False)
     assert pair.failed(slides) and slides.read_bytes() == b"not a video" and webcam.is_file()

@@ -26,7 +26,9 @@ from pathlib import Path
 
 import httpx
 from fastapi import Body, Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from starlette.background import BackgroundTask
 
 HERE = Path(__file__).resolve().parent
 # Short names the laptop sends → MLX weights on Hugging Face (downloaded once to ~/.cache/huggingface)
@@ -227,6 +229,60 @@ async def transcriptions(
     response = to_verbose_json(out["result"], duration, name, out["elapsed"])
     response["x_mac"]["carry_prompt"] = bool(carry_prompt)
     return response
+
+
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
+_combine_lock = threading.Lock()  # one at a time: libx264 already uses every core
+
+
+def side_by_side_command(slides: Path, webcam: Path, out: Path, height: int, webcam_width: int, audio: str) -> list[str]:
+    """Same layout as the laptop's pair.py: slides at full height, the webcam smaller beside them, on black.
+    libx264 on the CPU: measured faster than VideoToolbox here (11x vs 5.6x real time) and 4x smaller."""
+    layout = (f"[0:v]scale=-2:{height},setsar=1[s];"
+              f"[1:v]scale={webcam_width}:{height}:force_original_aspect_ratio=decrease,setsar=1,"
+              f"pad={webcam_width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black[c];[s][c]hstack=inputs=2,format=yuv420p[v]")
+    cmd = [FFMPEG, "-nostdin", "-hide_banner", "-loglevel", "error", "-y", "-i", str(slides), "-i", str(webcam),
+           "-filter_complex", layout, "-map", "[v]"]
+    if audio in ("slides", "webcam"):
+        cmd += ["-map", f"{0 if audio == 'slides' else 1}:a:0", "-c:a", "aac", "-b:a", "128k"]
+    return cmd + ["-c:v", "libx264", "-preset", "veryfast", "-crf", "26", "-g", "50",
+                  "-movflags", "+faststart", "-use_editlist", "0", "-f", "mp4", str(out)]
+
+
+@app.post("/v1/video/side-by-side", dependencies=[Depends(check_token)])
+async def side_by_side(
+    slides: UploadFile = File(...),
+    webcam: UploadFile = File(...),
+    height: int = Form(1080),
+    webcam_width: int = Form(640),
+    audio: str = Form("slides"),  # whose sound: "slides", "webcam" or "none"
+):
+    """Two pictures of one recording in → one mp4 out (Verbatim's pair.py; the laptop stays cool)."""
+    if not (240 <= height <= 2160 and 160 <= webcam_width <= 1920):
+        raise HTTPException(status_code=400, detail="height or webcam_width out of range")
+    work = Path(tempfile.mkdtemp(prefix="side-by-side-"))
+    try:
+        paths = []
+        for name, upload in (("slides", slides), ("webcam", webcam)):
+            path = work / f"{name}{Path(upload.filename or '.mp4').suffix or '.mp4'}"
+            with path.open("wb") as f:
+                shutil.copyfileobj(upload.file, f, 1 << 20)
+            paths.append(path)
+        out = work / "out.mp4"
+        cmd = side_by_side_command(paths[0], paths[1], out, height, webcam_width, audio)
+
+        def run():
+            with _combine_lock:
+                return subprocess.run(cmd, capture_output=True, text=True, check=False)
+
+        done = await asyncio.to_thread(run)
+        if done.returncode != 0 or not out.exists():
+            raise HTTPException(status_code=422, detail=f"ffmpeg failed: {done.stderr[-300:]}")
+    except BaseException:
+        shutil.rmtree(work, ignore_errors=True)
+        raise
+    return FileResponse(out, media_type="video/mp4", filename="side-by-side.mp4",
+                        background=BackgroundTask(shutil.rmtree, work, ignore_errors=True))
 
 
 def main() -> None:
