@@ -1,12 +1,19 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 met slides-knop; Verbatim met Bezig, slides-regels en LaTeX-notities (Opus 5.5), nu als aanvulling naast de slides en per vak instelbaar. Geverifieerd: 132 unit, 94 + 31 SwiftSkip, 265 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** de nieuwe notitiestijl op een echte les (Les 11 deel 3 nog in de oude stijl), modus "Zonder slides" op een echte les, update naar 4.5.0 in Zen, LaTeX op een PPTX-les en een lange les, Safari, Lighthouse.
+1. **Klaar:** fase 0 t/m 5; fase 6 grotendeels: landingspagina, privacypagina en READMEs in NL en EN. LaTeX-notities naast de slides, per vak instelbaar. Geverifieerd: 137 unit, 94 + 31 Velox, 265 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
+2. **Niet getest:** landings- en privacypagina op echte toestellen; Velox-download van de pagina in Zen; nieuwe notitiestijl (eigenaar maakt Les 11 deel 3 opnieuw); modus "Zonder slides" op een echte les; LaTeX op een PPTX-les en een lange les; Safari, Lighthouse.
 3. **Onafgewerkt:** slidekoppeling in Verbatim mislukt bij lessen in delen (skill omzeilt dat); schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) onbetrouwbaar; fase 2 in `PLAN.md` noemt nog Cloudflare.
-4. **Volgende stap:** Les 11 deel 3 opnieuw maken in de nieuwe stijl en laten beoordelen; daarna fase 6 in `PLAN.md`.
-5. **Wacht op eigenaar:** worker herstarten (`systemctl --user restart lecture-worker.service`) vóór een vak op "Zonder slides" gezet wordt; `~/Downloads/latex-notes.zip` uploaden op claude.ai (de skill is weer veranderd: eerst opnieuw maken); de twee vrienden de link naar 4.5.0 sturen.
+4. **Volgende stap:** fase 6 afronden: oordeel van de eigenaar over pagina's en Les 11; daarna eventueel een eerste Sequo-release (`inhaal-v1.0.0`) en de vinkjes in `PLAN.md`.
+5. **Wacht op eigenaar:** oordeel over Les 11 in de nieuwe stijl; pagina's nakijken op iPhone en laptop; `~/Downloads/latex-notes.zip` opnieuw maken en uploaden op claude.ai (skill veranderd); de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — fase 6: landingspagina, privacy en READMEs
+- Keuzes eigenaar: geschreven voor KU Leuven-studenten, link zelf delen (`noindex` blijft); één pagina met drie kaarten.
+- Landingspagina in NL en EN (browsertaal, NL/EN-knop, keuze bewaard). Velox-versie en downloads komen bij de build uit `updates.json` (`scripts/build-site.mjs`), dus elke release werkt de pagina bij. Op brede schermen drie kolommen.
+- Privacypagina `/privacy/` met een stuk per app, ankers vanaf elke kaart. Feiten nagekeken in de code: Sequo heeft geen netwerkverkeer buiten een eigen hub; Velox alleen bij downloads (nu ook slides) en de updatecheck van de browser; Verbatim stuurt alleen naar diensten die je zelf instelt.
+- READMEs: Sequo nieuw (NL + EN); Velox heet Velox, downloads via de Trivium-pagina (de links wezen nog naar 4.4.1), dode link naar `ROADMAP.md` weg; Verbatim met experimentele intro en Nederlandse handleiding.
+- Getest: 137 unit (5 nieuw voor de site), 94 Velox, 265 Verbatim; beide pagina's op 375 en 1440 px, licht en donker, NL en EN: 0 px overloop, geen fouten of 404's.
 
 ## 2026-11-02 — LaTeX-notities naast de slides
 - Eigenaarsoordeel Les 11: oké, niet wauw; te woordig, meer structuur. Studeert met de slides ernaast. Sequo-badges werken.
