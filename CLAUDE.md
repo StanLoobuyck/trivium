@@ -118,6 +118,11 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - De repo en de map heten `trivium`. Updates van Velox lopen via `site/swiftskip/updates.json`; de oude repo's `studie-ecosysteem` en `SwiftSkip` zijn weg (2026-11-02).
 - Map of repo hernoemd: venvs wijzen nog naar het oude pad. Herstel met `uv sync --reinstall` in `apps/hub` en `apps/verbatim`.
 - Zen verbergt het Extensies-paneel: zet `extensions.unifiedExtensions.button.always_visible` op true om een add-on vast te maken.
+- LaTeX-skill: bron is `apps/verbatim/skill/latex-notes`; `~/.claude/skills/latex-notes` is een link. De gesyncte kopie onder `~/.claude/skills/synced/` komt van claude.ai en verandert alleen door opnieuw te uploaden: vergelijk die eerst.
+- De worker bewaart `latex.py` in zijn geheugen na de eerste LaTeX-taak: wijzigingen daar vragen een herstart (`SKILL.md` en het sjabloon niet).
+- Toledo is Blackboard Ultra: relatieve `fetch`-adressen op de pagina komen op de CDN uit; de slides-knop leest de link van Ally en gebruikt `location.origin`.
+- Sequo rekent Verbatim-badges bij elke sync opnieuw uit (`reconcileNotes`) uit alle berichten op de hub.
+- `ls` is hier een alias met iconen: gebruik `\ls` in `$(...)`.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
 - SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
   daar lokaal.
