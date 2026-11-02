@@ -1,17 +1,20 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** fase 0 t/m 6 (alle fasen uit `PLAN.md`). Fase 6: landingspagina, privacypagina, READMEs in NL en EN, Sequo 1.0.0 als release (`inhaal-v1.0.0`). LaTeX-notities naast de slides, per vak instelbaar. Geverifieerd: 137 unit, 94 + 31 Velox, 265 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
+1. **Klaar:** fase 0 t/m 6, en alles hernoemd naar Sequo en Velox (ook mappen, id's, opslag, adressen; hub = `trivium-hub`). Releases: `sequo-v1.0.0`, `velox-v5.0.0`; oude releases en tags weg. Eerst `CLAUDE.md`, dan `npm test`.
 2. **Niet getest:** nieuwe notitiestijl op meer dan één les; modus "Zonder slides" op een echte les; LaTeX op een PPTX-les en een lange les; Safari, Lighthouse.
 3. **Onafgewerkt:** slidekoppeling in Verbatim mislukt bij lessen in delen (skill omzeilt dat); schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) onbetrouwbaar; fase 2 in `PLAN.md` noemt nog Cloudflare.
 4. **Volgende stap:** geen fase meer open. Kies met de eigenaar uit punt 3 en 6, of nieuwe wensen.
-5. **Wacht op eigenaar:** `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
+5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
 ## 2026-11-02 — oude namen weg: alles heet Sequo en Velox
 - Keuze eigenaar: ook technisch geen `inhaal` of `swiftskip` meer, verse start (nog niemand gebruikte de apps echt). Mappen `apps/sequo` en `apps/velox`, Dexie-database `sequo`, opslagsleutels, berichtkanaal `velox-sequo`, event-bron `velox`, Pages-pad `/trivium/sequo/`, feed `site/velox/updates.json`, add-on-id `velox@stanloobuyck.github.io`. Hub heet `trivium-hub` (map, LaunchDaemon `be.trivium.hub`, `/api`-antwoord).
 - "Inhaalplan" en "inhalen" blijven: gewoon Nederlands. Historische regels in de changelogs en de git-geschiedenis houden de oude namen.
-- Getest vóór de release: 136/137 unit (alleen de landingspagina mist nog een Velox-release), 94 Velox + lint schoon, 31 Velox-e2e, 16 hub, 265 Verbatim, 134 schermtests.
+- Getest: 137 unit, 94 Velox + lint schoon, 31 Velox-e2e, 16 hub, 265 Verbatim, 134 schermtests. Signed xpi nagekeken: id `velox@…`, update-adres `/trivium/velox/`. Live: site, `/sequo/`, feed en xpi geven 200, geen oude namen op de pagina.
+- Releases: Velox 5.0.0 (nieuw add-on-id, dus nieuwe installatie), Sequo 1.0.0 als `sequo-v1.0.0`; `inhaal-v1.0.0` en `swiftskip-v4.1.0`–`4.5.0` verwijderd.
+- Mac: hub verhuisd naar `~/trivium-hub` met LaunchDaemon `be.trivium.hub`, lege database, zelfde poort 8788; `/api/health` antwoordt `trivium-hub`. `~/inhaal-hub` blijft als back-up.
+- Fouten onderweg: rename-commit gepusht vóór de Velox-release, dus twee CI-runs faalden op de lege feed en de oude site wees even naar verwijderde downloads; daarna faalde de Pages-deploy op een netwerkfout (opnieuw gestart, nu groen). Sudo via `!` werkt niet: geen terminal, eigenaar draait sudo-commando's voor de Mac in een eigen venster.
 
 ## 2026-11-02 — fase 6: landingspagina, privacy en READMEs
 - Eigenaar: pagina's, Velox-download en Les 11 in de nieuwe stijl in orde. Sequo 1.0.0 uitgebracht als `inhaal-v1.0.0` (zonder "Latest": dat blijft bij Velox). Fase 6 afgevinkt in `PLAN.md`.
