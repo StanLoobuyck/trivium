@@ -1,7 +1,7 @@
 // De toestand van de app: laden, wijzigen en bij elke wijziging de schermen verwittigen.
 import { findCourseByCode, proposeCourses } from "../domain/courses.js";
 import { mergeRooster } from "../domain/merge.js";
-import { planRecordings } from "../domain/recordings.js";
+import { planRecordings, reconcileNotes } from "../domain/recordings.js";
 import { computeNumbers } from "../domain/sessions.js";
 import { db, getMeta, requestPersistence, setMeta, stamp } from "./index.js";
 
@@ -107,6 +107,14 @@ export async function ingestRecordings(events) {
   const result = await applyRecordingPlan(fresh);
   await setMeta("seenEvents", [...seen, ...fresh.map((e) => e.id)].slice(-1000));
   return result;
+}
+
+// Zet de badges van Verbatim op de juiste les, ook als de lesnummers intussen verschoven zijn.
+export async function reconcileVerbatim(events) {
+  const changes = reconcileNotes(events, {
+    courses: state.courses, sessions: state.sessions, numbers: computeNumbers(state.sessions), now: new Date(),
+  });
+  await Promise.all([...changes].map(([id, fields]) => updateSession(id, fields)));
 }
 
 export async function chooseRecording(key, sessionId) {

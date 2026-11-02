@@ -3,7 +3,7 @@ import { closeMenus, scroller, setBarTitle, stopPoll } from "./ui.js";
 import { drawChrome, ensureSideData } from "./sidebar.js";
 import { renderAdd } from "../screens/add.js";
 import { renderArchive } from "../screens/archive.js";
-import { renderDashboard } from "../screens/dashboard.js";
+import { renderDashboard, renderProgress } from "../screens/dashboard.js";
 import { renderLecture } from "../screens/lecture.js";
 import { renderSetup } from "../screens/setup.js";
 
@@ -21,6 +21,7 @@ export async function route() {
   if (page === "add") { ensureSideData(); return renderAdd(); }
   if (page === "archive") { ensureSideData(); return renderArchive(); }
   if ((page === "c" || page === "f") && arg) return renderDashboard(`${page}:${decodeURIComponent(arg)}`);
-  return renderDashboard("", page === "progress" ? "progress" : null);
+  if (page === "progress") return renderProgress();
+  return renderDashboard();
 }
 window.addEventListener("hashchange", route);

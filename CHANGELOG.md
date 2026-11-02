@@ -3,10 +3,18 @@
 ## ▶ Start here (volgende sessie)
 1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 uit met slides-knop, Verbatim-fix geïnstalleerd. Geverifieerd: `.xpi` van 4.5.0 online gelezen, 128 unit, 94 + 31 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
 2. **Niet getest:** update naar 4.5.0 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
-3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
+3. **Onafgewerkt:** schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) zijn onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
 4. **Volgende stap:** de LaTeX-skill in Verbatim, dan fase 6.
 5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — Verbatim-badges op de juiste les in Sequo, tab Bezig
+- Eigenaarstest: niets van Verbatim te zien bij de juiste les. De berichten kwamen aan (9), maar 7 badges stonden op latere lessen (les 1 op 4 november) en 1 ontbrak: de nummering was verschoven na het verwerken, en een bericht werd nooit opnieuw bekeken.
+- Sequo rekent de badges nu bij elke sync uit alle `notes.ready`-berichten (`reconcileNotes`). Gesimuleerd op een privékopie van de hubdata: 7 weg, 8 gezet, tweede ronde 0 wijzigingen.
+- Beperking: een opname zonder lesnummer in de titel en zonder les op die datum vindt geen les.
+- Verbatim: tab Bezig is een eigen pagina met alleen lopende lessen, altijd zichtbaar; Bibliotheek heeft nog één knop ernaartoe. Bekeken op 375 en 1440 px, licht en donker.
+- Slides: elke les bewaart al een eigen kopie in `jobs/<les>/slides/` (9 van 9 nagekeken), bruikbaar voor de LaTeX-skill.
+- Tests: 132 unit, 234+ Verbatim, 133 schermtests; `design light` faalde eenmalig in Firefox, daarna 3/3 goed.
 
 ## 2026-11-02 — slides over meerdere lessen
 - Keuze eigenaar: een les zonder eigen slides wacht 30 minuten en krijgt dan alle slides van het vak; de uitlijning kiest. Voorheen wachtte ze voor altijd.

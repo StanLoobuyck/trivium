@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findSession, planRecordings, recordingKey } from "./recordings.js";
+import { findSession, planRecordings, reconcileNotes, recordingKey } from "./recordings.js";
 
 const now = new Date("2026-11-01T12:00:00+01:00");
 const courses = [{ id: "c1", name: "DSV", codes: ["H01L6a"] }, { id: "c2", name: "DEP", codes: ["H01Z1a"] }];
@@ -94,6 +94,35 @@ describe("notes.ready", () => {
     const plan = planRecordings([notes(recording({ recordedOn: "2025-01-01" }))], context);
     expect(plan.changes.size).toBe(0);
     expect(plan.unmatched).toEqual([]);
+  });
+});
+
+describe("reconcileNotes", () => {
+  const notes = (rec, job, kind = "transcript", at = "2026-11-01T10:00:00+01:00") =>
+    event("notes.ready", rec, { kind, verbatimJob: job }, at);
+  const with_ = (id, fields) => sessions.map((s) => (s.id === id ? { ...s, ...fields } : s));
+
+  it("verplaatst een badge van de verkeerde les naar de juiste", () => {
+    const list = with_("b", { verbatimJob: "job-1", notesKind: "transcript" });
+    const changes = reconcileNotes([notes(recording({ lectureNumber: 1 }), "job-1")], { ...context, sessions: list });
+    expect(changes.get("a")).toEqual({ verbatimJob: "job-1", notesKind: "transcript" });
+    expect(changes.get("b")).toEqual({ verbatimJob: null, notesKind: null });
+  });
+
+  it("verandert niets als alles al klopt, dus geen eindeloze sync", () => {
+    const list = with_("a", { verbatimJob: "job-1", notesKind: "transcript" });
+    expect(reconcileNotes([notes(recording({ lectureNumber: 1 }), "job-1")], { ...context, sessions: list }).size).toBe(0);
+  });
+
+  it("laat notities winnen van een later transcript", () => {
+    const events = [notes(recording({ lectureNumber: 1 }), "job-1", "notes"),
+      notes(recording({ lectureNumber: 1 }), "job-1", "transcript", "2026-11-02T10:00:00+01:00")];
+    expect(reconcileNotes(events, context).get("a").notesKind).toBe("notes");
+  });
+
+  it("raakt een badge zonder bericht niet aan", () => {
+    const list = with_("b", { verbatimJob: "ander", notesKind: "notes" });
+    expect(reconcileNotes([notes(recording({ lectureNumber: 1 }), "job-1")], { ...context, sessions: list }).has("b")).toBe(false);
   });
 });
 

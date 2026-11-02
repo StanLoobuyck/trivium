@@ -13,6 +13,8 @@ export const recordingKey = (recording) => `${codeKey(recording.courseCode)}|${r
 
 const hasOtherRecording = (session, key) => (session.recordings ?? []).some((r) => r.key && r.key !== key);
 
+const NOTE_RANK = { transcript: 1, notes: 2 };
+
 function firstUsable(list, now) {
   const sorted = [...list].sort((a, b) => (a.type !== "lecture") - (b.type !== "lecture") || a.start.localeCompare(b.start));
   return sorted.find((s) => !isDone(s, now)) ?? sorted[0] ?? null;
@@ -65,6 +67,30 @@ function addUnmatched(unmatched, event, key, course) {
   return entry ? unmatched.map((u) => (u === entry ? updated : u)) : [...unmatched, updated];
 }
 
+// Lesnummers kunnen achteraf verschuiven (rooster aangevuld), dus een badge kan op de verkeerde les staan. Dit rekent
+// uit alle notes.ready-berichten uit waar elke badge hoort. Alleen badges uit die berichten worden weggehaald.
+export function reconcileNotes(events, { courses, sessions, numbers, now }) {
+  const wanted = new Map();
+  const known = new Set();
+  for (const event of [...events].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))) {
+    if (event.type !== "notes.ready") continue;
+    const { kind, verbatimJob } = event.payload;
+    known.add(verbatimJob);
+    const { session } = findSession(event.payload.recording, { courses, sessions, numbers, now });
+    if (!session) continue;
+    if ((NOTE_RANK[kind] ?? 0) >= (NOTE_RANK[wanted.get(session.id)?.notesKind] ?? 0)) {
+      wanted.set(session.id, { verbatimJob, notesKind: kind });
+    }
+  }
+  const changes = new Map();
+  for (const session of sessions.filter(isAlive)) {
+    const target = wanted.get(session.id);
+    if (target && (target.verbatimJob !== session.verbatimJob || target.notesKind !== session.notesKind)) changes.set(session.id, target);
+    else if (!target && known.has(session.verbatimJob)) changes.set(session.id, { verbatimJob: null, notesKind: null });
+  }
+  return changes;
+}
+
 // Rekent uit wat er moet veranderen; `forced` koppelt een opname aan een les die de gebruiker koos.
 export function planRecordings(events, { courses, sessions, numbers, now, unmatched = [], forced = {} }) {
   const working = sessions.map((s) => ({ ...s }));
@@ -76,8 +102,6 @@ export function planRecordings(events, { courses, sessions, numbers, now, unmatc
     changes.set(session.id, { ...changes.get(session.id), ...fields });
   };
 
-  const noteMark = { transcript: 1, notes: 2 };
-
   for (const event of [...events].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))) {
     const { recording } = event.payload;
     const key = recordingKey(recording);
@@ -87,7 +111,7 @@ export function planRecordings(events, { courses, sessions, numbers, now, unmatc
     if (event.type === "notes.ready") {
       // Elk toestel haalt dit bij de hub; zonder les is er geen badge, en dat is geen vraag aan de gebruiker waard.
       const { kind, verbatimJob } = event.payload;
-      if (session && (noteMark[kind] ?? 0) >= (noteMark[session.notesKind] ?? 0)) change(session, { verbatimJob, notesKind: kind });
+      if (session && (NOTE_RANK[kind] ?? 0) >= (NOTE_RANK[session.notesKind] ?? 0)) change(session, { verbatimJob, notesKind: kind });
       continue;
     }
     if (!session) { waiting = addUnmatched(waiting, event, key, course); continue; }

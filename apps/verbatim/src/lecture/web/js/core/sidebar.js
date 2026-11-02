@@ -46,7 +46,7 @@ export function drawSidebar() {
   const [, page, arg] = location.hash.split("/");
   const sel = page === "c" || page === "f" ? `${page}:${decodeURIComponent(arg || "")}` : "";
   const done = S.lectures.filter((l) => l.id);
-  const busy = S.queue.items.filter((i) => i.status !== "done").length;
+  const busy = S.queue.items.filter((i) => i.status !== "done").length + (S.inbox?.waiting?.length ?? 0);
   const home = !page || page === "lecture";
   const counts = (pred) => done.filter(pred).length;
   const current = sortedCourses().filter((c) => !isArchived(c.id));
@@ -55,7 +55,7 @@ export function drawSidebar() {
   const nav = `
     <ul class="list list-side">
       ${rowLink("#/", t("nav_library"), done.length, home, icon("book"))}
-      ${busy ? rowLink("#/progress", t("nav_progress"), busy, page === "progress", icon("overview")) : ""}
+      ${rowLink("#/progress", t("nav_progress"), busy, page === "progress", icon("overview"))}
     </ul>
     ${current.length ? `<p class="group-title side-title">${esc(courseTitle)}</p>
     <ul class="list list-side">${current.map((c) => rowLink(`#/c/${encodeURIComponent(c.id)}`, c.name, counts((l) => l.course === c.id), sel === `c:${c.id}`,

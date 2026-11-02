@@ -1,4 +1,4 @@
-// Home = the library: what's in progress + all lectures (or one course / folder). Polled every 3 s.
+// Home = the library: all lectures (or one course / folder). Bezig = only what is running. Both polled every 3 s.
 import { api, post } from "../core/api.js";
 import { $, $$, view } from "../core/dom.js";
 import { esc } from "../core/format.js";
@@ -8,19 +8,24 @@ import { paint, poll, toast } from "../core/ui.js";
 import { progressHtml, statusText } from "../shared/jobstatus.js";
 import { drawLibrary, setLibrarySel } from "./library.js";
 
-// sel: "" (all), "c:<course>" or "f:<folder>"; focus = "progress" scrolls to the in-progress list
-export async function renderDashboard(sel = "", focus = null) {
+// sel: "" (all), "c:<course>" or "f:<folder>"
+export async function renderDashboard(sel = "") {
   setLibrarySel(sel);
   view.innerHTML = `
     <h1 class="large-title" id="lib-title"></h1>
     <nav class="chips narrow-only" id="lib-chips" aria-label="${t("nav_courses")}"></nav>
     <div class="overview">
-      <div class="overview-side flow"><section id="lib-hero"></section><section id="jobs-wrap"></section></div>
+      <div class="overview-side flow"><section id="lib-hero"></section><section id="lib-busy"></section></div>
       <div class="overview-main flow"><section class="stack-tight" id="lib-tools"></section><section id="lib-wrap"></section></div>
       <div class="overview-extra flow" id="lib-actions"></div>
     </div>`;
   await refreshDashboard();
-  if (focus === "progress") $("#jobs-wrap")?.scrollIntoView({ block: "start" });
+  poll(refreshDashboard, 3000);
+}
+
+export async function renderProgress() {
+  view.innerHTML = `<h1 class="large-title">${t("nav_progress")}</h1><section class="progress-page" id="jobs-wrap"></section>`;
+  await refreshDashboard();
   poll(refreshDashboard, 3000);
 }
 
@@ -32,20 +37,28 @@ export async function refreshDashboard() {
   S.setup = s; S.queue = q; S.lectures = l; S.folders = f; S.sem = sem; S.inbox = inbox;
   markSideLoaded();
   drawSidebar();
-  if (!$("#jobs-wrap")) return;
-  drawJobs();
-  drawLibrary();
+  if ($("#jobs-wrap")) drawJobs();
+  if ($("#lib-wrap")) { drawBusyLink(); drawLibrary(); }
 }
 window.addEventListener("lt:folders", () => { if ($("#lib-wrap")) { $("#lib-wrap")._html = null; drawLibrary(); } });
 
-// --- in progress (only shown when something is) --------------------------------------------------------------
+// --- in progress --------------------------------------------------------------------------------------------
+
+const activeJobs = () => S.queue.items.filter((i) => i.status !== "done").reverse();
+const waitingJobs = () => S.inbox?.waiting || [];  // watch folder: recordings that can't be queued yet
+
+// The tab bar has no Bezig, so the library always leads there.
+function drawBusyLink() {
+  const n = activeJobs().length + waitingJobs().length;
+  paint($("#lib-busy"), n ? `<a class="btn btn-block" href="#/progress">${t("nav_progress")} · ${n}</a>` : "");
+}
 
 function drawJobs() {
-  const items = S.queue.items.filter((i) => i.status !== "done").reverse();
-  const waiting = S.inbox?.waiting || [];  // watch folder: recordings that can't be queued yet
+  const items = activeJobs();
+  const waiting = waitingJobs();
   const wrap = $("#jobs-wrap");
-  if (!paint(wrap, items.length || waiting.length ? `<h2 class="group-title" id="prog">${t("progress")}</h2>
-    <div class="card flat">${items.map(jobHtml).join("")}${waiting.map(inboxHtml).join("")}</div>` : "")) return;
+  if (!paint(wrap, items.length || waiting.length ? `<div class="card flat">${items.map(jobHtml).join("")}${waiting.map(inboxHtml).join("")}</div>`
+    : `<div class="empty"><p>${t("progress_empty")}</p></div>`)) return;
   $$("[data-qa]", wrap).forEach((b) => b.addEventListener("click", async () => {
     try { await post(`/api/queue/${b.dataset.id}/${b.dataset.qa}`); } catch (e) { toast(e.message, true); }
     refreshDashboard();

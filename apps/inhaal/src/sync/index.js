@@ -59,18 +59,14 @@ async function refreshRooster(hash) {
   onRooster(result);
 }
 
-// Berichten van Verbatim. Elk toestel haalt ze zelf op; de cursor blijft lokaal.
+// Berichten van Verbatim. Elk toestel haalt ze zelf op, telkens allemaal: zo volgen de badges een gewijzigd rooster.
 async function fetchEvents() {
-  const after = await getMeta("eventCursor", 0);
-  const answer = await request(`events?after=${after}`).catch(() => null);
+  const answer = await request("events?after=0").catch(() => null);
   if (!answer) return; // een bericht dat niet aankomt, breekt niets: de gewone sync gaat gewoon door
-  const { events, cursor } = answer;
-  if (!events.length) return;
-  if (store.state.semester) {
-    await store.ingestRecordings(events);
-    onChange();
-  }
-  await setMeta("eventCursor", cursor);
+  if (!answer.events.length || !store.state.semester) return;
+  await store.ingestRecordings(answer.events);
+  await store.reconcileVerbatim(answer.events);
+  onChange();
 }
 
 function setStatus(status) {
