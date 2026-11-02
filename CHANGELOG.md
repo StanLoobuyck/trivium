@@ -9,6 +9,8 @@
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
 ## 2026-11-02 — LaTeX-notities in Verbatim
+- Correctie: de eerste aanpassing vertrok van de oudere lokale kopie (18 okt). De gesyncte versie (25 okt) had al dichtheidsregels; die zijn nu overgenomen. De gesyncte kopie heeft geen scripts en blijft los van de repo.
+- Uit een review: paden via `<skill>`, `tectonic` zonder `cd`, maximaal 3 pogingen per crop, standaardopmerkingen in de taal van de les. Verbatim geeft het aantal pagina's vooraf mee voor het paginabudget.
 - Skill `latex-notes` zit nu in `apps/verbatim/skill/`; `~/.claude/skills/latex-notes` is een link daarnaartoe (install.sh legt die). De kopie in de anthropic-skills-plugin blijft apart.
 - Fouten uit de review opgelost: PPTX-afbeeldingen ontbraken bij een Verbatim-les; niet-besproken slides hadden geen tekst; previews van meerdere decks overschreven elkaar. Nieuw: pagina's van andere lessen blijven weg uit grote decks.
 - Knop LaTeX-notities op het lesscherm: wachtrij, Claude Sonnet 5.5 via `claude -p`, stappen op Bezig, daarna PDF openen. Voorbereiding en cursusmap doet Verbatim zelf, dat spaart quota. Zelfde daglimiet en schema als de notities. Resultaat in `~/Documents/Lesnotities/<vak>/`.

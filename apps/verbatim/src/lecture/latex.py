@@ -27,7 +27,7 @@ from .util import find_claude, read_json, slugify
 SKILL_DIR = Path(__file__).resolve().parents[2] / "skill" / "latex-notes"
 MODEL = "claude-sonnet-5-5"
 TIMEOUT_S = 3600.0
-TOOLS = ["Read", "Write", "Edit", "Glob", "Grep", "Bash(uv run *)", "Bash(cd *)", "Bash(tectonic *)", "Bash(cp *)",
+TOOLS = ["Read", "Write", "Edit", "Glob", "Grep", "Bash(uv run *)", "Bash(tectonic *)", "Bash(cp *)",
          "Bash(mkdir *)", "Bash(ls *)", "Bash(command -v *)"]
 BEGIN, END = "% LESSEN BEGIN", "% LESSEN END"
 
@@ -91,14 +91,23 @@ def setup_course(folder: Path, course: str, manifest: dict, lecturer: str | None
     return tex
 
 
-def prompt(job_root: Path, work: Path, folder: Path, tex: Path, manifest: dict) -> str:
+def pdf_pages(pdf: Path) -> int:
+    import pymupdf
+
+    return pymupdf.open(pdf).page_count if pdf.exists() else 0
+
+
+def prompt(job_root: Path, work: Path, folder: Path, tex: Path, manifest: dict, pages_before: int | None = 0) -> str:
     body = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").split("---", 2)[2]
     number = lecture_nr(manifest)
     given = (f"Started from Verbatim. Lecture: {manifest.get('title')} ({manifest.get('date')}), "
              f"lecture number: {number if number else 'none: use the title'}. Job folder: {job_root}. "
              f"Work folder, already prepared: {work}. Course folder, already set up: {folder}. "
-             f"Lecture file to write: {tex.relative_to(folder)}.")
-    return body.replace("$ARGUMENTS", given).replace("~/.claude/skills/latex-notes", str(SKILL_DIR))
+             f"Lecture file to write: {tex.relative_to(folder)}. "
+             + (f"main.pdf had {pages_before} pages before this lecture." if pages_before is not None else
+                "This lecture is being redone, so main.pdf already holds an older version: judge the page budget "
+                "from the page where the lecture starts and the next one."))
+    return body.replace("$ARGUMENTS", given).replace("<skill>", str(SKILL_DIR))
 
 
 def command(exe: str, job_root: Path, folder: Path) -> list[str]:
@@ -172,8 +181,10 @@ def run(job_root: Path, conf: Config, rep: Reporter) -> Path:
     work = folder / ".work" / tex_name
     prepare(job_root, work)
     lecturer = read_json(work / "lecture.json").get("lecturer")
+    redo = (folder / "lessen" / f"{tex_name}.tex").exists()
     tex = setup_course(folder, folder.name, manifest, lecturer)
     pdf = folder / "main.pdf"
+    pages_before = None if redo else pdf_pages(pdf)
     before = pdf.stat().st_mtime if pdf.exists() else 0.0
 
     proc = subprocess.Popen(command(exe, job_root, folder), cwd=folder, text=True, stdin=subprocess.PIPE,
@@ -184,7 +195,7 @@ def run(job_root: Path, conf: Config, rep: Reporter) -> Path:
         errors: list[str] = []
         reader = threading.Thread(target=lambda: errors.extend(proc.stderr), daemon=True)  # a full pipe would block
         reader.start()
-        proc.stdin.write(prompt(job_root, work, folder, tex, manifest))
+        proc.stdin.write(prompt(job_root, work, folder, tex, manifest, pages_before))
         proc.stdin.close()
         result = follow(proc.stdout, rep)
         proc.wait()

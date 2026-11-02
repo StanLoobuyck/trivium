@@ -48,6 +48,9 @@ def test_prompt_is_for_a_run_without_questions(tmp_path):
     assert "Started from Verbatim" in text and "lecture number: 3" in text and "lessen/2026-10-07_les-3.tex" in text
     assert "$ARGUMENTS" not in text and "~/.claude/skills" not in text and str(latex.SKILL_DIR) in text
     assert not text.lstrip().startswith("name:")
+    assert "<skill>" not in text and "main.pdf had 0 pages" in text
+    assert "Density" in text and "5 pages per hour" in text and "at most 3 tries" in text
+    assert "being redone" in latex.prompt(Path("/jobs/j"), tmp_path / "w", tmp_path / "Vak", tex, MANIFEST, None)
 
 
 def test_command_keeps_the_users_own_settings_out():

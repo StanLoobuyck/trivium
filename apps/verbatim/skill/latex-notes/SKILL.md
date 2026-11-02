@@ -4,7 +4,7 @@ description: Turn a recorded lecture (transcript + PDF/PPTX slides) into complet
 argument-hint: [lecture: job folder or name, e.g. "Les 6 DEP" | transcript file + slide files]
 model: claude-sonnet-5-5
 effort: high
-allowed-tools: Bash(uv run *) Bash(cd *) Bash(tectonic *) Bash(mkdir *) Bash(cp *) Bash(ls *) Bash(command -v *) Read Write Edit Glob Grep
+allowed-tools: Bash(uv run *) Bash(tectonic *) Bash(mkdir *) Bash(cp *) Bash(ls *) Bash(command -v *) Read Write Edit Glob Grep
 ---
 
 # LaTeX lecture notes
@@ -12,10 +12,11 @@ allowed-tools: Bash(uv run *) Bash(cd *) Bash(tectonic *) Bash(mkdir *) Bash(cp 
 Input: $ARGUMENTS
 
 Goal: notes a strong student would want to study from: as compact and visual as good handwritten notes,
-but complete. Everything the lecturer explains, derives or works out goes in, including what is said but
-not on the slides. Nothing invented: every statement comes from the transcript or the slides.
+and complete in information. Every fact, formula, derivation idea, example and warning goes in, including
+what is said but not on the slides; the words around them are what gets squeezed (see Density).
+Nothing invented: every statement comes from the transcript or the slides.
 
-Skill folder: `~/.claude/skills/latex-notes` (scripts in `scripts/`, templates in `templates/`). This is a link to
+`<skill>` below = the folder this SKILL.md is in (scripts in `scripts/`, templates in `templates/`). The source is
 `apps/verbatim/skill/latex-notes` in the Trivium repo: change it there.
 
 **Started from Verbatim** (the input says so): nobody is there to answer, so never ask. Verbatim has already done
@@ -33,8 +34,8 @@ report of step 6.
 
 Run, with WORK = `<course folder>/.work/<lecture file name>/` (see step 2 for the names):
 ```
-uv run ~/.claude/skills/latex-notes/scripts/prepare.py --job <job folder> --out WORK
-uv run ~/.claude/skills/latex-notes/scripts/prepare.py --transcript <file> --slides <pdf/pptx> [--slides …] --out WORK
+uv run <skill>/scripts/prepare.py --job <job folder> --out WORK
+uv run <skill>/scripts/prepare.py --transcript <file> --slides <pdf/pptx> [--slides …] --out WORK
 ```
 It writes `WORK/parts.md` (per part: time range, slide pages, slide text, transcript with [m:ss] stamps),
 `WORK/lecture.json` (course, title, date, language, lecturer, slide files, page sizes) and slide previews in
@@ -62,7 +63,8 @@ Add `\input{lessen/<file>}` between `% LESSEN BEGIN` and `% LESSEN END`, keeping
 
 ## 3. Write the lecture file
 
-Language: the lecture's language (lecture.json `language`); keep technical terms in the language the
+Language: the lecture's language (lecture.json `language`), also for the standard remarks: the Dutch `\opm{…}`
+wordings here become English in an English lecture (`\opm{only on the slide}`, `\opm{work out}`). Keep technical terms in the language the
 lecturer uses for them (English terms in a Dutch lecture stay English).
 
 Start with `\les{<number>}{<main subject of the lecture>}{<date written out>}`.
@@ -75,8 +77,9 @@ matters), so the reader can find the slide and the moment in the recording. With
 **Style of good handwritten notes**, in LaTeX:
 - Short phrases and keywords instead of full paragraphs; full sentences only where an explanation needs it.
 - Logic as arrows: `\pijl` (leads to, so), `\dus` (therefore), `$\Leftrightarrow$`; one step per line.
-- Derivations written out step by step in `align*`, every step the lecturer does (and the obvious missing
-  one), with `\opm{…}` grey remarks saying what happens in a step (`\opm{substitueer $u=RC$}`).
+- Derivations in `align*`, one line per non-trivial step the lecturer takes, with `\opm{…}` grey remarks
+  saying what happens (`\opm{substitueer $u=RC$}`). Pure bookkeeping (expanding, collecting terms) is one
+  line with `\opm{uitwerken}`; never skip a step where something is substituted, approximated or assumed.
 - `\opm{…}` also for the small asides next to a line: names of equations, units, "zie oefenzitting".
 - Comparisons side by side: `\begin{vergelijk} … \tcblower … \end{vergelijk}` (dashed line between).
 - Context, history, "in the real world", tangents: `\begin{kader}[Title] … \end{kader}` (dashed box).
@@ -100,14 +103,31 @@ matters), so the reader can find the slide and the moment in the recording. With
   lecturer ties it to the content; organisational exam info goes in one `kader` at the end if present.
 - Never invent results, numbers or explanations that are not in the material.
 
+**Density**: compress words, never information. The notes must stay short enough to review.
+- Budget: about 5 pages per hour of recording (recording length = last time stamp in `parts.md`; a 2 h
+  lecture ≈ 10 pages). Derivation- or figure-heavy lectures may run ~20% over, talk-heavy ones should come
+  in well under. It is a ceiling, not a target to fill.
+- Write each idea once. Where the lecturer repeats, rephrases or recaps, keep the clearest version (and
+  `\belangrijk` if the repetition signals importance). Slide text the lecturer only reads out is not
+  written twice.
+- One line per idea: keyword or short phrase plus formula. No "de lector legt uit dat…".
+- When something is too long, cut in this order: (1) repetition and recaps, (2) anecdotes and motivation →
+  one line, or a `kader` of at most 3 lines, (3) routine algebra and arithmetic → result plus `\opm`,
+  (4) prose that duplicates a formula or figure, (5) a figure that adds nothing beyond a formula.
+- Never cut: definitions, formulas with their conditions, results, worked-example numbers, warnings and
+  pitfalls, exam hints, and the reason behind a non-obvious step.
+- Use compact forms: `vergelijk` for two-sided comparisons, one `align*` per derivation, `\pijl` chains,
+  small TikZ instead of a large crop. No manual vertical space (`\\[…]`, `\bigskip`, blank-line stacks).
+
 ## 4. Figures
 
 Look at the previews in `WORK/slides/` for the slides of each topic (p162.png = slide page 162).
 - **Real figures** (circuits, layouts, measured plots, photos, complex diagrams): crop them from the PDF as
   a vector image. Copy the PDF to `<course>/slides/` once, then read the box off the preview as fractions
   of the page (0,0 = top left) and run
-  `uv run ~/.claude/skills/latex-notes/scripts/crop.py <course>/slides/<pdf> <page> X0 Y0 X1 Y1 --preview WORK/crop.png`.
-  Look at the preview; adjust until only the figure (with its labels) is in it. Use the printed
+  `uv run <skill>/scripts/crop.py <course>/slides/<pdf> <page> X0 Y0 X1 Y1 --preview WORK/crop.png`.
+  Look at the preview; adjust until only the figure (with its labels) is in it, at most 3 tries per figure.
+  Still wrong: redraw it in TikZ, or keep the best crop with a `% CHECK`. Use the printed
   `\includegraphics` line inside `\begin{center} … \end{center}`, or `\slidefig{width}{page}{trim}{slides/<pdf>}{caption}`.
 - **Simple sketches** (axes with a curve, potential wells, energy levels, timing diagrams, block diagrams,
   a small gate network): redraw in TikZ / pgfplots / circuitikz, small and clean, like a hand sketch.
@@ -118,17 +138,26 @@ Look at the previews in `WORK/slides/` for the slides of each topic (p162.png = 
 
 ## 5. Compile and check
 
-If `command -v tectonic` finds it: `cd <course folder> && tectonic main.tex` (the first run downloads
+If `command -v tectonic` finds it: `tectonic "<course folder>/main.tex"` (the PDF lands next to it; the first run downloads
 packages, which can take a minute). A bad line in an older lecture of the course stops the whole document: then
 fix that line minimally and say so in the report. Fix every error and rerun until it compiles; then look at the warnings
 for overfull lines in your file and fix the bad ones. If Tectonic is missing, don't install anything: tell
 the user `sudo pacman -S tectonic` and that the .tex is ready.
 
+Page budget: this lecture's pages = pages of `main.pdf` now minus before you added it (new course: minus
+the title page; Verbatim gives the number before in the input). Count with
+`uv run --with pypdf python -c "import pypdf;print(len(pypdf.PdfReader('<course folder>/main.pdf').pages))"`.
+More than 20% over the budget from Density: do one compression pass on the .tex (tighten wording, merge,
+remove duplication; delete no facts), recompile and recount. Only one pass; if still over, leave it and
+report the numbers.
+
 Then reread your lecture file once against `parts.md`, part by part: is every part covered, every
-formula checked, every `% CHECK` still needed?
+formula checked, every `% CHECK` still needed? After a compression pass this also confirms nothing
+was lost.
 
 ## 6. Report (short)
 
-- Paths: the lecture file, main.tex, the PDF (if compiled) and its page count.
+- Paths: the lecture file, main.tex, the PDF (if compiled), and this lecture's pages against the budget
+  (e.g. "9 pages, budget 10").
 - Topics covered (one line), number of figures (cropped / TikZ).
 - Every `% CHECK` with its line, and parts of the recording you couldn't follow (garbled transcript).
