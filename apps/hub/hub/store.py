@@ -66,7 +66,7 @@ class Store:
         return [json.loads(data) for _, data in rows], rows[-1][0] if rows else after
 
     def active_courses(self) -> list[dict]:
-        """De vakken van het actieve semester, zoals Inhaal ze kent; verborgen vakken niet."""
+        """De vakken van het actieve semester, zoals Sequo ze kent; verborgen vakken niet."""
         def records(table: str) -> list[dict]:
             rows = self.db.execute("SELECT data FROM records WHERE tbl = ?", (table,)).fetchall()
             return [r for r in (json.loads(data) for (data,) in rows) if not r.get("deletedAt")]

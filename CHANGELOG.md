@@ -8,6 +8,11 @@
 5. **Wacht op eigenaar:** `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — oude namen weg: alles heet Sequo en Velox
+- Keuze eigenaar: ook technisch geen `inhaal` of `swiftskip` meer, verse start (nog niemand gebruikte de apps echt). Mappen `apps/sequo` en `apps/velox`, Dexie-database `sequo`, opslagsleutels, berichtkanaal `velox-sequo`, event-bron `velox`, Pages-pad `/trivium/sequo/`, feed `site/velox/updates.json`, add-on-id `velox@stanloobuyck.github.io`. Hub heet `trivium-hub` (map, LaunchDaemon `be.trivium.hub`, `/api`-antwoord).
+- "Inhaalplan" en "inhalen" blijven: gewoon Nederlands. Historische regels in de changelogs en de git-geschiedenis houden de oude namen.
+- Getest vóór de release: 136/137 unit (alleen de landingspagina mist nog een Velox-release), 94 Velox + lint schoon, 31 Velox-e2e, 16 hub, 265 Verbatim, 134 schermtests.
+
 ## 2026-11-02 — fase 6: landingspagina, privacy en READMEs
 - Eigenaar: pagina's, Velox-download en Les 11 in de nieuwe stijl in orde. Sequo 1.0.0 uitgebracht als `inhaal-v1.0.0` (zonder "Latest": dat blijft bij Velox). Fase 6 afgevinkt in `PLAN.md`.
 - CI: één publicatie faalde omdat de vorige nog bezig was; die commit raakte alleen `CHANGELOG.md`, de site was al juist.

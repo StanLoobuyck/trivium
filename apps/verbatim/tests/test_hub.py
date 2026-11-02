@@ -1,4 +1,4 @@
-"""The optional link with Inhaal's hub. No network: httpx is replaced."""
+"""The optional link with Sequo's hub. No network: httpx is replaced."""
 
 import json
 

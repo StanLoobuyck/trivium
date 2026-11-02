@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Velox</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="components.css" />
+    <link rel="stylesheet" href="ui.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup" id="popup">
+      <header class="pop-head">
+        <div class="side-brand">
+          <img class="side-logo" src="icons/icon48.png" alt="" width="24" height="24" />
+          <span>Velox</span>
+        </div>
+        <button
+          class="icon-btn"
+          id="open-settings"
+          type="button"
+          data-i18n-title="settings"
+          data-i18n-aria-label="settings"
+        >
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+            <circle cx="16" cy="7" r="2" />
+            <circle cx="8" cy="17" r="2" />
+          </svg>
+        </button>
+        <input
+          class="switch"
+          type="checkbox"
+          id="enabled"
+          role="switch"
+          data-i18n-title="popupToggleTitle"
+          data-i18n-aria-label="veloxOn"
+        />
+      </header>
+
+      <div class="body" id="body">
+        <section class="lecture" aria-live="polite">
+          <p class="lecture-title" id="lecture-title"></p>
+          <p class="lecture-course" id="lecture-course" hidden></p>
+          <p class="lecture-hint" id="lecture-hint"></p>
+        </section>
+
+        <section>
+          <div class="site-off" id="site-off" hidden>
+            <button class="btn btn-block site-enable" id="site-enable" type="button">
+              <span data-i18n="enableOn"></span><span id="site-host"></span>
+            </button>
+            <p class="site-note" data-i18n="enableNote"></p>
+          </div>
+
+          <div class="download" id="download">
+            <button class="btn btn-primary btn-block" id="download-btn" type="button" hidden>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4v11" />
+                <path d="m7 10 5 5 5-5" />
+                <path d="M5 20h14" />
+              </svg>
+              <span id="download-label"></span>
+            </button>
+
+            <div class="dl-progress" id="progress" hidden>
+              <div class="progress-head">
+                <span class="progress-phase" id="progress-phase"></span>
+                <button
+                  class="icon-btn"
+                  id="cancel-btn"
+                  type="button"
+                  data-i18n-title="cancelDownload"
+                  data-i18n-aria-label="cancelDownload"
+                >
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </div>
+              <div
+                class="progress"
+                id="progress-bar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-labelledby="progress-phase"
+              >
+                <span id="progress-fill"></span>
+              </div>
+              <p class="progress-meta" id="progress-meta"></p>
+            </div>
+
+            <p class="status status-done" id="done" hidden>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10" /></svg>
+              <span data-i18n="savedToDownloads"></span>
+              <button class="link" id="show-file" type="button" data-i18n="showInFolder"></button>
+            </p>
+            <p class="status status-error" id="error" role="alert" hidden></p>
+          </div>
+        </section>
+
+        <ul class="list controls">
+          <li class="row">
+            <span class="row-label" id="speed-label" data-i18n="speed"></span>
+            <div class="stepper" role="group" aria-labelledby="speed-label">
+              <button
+                class="icon-btn"
+                id="speed-down"
+                type="button"
+                data-i18n-title="slower"
+                data-i18n-aria-label="slower"
+              >
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
+              </button>
+              <output class="stepper-value" id="speed-value" aria-live="polite">–</output>
+              <button
+                class="icon-btn"
+                id="speed-up"
+                type="button"
+                data-i18n-title="faster"
+                data-i18n-aria-label="faster"
+              >
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              </button>
+            </div>
+          </li>
+          <li class="row">
+            <span class="row-label" id="skip-label" data-i18n="skip"></span>
+            <div
+              class="segmented segmented-compact"
+              id="skip-options"
+              role="radiogroup"
+              aria-labelledby="skip-label"
+            ></div>
+          </li>
+          <li>
+            <button class="row" id="open-shortcuts" type="button">
+              <span class="row-label" data-i18n="shortcuts"></span>
+              <span class="row-trail">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+              </span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <p class="pop-foot" id="link-line" hidden></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

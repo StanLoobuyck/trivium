@@ -14,7 +14,7 @@ export function toast(msg, bad = false) {
   toastTimer = setTimeout(() => el.classList.remove("is-open"), bad ? 7000 : 3500);
 }
 
-// Laptop: the page scrolls inside #scroller (as in Inhaal). Narrow: the document itself scrolls.
+// Laptop: the page scrolls inside #scroller (as in Sequo). Narrow: the document itself scrolls.
 export function scroller() {
   const el = $("#scroller");
   return getComputedStyle(el).overflowY === "auto" ? el : document.scrollingElement;
@@ -34,7 +34,7 @@ export function setBarTitle(title = "", sub = "") {
   $("#bar-title").innerHTML = title ? `<h1 class="editable" id="lec-title" title="${t("rename")}">${esc(title)}</h1><p class="label">${esc(sub)}</p>` : "";
 }
 
-// Same three choices as Inhaal; "system" removes the override so the OS decides.
+// Same three choices as Sequo; "system" removes the override so the OS decides.
 export const themeChoice = () => document.documentElement.dataset.theme || "system";
 export function setTheme(choice) {
   if (choice === "system") delete document.documentElement.dataset.theme;

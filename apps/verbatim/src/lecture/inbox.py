@@ -93,7 +93,7 @@ def ensure_folders(conf: Config, courses: list[Course]) -> None:
 
 
 def course_folders(conf: Config, courses: list[Course]) -> list[tuple[Path, str]]:
-    """(folder, course id): the inbox by course id, and SwiftSkip's Downloads folders by course code."""
+    """(folder, course id): the inbox by course id, and Velox's Downloads folders by course code."""
     ids = {c.id for c in courses}
     codes = {code.upper(): c.id for c in courses for code in c.codes}
     found = []

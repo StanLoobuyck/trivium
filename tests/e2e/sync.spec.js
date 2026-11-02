@@ -57,7 +57,7 @@ test("notities klaar van Verbatim verschijnen als badge, en de hub geeft de vakk
   await laptop.goto("/#/");
   await expect(laptop.getByTestId("open-count")).toBeVisible({ timeout: 15000 });
   const { day, code } = await laptop.evaluate(async () => {
-    const open = indexedDB.open("inhaal");
+    const open = indexedDB.open("sequo");
     const db = await new Promise((resolve) => { open.onsuccess = () => resolve(open.result); });
     const sessions = await new Promise((resolve) => { db.transaction("sessions").objectStore("sessions").getAll().onsuccess = (e) => resolve(e.target.result); });
     const session = sessions.filter((s) => s.type === "lecture" && s.code && s.status === "upcoming" && new Date(s.end) < new Date()).sort((a, b) => a.start.localeCompare(b.start))[0];

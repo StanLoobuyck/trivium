@@ -3,12 +3,12 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/inhaal",
+    "apps/sequo",
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @studie/inhaal",
-    "build": "npm run build -w @studie/inhaal && node scripts/build-site.mjs",
+    "dev": "npm run dev -w @studie/sequo",
+    "build": "npm run build -w @studie/sequo && node scripts/build-site.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "preview": "vite preview --outDir _site --port 4173 --strictPort"

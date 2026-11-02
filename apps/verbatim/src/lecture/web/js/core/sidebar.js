@@ -23,7 +23,7 @@ const tag = (n) => (n != null && n !== 0 ? `<span class="count">${n}</span>` : "
 const rowLink = (href, label, n, on, lead, attrs = "") =>
   `<li><a class="row" href="${href}" ${attrs} ${on ? 'aria-current="page"' : ""}>${lead}<span class="row-main"><span>${esc(label)}</span></span>${tag(n)}</a></li>`;
 
-// The parts that need no data from the server: same rows and same tab bar as Inhaal.
+// The parts that need no data from the server: same rows and same tab bar as Sequo.
 export function drawChrome() {
   const [, page] = location.hash.split("/");
   const setup = page === "setup";

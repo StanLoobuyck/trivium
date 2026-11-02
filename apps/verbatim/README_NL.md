@@ -10,8 +10,8 @@ studienotities. Uitschrijven gebeurt **lokaal op je NVIDIA-GPU** (faster-whisper
 via je eigen Claude-abonnement, met Gemini als reserve. Op vraag maakt Verbatim ook LaTeX-lesnotities per vak.
 
 - **Werkt op:** Linux (gemaakt op Arch), best met een NVIDIA-GPU. Zonder GPU heb je een gratis Groq-sleutel nodig.
-- **Samen met [Velox](../swiftskip/README_NL.md):** Velox bewaart Toledo-opnames en slides meteen in de inbox van
-  Verbatim. **Met [Sequo](../inhaal/README.md):** een les krijgt daar een badge zodra haar notities klaar zijn.
+- **Samen met [Velox](../velox/README_NL.md):** Velox bewaart Toledo-opnames en slides meteen in de inbox van
+  Verbatim. **Met [Sequo](../sequo/README.md):** een les krijgt daar een badge zodra haar notities klaar zijn.
 
 ## Installeren (Arch Linux)
 

@@ -26,14 +26,14 @@ describe("één look: de apps gebruiken packages/design", () => {
     expect(html).toContain('class="sidebar"');
   });
 
-  it.each(["popup/popup.html", "options/options.html", "welcome/welcome.html"])("SwiftSkip %s laadt de gedeelde stijl", (file) => {
-    const html = readFileSync(join(apps, "swiftskip/src", file), "utf8");
+  it.each(["popup/popup.html", "options/options.html", "welcome/welcome.html"])("Velox %s laadt de gedeelde stijl", (file) => {
+    const html = readFileSync(join(apps, "velox/src", file), "utf8");
     expect(html).toContain('href="tokens.css"');
     expect(html).toContain('href="components.css"');
   });
 
   it("de speler-overlay gebruikt de donkere waarden van de tokens", () => {
-    const css = readFileSync(join(apps, "swiftskip/src/content/style.css"), "utf8");
+    const css = readFileSync(join(apps, "velox/src/content/style.css"), "utf8");
     const dark = darkTokens();
     const value = (name) => css.match(new RegExp(`${name}:\\s*([^;]+);`))[1].trim().toLowerCase();
     expect(value("--ss-card")).toBe(dark["--card"]);

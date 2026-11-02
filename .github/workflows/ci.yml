@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  inhaal:
+  sequo:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,18 +34,18 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv run --project apps/hub pytest apps/hub/tests -q
 
-  swiftskip:
+  velox:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/swiftskip
+        working-directory: apps/velox
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: apps/swiftskip/package-lock.json
+          cache-dependency-path: apps/velox/package-lock.json
       - run: npm ci
       # Echte TS-naar-MP4-test en testmedia voor de lokale pagina's.
       - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
@@ -68,7 +68,7 @@ jobs:
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [inhaal, hub]
+    needs: [sequo, hub]
     runs-on: ubuntu-latest
     permissions:
       pages: write

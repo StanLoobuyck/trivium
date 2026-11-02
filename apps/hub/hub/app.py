@@ -23,7 +23,7 @@ class Change(BaseModel):
 
 
 class Event(BaseModel, extra="allow"):
-    """Zie packages/contract/CONTRACT.md. De hub bewaart events; Inhaal beslist wat ze betekenen."""
+    """Zie packages/contract/CONTRACT.md. De hub bewaart events; Sequo beslist wat ze betekenen."""
 
     id: str
     type: Literal["notes.ready"]
@@ -58,7 +58,7 @@ def create_app(*, code: str, db_path: str | Path, web_dir: str | None = None, ro
 
     @app.get("/api/health")
     def health() -> dict:
-        return {"app": "inhaal-hub"}
+        return {"app": "trivium-hub"}
 
     @app.post("/api/sync", dependencies=[Depends(check_code)])
     def sync(request: SyncRequest) -> dict:

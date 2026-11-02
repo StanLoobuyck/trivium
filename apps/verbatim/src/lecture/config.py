@@ -41,7 +41,7 @@ class _Strict(BaseModel):
 class Paths(_Strict):
     jobs_dir: Path
     inbox_dir: Path
-    # SwiftSkip can only save inside Downloads: <this folder>/<course code>/
+    # Velox can only save inside Downloads: <this folder>/<course code>/
     downloads_inbox: Path = Field(default=Path("~/Downloads/Verbatim"), validate_default=True)
     latex_dir: Path = Field(default=Path("~/Documents/Lesnotities"), validate_default=True)  # one folder per course
 
@@ -278,7 +278,7 @@ class ArchiveConfig(_Strict):
 
 
 class HubConfig(_Strict):
-    url: str = ""  # your own Inhaal hub; empty = Verbatim works alone
+    url: str = ""  # your own Sequo hub; empty = Verbatim works alone
 
 
 class Config(_Strict):
@@ -319,7 +319,7 @@ class Config(_Strict):
 class Course(_Strict):
     id: str
     name: str
-    # timetable codes shared with Inhaal and SwiftSkip (compared without regard to case)
+    # timetable codes shared with Sequo and Velox (compared without regard to case)
     codes: list[str] = Field(default_factory=list)
     language: Literal["nl", "en"]
     lecturer: str | None = None

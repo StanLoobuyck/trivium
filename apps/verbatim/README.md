@@ -11,8 +11,8 @@ with Groq's free Whisper API or your own model server as fallback. Notes are wri
 own Claude subscription) with Gemini as fallback; LaTeX lecture notes by Claude through Claude Code.
 
 - **Runs on:** Linux (developed on Arch), best with an NVIDIA GPU. Without a GPU it needs a Groq key.
-- **Works with:** [Velox](../swiftskip/README.md) saves Toledo recordings and slides in `~/Downloads/Verbatim/<course code>/`, which Verbatim picks up;
-  [Sequo](../inhaal/README_EN.md) shows a badge on a lecture once its notes are ready.
+- **Works with:** [Velox](../velox/README.md) saves Toledo recordings and slides in `~/Downloads/Verbatim/<course code>/`, which Verbatim picks up;
+  [Sequo](../sequo/README_EN.md) shows a badge on a lecture once its notes are ready.
 - **Privacy:** recordings and slides stay on your computer; audio or text only goes to a service you set up yourself.
   See the [privacy policy](https://stanloobuyck.github.io/trivium/privacy/#verbatim) and [Privacy](#privacy) below.
 

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { fillLanding, newestVelox } from "./build-site.mjs";
 
-const link = (v) => `https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v${v}/swiftskip-firefox.xpi`;
+const link = (v) => `https://github.com/StanLoobuyck/trivium/releases/download/velox-v${v}/velox-firefox.xpi`;
 const updates = (...versions) => JSON.stringify({ addons: { x: { updates: versions.map((v) => ({ version: v, update_link: link(v) })) } } });
 
 describe("landingspagina", () => {
@@ -13,9 +13,9 @@ describe("landingspagina", () => {
   });
 
   it("vult elke plaatshouder van de echte pagina in", () => {
-    const html = fillLanding(readFileSync("site/index.html", "utf8"), newestVelox(readFileSync("site/swiftskip/updates.json", "utf8")));
+    const html = fillLanding(readFileSync("site/index.html", "utf8"), newestVelox(readFileSync("site/velox/updates.json", "utf8")));
     expect(html).not.toContain("%%");
-    expect(html).toContain("swiftskip-chrome.zip");
+    expect(html).toContain("velox-chrome.zip");
   });
 
   it("weigert een pagina met een onbekende plaatshouder", () => {

@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Sequo (test page)</title>
+<script>
+  // Plays Sequo's side of the link (see packages/contract/CONTRACT.md).
+  window.received = [];
+  const post = (message) =>
+    window.postMessage({ channel: "velox-sequo", from: "sequo", ...message }, location.origin);
+  window.addEventListener("message", ({ data }) => {
+    if (data?.channel !== "velox-sequo" || data.from !== "velox") return;
+    if (data.type === "hello") window.linked = true;
+    if (data.type === "events") {
+      window.received.push(...data.events);
+      post({ type: "ack", ids: data.events.map((event) => event.id) });
+    }
+  });
+  post({ type: "ready" });
+</script>

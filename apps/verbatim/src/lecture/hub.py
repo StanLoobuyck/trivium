@@ -1,6 +1,6 @@
-"""The optional link with your own Inhaal hub (packages/contract/CONTRACT.md): courses in, "notes ready" out.
+"""The optional link with your own Sequo hub (packages/contract/CONTRACT.md): courses in, "notes ready" out.
 
-Verbatim works alone: without an address nothing here does anything. Which lectures Inhaal was told about is kept
+Verbatim works alone: without an address nothing here does anything. Which lectures Sequo was told about is kept
 next to the jobs; the worker compares that with the jobs every idle round. So older lectures are reported too, what
 couldn't be delivered goes out later, and the settings are read fresh: a worker started before the link still sees it.
 """
@@ -37,7 +37,7 @@ def fetch_courses(conf: Config) -> list[dict]:
 
 
 def course_colors(conf: Config, courses: list[Course]) -> dict[str, str]:
-    """Inhaal's colour per Verbatim course id, matched like settings.import_courses: same code, else same name."""
+    """Sequo's colour per Verbatim course id, matched like settings.import_courses: same code, else same name."""
     def key(name: str) -> str:
         return " ".join(name.lower().split())
 

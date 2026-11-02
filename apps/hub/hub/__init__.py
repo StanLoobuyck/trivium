@@ -1,1 +1,1 @@
-"""Hub voor Inhaal: sync tussen toestellen en het rooster ophalen."""
+"""Hub voor Sequo: sync tussen toestellen en het rooster ophalen."""

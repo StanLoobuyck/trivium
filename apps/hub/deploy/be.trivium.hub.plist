@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>be.trivium.hub</string>
+  <key>UserName</key><string>__USER__</string>
+  <key>WorkingDirectory</key><string>__HOME__/trivium-hub</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>set -a; . ./.env; set +a; exec .venv/bin/uvicorn --factory hub.app:from_env --host 127.0.0.1 --port 8788</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>__HOME__/trivium-hub/hub.log</string>
+  <key>StandardErrorPath</key><string>__HOME__/trivium-hub/hub.log</string>
+</dict>
+</plist>

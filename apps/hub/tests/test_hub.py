@@ -20,7 +20,7 @@ def change(record_id="a", updated="2026-11-01T10:00:00.000Z", status="watched", 
 @pytest.fixture
 def client(tmp_path):
     (tmp_path / "web").mkdir()
-    (tmp_path / "web" / "index.html").write_text("<h1>Inhaal</h1>")
+    (tmp_path / "web" / "index.html").write_text("<h1>Sequo</h1>")
     return TestClient(create_app(code=CODE, db_path=tmp_path / "hub.sqlite", web_dir=str(tmp_path / "web")))
 
 
@@ -37,8 +37,8 @@ def test_weigert_zonder_of_met_foute_code(client):
 
 
 def test_health_en_app_zijn_open(client):
-    assert client.get("/api/health").json() == {"app": "inhaal-hub"}
-    assert "Inhaal" in client.get("/").text
+    assert client.get("/api/health").json() == {"app": "trivium-hub"}
+    assert "Sequo" in client.get("/").text
 
 
 def test_een_korte_code_start_niet(tmp_path):

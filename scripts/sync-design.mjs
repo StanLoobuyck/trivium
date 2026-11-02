@@ -1,5 +1,5 @@
 // Kopieert packages/design naar Verbatim. Verbatim heeft geen buildstap en draait los van de monorepo, dus de bestanden
-// staan er letterlijk; packages/design/tests/synced.test.js faalt zodra de kopie afwijkt. SwiftSkip kopieert bij het bouwen.
+// staan er letterlijk; packages/design/tests/synced.test.js faalt zodra de kopie afwijkt. Velox kopieert bij het bouwen.
 import { cp, mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

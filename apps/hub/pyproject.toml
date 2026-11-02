@@ -1,7 +1,7 @@
 [project]
-name = "inhaal-hub"
+name = "trivium-hub"
 version = "0.1.0"
-description = "Sync en rooster voor Inhaal"
+description = "Sync en rooster voor Sequo"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "httpx"]
 

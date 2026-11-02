@@ -1,0 +1,164 @@
+/* Settings page: sidebar and grouped lists from packages/design, the same as Sequo's settings. */
+@media (min-width: 900px) {
+  .pane:not(.is-active) {
+    display: none;
+  }
+}
+
+h2,
+h3 {
+  font-weight: var(--weight-regular);
+}
+
+a {
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.sidebar a:hover {
+  text-decoration: none;
+}
+
+.page {
+  padding-top: var(--space-6);
+}
+
+.row .label {
+  white-space: normal;
+}
+
+.row-text {
+  font-size: var(--text-sub);
+}
+
+.row .segmented,
+.row .btn {
+  flex: none;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.section-head .group-title {
+  padding-bottom: 0;
+}
+
+.section-intro {
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+.notice {
+  margin-bottom: var(--space-3);
+}
+
+#shortcut-groups .group-title {
+  padding-top: var(--space-4);
+}
+
+/* ─── Shortcuts ─────────────────────────────────────────────────────────── */
+
+.shortcut {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: var(--row-min);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-4);
+  font-size: var(--text-sub);
+}
+
+.shortcut + .shortcut::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto var(--space-4);
+  border-top: var(--hairline) solid var(--separator);
+}
+
+.shortcut-keys {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.binding {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-row);
+  background: none;
+  cursor: pointer;
+}
+
+.binding:hover {
+  background: var(--fill);
+}
+
+.binding .plus {
+  color: var(--text-2);
+  font-size: var(--text-micro);
+}
+
+.binding.is-recording {
+  min-width: 108px;
+  justify-content: center;
+  background: var(--accent-tint);
+  color: var(--accent-text);
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+}
+
+.binding-empty {
+  color: var(--text-2);
+  font-size: var(--text-label);
+}
+
+details.jump summary {
+  min-height: var(--row-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-row);
+  background: var(--card);
+  color: var(--text);
+  font-size: var(--text-sub);
+  cursor: pointer;
+}
+
+details.jump[open] summary {
+  margin-bottom: var(--space-2);
+}
+
+/* ─── Sites + about ─────────────────────────────────────────────────────── */
+
+.site {
+  justify-content: space-between;
+  font-size: var(--text-sub);
+}
+
+.site .builtin {
+  color: var(--text-2);
+  font-size: var(--text-label);
+}
+
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--text-sub);
+}

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const screens = [["inhaal", "/inhaal/"], ["design", "/design/"], ["site", "/"]];
+const screens = [["sequo", "/sequo/"], ["design", "/design/"], ["site", "/"]];
 
 for (const scheme of ["light", "dark"]) {
   for (const [name, path] of screens) {
@@ -38,12 +38,12 @@ for (const scheme of ["light", "dark"]) {
   }
 }
 
-test("Inhaal is een PWA die zonder netwerk opent", async ({ page, context, browserName }) => {
+test("Sequo is een PWA die zonder netwerk opent", async ({ page, context, browserName }) => {
   test.skip(browserName === "firefox", "offline-emulatie met service worker is onbetrouwbaar in Firefox");
-  await page.goto("/inhaal/");
+  await page.goto("/sequo/");
   await page.evaluate(() => navigator.serviceWorker.ready);
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
-  const manifest = await page.request.get("/inhaal/manifest.webmanifest");
+  const manifest = await page.request.get("/sequo/manifest.webmanifest");
   expect((await manifest.json()).display).toBe("standalone");
 
   await context.setOffline(true);
@@ -79,14 +79,14 @@ for (const [locale, title] of [["nl-BE", "Overzicht"], ["en-GB", "Overview"]]) {
   test.describe(locale, () => {
     test.use({ locale });
 
-    test("Inhaal volgt de taal van het toestel", async ({ page }) => {
-      await page.goto("/inhaal/");
+    test("Sequo volgt de taal van het toestel", async ({ page }) => {
+      await page.goto("/sequo/");
       await expect(page.locator("h1")).toHaveText(title);
     });
   });
 }
 
-const IN_APP = [["overzicht", "/inhaal/#/"], ["lijst", "/inhaal/#/", "Lijst"], ["instellingen", "/inhaal/#/instellingen"], ["vak", "vak"]];
+const IN_APP = [["overzicht", "/sequo/#/"], ["lijst", "/sequo/#/", "Lijst"], ["instellingen", "/sequo/#/instellingen"], ["vak", "vak"]];
 
 for (const scheme of ["light", "dark"]) {
   test.describe(`gevulde app ${scheme}`, () => {
@@ -94,7 +94,7 @@ for (const scheme of ["light", "dark"]) {
 
     test("alle schermen en sheets", async ({ page }, info) => {
       await page.clock.setFixedTime(new Date("2026-11-01T12:00:00+01:00"));
-      await page.goto("/inhaal/");
+      await page.goto("/sequo/");
       const chooser = page.waitForEvent("filechooser");
       await page.getByRole("button", { name: "Rooster uploaden" }).first().click();
       await (await chooser).setFiles("fixtures/rooster-anon.ics");
@@ -118,7 +118,7 @@ for (const scheme of ["light", "dark"]) {
 
       for (const [name, path, button] of IN_APP) {
         if (path === "vak") {
-          await page.goto("/inhaal/#/");
+          await page.goto("/sequo/#/");
           await page.getByRole("button", { name: "Per vak" }).click();
           await page.locator("#view a.row").first().click();
         }

@@ -155,7 +155,7 @@ def _name_key(name: str) -> str:
 
 
 def import_courses(found: list[dict]) -> dict[str, int]:
-    """Inhaal's courses: an existing course (same code or name) gets the codes, an unknown one is added.
+    """Sequo's courses: an existing course (same code or name) gets the codes, an unknown one is added.
 
     Nothing else about an existing course changes, and nothing is removed.
     """

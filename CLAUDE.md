@@ -1,7 +1,7 @@
 # Trivium — notities voor Claude Code
 
-Monorepo met drie apps, elk apart te downloaden en te gebruiken: **Sequo** (technisch `inhaal`, nieuw: welke lessen moet ik
-nog inhalen), **Velox** (technisch `swiftskip`, bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
+Monorepo met drie apps, elk apart te downloaden en te gebruiken: **Sequo** (technisch `sequo`, nieuw: welke lessen moet ik
+nog inhalen), **Velox** (technisch `velox`, bestaat: Toledo-opnames kijkbaar en downloadbaar) en **Verbatim** (bestaat:
 transcripts en notities). De eigenaar schrijft zelf geen code: Claude Code bouwt, draait en test alles; de
 eigenaar test de app en beslist. Dit is een **publieke repo**: geen persoonlijke gegevens, adressen of
 rooster in gecommitte bestanden. Persoonlijke setup hoort in `CLAUDE.local.md`. `PLAN.md` bevat persoonlijke
@@ -30,20 +30,20 @@ details en blijft lokaal; beide staan in `.gitignore`.
 - Test elk scherm op iPhone-formaat (375 px) en 1440 px, licht en donker. Vertel wat je niet kon testen.
 - Antwoord in de taal van de eigenaar (Nederlands of Engels).
 
-Namen: Trivium is het geheel, Sequo en Velox zijn wat je ziet. Mappen, id's, opslag, repo- en update-adressen blijven `inhaal` en `swiftskip`, zodat installaties en koppelingen werken.
+Namen: Trivium is het geheel, Sequo en Velox zijn wat je ziet. Ook mappen, id's, opslag en adressen heten `sequo` en `velox` (hernoemd op 2026-11-02, verse start; de oude namen staan alleen nog in de geschiedenis). De hub heet `trivium-hub`.
 
 ## Mapstructuur
 ```
 apps/
-  inhaal/     PWA: src/{domain,db,ui,screens,sync,i18n}, Vite-config
-  hub/        (fase 2) Python FastAPI op de Mac: /sync, /rooster, /events; serveert ook de eigen Inhaal
-  swiftskip/  (fase 3) verhuisd uit de SwiftSkip-repo, met geschiedenis
+  sequo/      PWA: src/{domain,db,ui,screens,sync,i18n}, Vite-config
+  hub/        (fase 2) Python FastAPI op de Mac: /sync, /rooster, /events; serveert ook de eigen Sequo
+  velox/      (fase 3) verhuisd uit de oude extensierepo, met geschiedenis
   verbatim/   (fase 4) verhuisd uit lecture-transcriber, met geschiedenis, incl. mac/ modelserver
 packages/
   design/     tokens.css, components.css, icons.js — stijl A, zonder framework en zonder build
   contract/   CONTRACT.md + JSON Schema: vakcodes, sessie-id's, events
-site/         GitHub Pages: landingspagina, downloads, SwiftSkip updates.json, Inhaal-build
-.github/      CI per app; releases met prefix (inhaal-v1.0.0, swiftskip-v4.1.0, verbatim-v0.2.0)
+site/         GitHub Pages: landingspagina, downloads, Velox updates.json, Sequo-build
+.github/      CI per app; releases met prefix (sequo-v1.0.0, velox-v5.0.0, verbatim-v0.2.0)
 fixtures/     private/ = echt rooster, nooit committen; tests gebruiken een geanonimiseerde kopie
 ```
 Elke app blijft los te bouwen, testen en releasen; het enige wat ze delen is `packages/`.
@@ -51,8 +51,8 @@ Elke app blijft los te bouwen, testen en releasen; het enige wat ze delen is `pa
 ## Stack
 | Onderdeel | Keuze |
 | --- | --- |
-| Inhaal UI | Vanilla JS (ES-modules) + `packages/design`, kleine eigen componenten. Geen framework, geen Tailwind |
-| Inhaal build | Vite, alleen voor bundelen en PWA (vite-plugin-pwa) |
+| Sequo UI | Vanilla JS (ES-modules) + `packages/design`, kleine eigen componenten. Geen framework, geen Tailwind |
+| Sequo build | Vite, alleen voor bundelen en PWA (vite-plugin-pwa) |
 | Opslag | Dexie.js op IndexedDB; local-first, UUID + `createdAt`/`updatedAt`/`deletedAt` op elk record |
 | Datums | date-fns met `nl-BE` en `en-GB`; tijden in Europe/Brussels |
 | Rooster | `ical.js` in `domain/rooster.js` |
@@ -62,7 +62,7 @@ Elke app blijft los te bouwen, testen en releasen; het enige wat ze delen is `pa
 | Hub (fase 2) | Python 3.12 + FastAPI + SQLite met uv, als LaunchDaemon op de Mac, deploy met rsync |
 | Toegang (fase 2) | Tailscale Funnel (gratis `*.ts.net`) met koppelcode per toestel; geen eigen domein, niets extra op de iPhone |
 
-**Regel:** alle rekenlogica van Inhaal zit in `domain/` als pure, geteste functies zonder UI (herbruikbaar
+**Regel:** alle rekenlogica van Sequo zit in `domain/` als pure, geteste functies zonder UI (herbruikbaar
 voor een latere iOS-app). Afgeleide waarden (aantallen, `number`, tempo) worden altijd berekend, nooit
 opgeslagen. De vakcode is de gedeelde sleutel tussen de drie apps; zie `packages/contract/CONTRACT.md`.
 
@@ -98,24 +98,24 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 
 ## Fasen (details en acceptatiecriteria in `PLAN.md`)
 0. Monorepo en stijl A
-1. Inhaal-MVP (vervangt de Notes-lijst)
+1. Sequo-MVP (vervangt de Notes-lijst)
 2. Hub op de Mac
-3. SwiftSkip erbij
+3. Velox erbij
 4. Verbatim erbij
 5. Eén look
 6. Publiek
 
 ## Valkuilen
-- Proefrun van een SwiftSkip-release: `npm run release -- <versie> --dry-run`. Zonder `--` slikt npm de vlag en publiceert
+- Proefrun van een Velox-release: `npm run release -- <versie> --dry-run`. Zonder `--` slikt npm de vlag en publiceert
   het echt.
 - De hub herstart niet met `scripts/deploy-hub.sh`: nieuwe hubcode vraagt een herstart (proces stoppen volstaat, KeepAlive start het opnieuw).
 - Verbatim draait op de laptop als geïnstalleerde tool: Python-wijzigingen vragen `apps/verbatim/scripts/install.sh` en een herstart van de
   worker (vraag eerst). Statische webbestanden gelden na herladen. Persoonlijke instellingen staan in `~/.config/lecture-transcriber/`.
 - Vóór code in deze publieke repo komt: scannen op Mac-naam, IP, thuispaden, plaatsen, privémail en Claude-vermeldingen.
 - Eén look: `packages/design` is de enige bron. Na een wijziging daar: `node scripts/sync-design.mjs` (kopie voor Verbatim; een test faalt anders).
-  SwiftSkip kopieert bij het bouwen. De speler-overlay heeft de donkere waarden letterlijk in `style.css`; ook die bewaakt een test. Geen eigen tokens of knoppen in een app.
+  Velox kopieert bij het bouwen. De speler-overlay heeft de donkere waarden letterlijk in `style.css`; ook die bewaakt een test. Geen eigen tokens of knoppen in een app.
 - Popup testen in echte Zen kan zonder venster: `--headless --marionette -remote-allow-system-access` met een eigen profiel, `Addon:Install` en `browserActionFor(ext).openPopup`.
-- De repo en de map heten `trivium`. Updates van Velox lopen via `site/swiftskip/updates.json`; de oude repo's `studie-ecosysteem` en `SwiftSkip` zijn weg (2026-11-02).
+- De repo en de map heten `trivium`. Updates van Velox lopen via `site/velox/updates.json`; de oude repo's en de releases met de oude namen zijn weg (2026-11-02).
 - Map of repo hernoemd: venvs wijzen nog naar het oude pad. Herstel met `uv sync --reinstall` in `apps/hub` en `apps/verbatim`.
 - Zen verbergt het Extensies-paneel: zet `extensions.unifiedExtensions.button.always_visible` op true om een add-on vast te maken.
 - LaTeX-skill: bron is `apps/verbatim/skill/latex-notes`; `~/.claude/skills/latex-notes` is een link. De gesyncte kopie onder `~/.claude/skills/synced/` komt van claude.ai en verandert alleen door opnieuw te uploaden: vergelijk die eerst.
@@ -124,7 +124,7 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Sequo rekent Verbatim-badges bij elke sync opnieuw uit (`reconcileNotes`) uit alle berichten op de hub.
 - `ls` is hier een alias met iconen: gebruik `\ls` in `$(...)`.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
-- SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
+- Velox is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/velox`. `.env` met de AMO-sleutels staat
   daar lokaal.
 - WebKit draait niet op Arch: lokaal Chromium en Firefox, WebKit alleen in de CI.
 - Eigen rooster testen: upload `fixtures/private/rooster.ics` en `rooster-aanvulling.ics` samen. De aanvulling komt

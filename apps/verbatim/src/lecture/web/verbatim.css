@@ -1,4 +1,4 @@
-/* Verbatim: alleen wat Inhaal niet heeft. Kleuren, type, maten en componenten komen uit design/ (kopie van
+/* Verbatim: alleen wat Sequo niet heeft. Kleuren, type, maten en componenten komen uit design/ (kopie van
    packages/design, zie scripts/sync-design.mjs). Hier dus geen eigen kleuren of tokens, alleen var(--…). */
 
 [hidden] { display: none !important; }
@@ -38,7 +38,7 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .icon-btn:hover { background: var(--fill); color: var(--text); }
 .icon-btn:focus-visible { border-radius: var(--radius-full); }
 
-/* ---- Zijbalk: dezelfde rijen als Inhaal; de lijst scrolt, modellen en Instellingen blijven staan ---- */
+/* ---- Zijbalk: dezelfde rijen als Sequo; de lijst scrolt, modellen en Instellingen blijven staan ---- */
 .side-scroll { flex: 1 1 0; display: flex; flex-direction: column; gap: var(--space-1); min-height: 0; overflow-y: auto; scrollbar-width: none; }
 .side-scroll::-webkit-scrollbar { display: none; }
 .sidebar .list-side > li > button.row { width: 100%; color: var(--text-2); }
@@ -109,7 +109,7 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .add-foot .error, .add-model .error { margin-right: auto; color: var(--danger); font-size: var(--text-label); }
 .uploading { font-size: var(--text-label); color: var(--text-2); }
 
-/* ---- Instellingen: secties als in Inhaal ---- */
+/* ---- Instellingen: secties als in Sequo ---- */
 .setup-section > h2 { padding: 0 var(--space-4) var(--space-2); font-size: var(--text-label); font-weight: var(--weight-regular); color: var(--text-2); }
 .setup-section > p { padding: 0 var(--space-4) var(--space-2); }
 .setup-section > .list + *, .setup-section > div + .list, .setup-section > .card + * { margin-top: var(--space-3); }
@@ -296,7 +296,7 @@ mark { padding-inline: 2px; border-radius: 3px; background: var(--course-yellow-
 .word-fix .from { max-width: 120px; overflow: hidden; color: var(--text-2); text-decoration: line-through; text-overflow: ellipsis; white-space: nowrap; }
 .loading { padding-block: var(--space-8); color: var(--text-2); }
 
-/* Laptop: meer kolommen, dezelfde breekpunten als Inhaal. */
+/* Laptop: meer kolommen, dezelfde breekpunten als Sequo. */
 @media (min-width: 900px) {
   .narrow-only { display: none; }
   .add-row { grid-template-columns: minmax(0, 1fr) 150px minmax(0, 1.2fr) 130px 44px; }

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sequo</title>
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F2F7">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sequo">
+  <script>
+    try {
+      const theme = localStorage.getItem("sequo-theme");
+      if (theme) document.documentElement.dataset.theme = theme;
+    } catch {}
+  </script>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+</head>
+<body class="app">
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@ const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 const validate = ajv.compile(schema);
 
-const event = (type, payload, source = "swiftskip") => ({
+const event = (type, payload, source = "velox") => ({
   id: "3f2b7c1e-8a44-4f0e-9d1a-2b6c5e7f9a10",
   type,
   source,

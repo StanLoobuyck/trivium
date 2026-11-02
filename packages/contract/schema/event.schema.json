@@ -7,7 +7,7 @@
   "properties": {
     "id": { "type": "string", "format": "uuid" },
     "type": { "enum": ["recording.watched", "recording.progress", "recording.downloaded", "notes.ready"] },
-    "source": { "enum": ["swiftskip", "verbatim"] },
+    "source": { "enum": ["velox", "verbatim"] },
     "occurredAt": { "type": "string", "format": "date-time" },
     "payload": {
       "type": "object",
