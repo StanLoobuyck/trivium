@@ -22,3 +22,22 @@ describe("landingspagina", () => {
     expect(() => fillLanding("%%NIEUW%%", newestVelox(updates("1.0.0")))).toThrow();
   });
 });
+
+describe("privacypagina", () => {
+  const privacy = readFileSync("site/privacy/index.html", "utf8");
+  const landing = readFileSync("site/index.html", "utf8");
+
+  it("heeft elk stuk waar de landingspagina naar linkt, in beide talen", () => {
+    const anchors = [...landing.matchAll(/href="\.\/privacy\/#([a-z]+)"/g)].map((m) => m[1]);
+    expect(anchors).toEqual(["sequo", "velox", "verbatim"]);
+    for (const id of anchors) {
+      expect(privacy).toContain(`id="${id}"`);
+      expect(privacy).toContain(`id="${id}-en"`);
+    }
+  });
+
+  it("heeft een Nederlands en een Engels stuk", () => {
+    expect(privacy).toContain('data-lang="nl"');
+    expect(privacy).toContain('data-lang="en"');
+  });
+});

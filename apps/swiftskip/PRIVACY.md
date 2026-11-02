@@ -1,8 +1,10 @@
-# SwiftSkip privacy policy
+# Velox privacy policy
 
-_Last updated: 1 November 2026_
+_Last updated: 2 November 2026_
 
-**In short: SwiftSkip collects no personal data and sends nothing to the developer or anyone else.** The only exception is a link with Inhaal that you set up yourself. There are no accounts, no analytics and no tracking.
+Velox was called SwiftSkip; its code and settings still use that name.
+
+**In short: SwiftSkip collects no personal data and sends nothing to the developer or anyone else.** The only exception is a link with Sequo (Inhaal) that you set up yourself. There are no accounts, no analytics and no tracking.
 
 ## What SwiftSkip stores
 
@@ -19,7 +21,9 @@ Lecture titles and download progress are kept in memory only while the browser i
 
 ## Network requests
 
-SwiftSkip only makes network requests when **you** download a lecture. It then fetches that recording from the same servers your browser already uses to play it (Kaltura). Nothing is sent anywhere else.
+SwiftSkip only makes network requests when **you** download a lecture or a slide file. It then fetches that file from the same servers your browser already uses (Kaltura for recordings, Toledo for slides). Nothing is sent anywhere else.
+
+Firefox, Zen and LibreWolf check `stanloobuyck.github.io` for new versions now and then. The browser does that itself; SwiftSkip adds nothing to it.
 
 ## Link with Inhaal (optional)
 
