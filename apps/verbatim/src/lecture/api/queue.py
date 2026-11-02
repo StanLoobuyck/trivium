@@ -7,7 +7,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
 
 from .. import config as cfgmod
@@ -50,6 +50,8 @@ def queue_action(item_id: str, action: str):
             q.retry(item_id)
         elif action == "remove":
             q.remove(item_id)
+        elif action == "stop":  # the worker stops at its next step and removes what was done (queue.Stopped)
+            q.request_stop(item_id)
         else:
             raise HTTPException(404)
     except KeyError as exc:
@@ -105,3 +107,19 @@ def inbox_waiting():
             "root": str(conf.paths.inbox_dir),
             "waiting": [f for f in inbox.scan(conf, courses) if not f["ready"]]})
     return _inbox_cache["data"]
+
+
+@router.post("/api/inbox/stop")
+def inbox_stop(body: dict = Body(...)):
+    """Stop a recording that waits in the watch folder (also while slides and webcam are being combined):
+    the inbox leaves it alone until it is added by hand."""
+    from .. import inbox
+
+    conf = cfgmod.load_config()
+    media = Path(str(body.get("media") or "")).resolve()
+    waiting = {Path(f["media"]).resolve() for f in inbox.scan(conf, cfgmod.load_courses())}
+    if media not in waiting:
+        raise HTTPException(404, "not waiting in the watch folder")
+    inbox.ignore(conf, media)
+    _inbox_cache["data"] = None  # the Bezig list shows it gone right away
+    return {"ok": True}

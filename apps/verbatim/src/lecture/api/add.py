@@ -155,6 +155,9 @@ def add(items: list[NewItem]):
     if problems:
         raise HTTPException(400, "; ".join(problems))
     q = common.Queue()
+    from .. import inbox
+    for it in items:  # added by hand: a recording stopped earlier may come back
+        inbox.unignore(cfgmod.load_config(), Path(it.media))
     added = [q.add(Path(it.media), it.course, [Path(s) for s in it.slides], it.title or None, it.date or None,
                    it.notes, it.language) for it in items]
     return {"added": added, "worker": common.worker_running()}

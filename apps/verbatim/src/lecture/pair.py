@@ -93,6 +93,31 @@ def command(slides: Path, webcam: Path, out: Path, audio_from: int | None, audio
     return cmd + ["-g", str(KEYFRAME_EVERY), "-movflags", "+faststart", "-use_editlist", "0", "-f", "mp4", str(out)]
 
 
+def stopped(video: Path) -> bool:
+    """The user pressed Stop on this pair (the UI runs in another process: it writes the inbox's ignore list)."""
+    from . import config as cfgmod
+    from . import inbox
+
+    try:
+        return str(video.resolve()) in inbox.ignored(cfgmod.load_config())
+    except Exception:  # noqa: BLE001 - no config: nothing was stopped
+        return False
+
+
+def _run_stoppable(cmd: list[str], video: Path) -> tuple[int, str]:
+    """ffmpeg, ended within a second when the user stops the pair."""
+    proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    while True:
+        try:
+            _, err = proc.communicate(timeout=1.0)
+            return proc.returncode, err or ""
+        except subprocess.TimeoutExpired:
+            if stopped(video):
+                proc.terminate()
+                proc.communicate()
+                return -1, "stopped by the user"
+
+
 def on_mac(video: Path, webcam: Path, part: Path, audio: str) -> str | None:
     """Combine on the Mac's model server. None when done, else why not (not set up, not reachable, failed)."""
     from . import config as cfgmod
@@ -116,6 +141,8 @@ def on_mac(video: Path, webcam: Path, part: Path, audio: str) -> str | None:
                     return f"Mac answered {r.status_code}: {r.read()[:200].decode(errors='replace')}"
                 with part.open("wb") as f:
                     for chunk in r.iter_bytes(1 << 20):
+                        if stopped(video):
+                            break
                         f.write(chunk)
     except httpx.HTTPError as exc:
         part.unlink(missing_ok=True)
@@ -135,17 +162,24 @@ def combine(video: Path, webcam: Path, rep=None, use_mac: bool = True) -> bool:
     audio_from, audio_codec = (0, slides_audio) if slides_audio else ((1, webcam_audio) if webcam_audio else (None, None))
     why = on_mac(video, webcam, part, {0: "slides", 1: "webcam"}.get(audio_from, "none")) if use_mac else "off"
     ok = why is None
+    if stopped(video):
+        part.unlink(missing_ok=True)
+        say(f"inbox: combining {video.name} stopped by the user")
+        return False
     if not ok:
         say(f"inbox: combining {video.name} on the laptop (Mac: {why})")
     node = amd_render_node()
     for hw in ([node] if node else []) + [None]:  # the laptop's AMD chip, the CPU only as a last resort
         if ok:
             break
-        cmd = command(video, webcam, part, audio_from, audio_codec, hw)
-        done = subprocess.run(cmd, capture_output=True, text=True, check=False)
-        ok = done.returncode == 0 and part.exists() and part.stat().st_size > 0
+        code, err = _run_stoppable(command(video, webcam, part, audio_from, audio_codec, hw), video)
+        if stopped(video):
+            part.unlink(missing_ok=True)
+            say(f"inbox: combining {video.name} stopped by the user")
+            return False
+        ok = code == 0 and part.exists() and part.stat().st_size > 0
         if not ok:
-            say(f"inbox: combining on {'the AMD chip' if hw else 'the CPU'} failed: {done.stderr.strip()[-300:]}")
+            say(f"inbox: combining on {'the AMD chip' if hw else 'the CPU'} failed: {err.strip()[-300:]}")
     if not ok:
         part.unlink(missing_ok=True)
         _failed_marker(video).touch()

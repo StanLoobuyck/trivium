@@ -67,11 +67,36 @@ def pick_slides(video: Path, decks: list[Path], waited_s: float = 0.0) -> tuple[
     return sorted(decks), "all decks of the course" if decks else "no slides"
 
 
+def _ignored_file(conf: Config) -> Path:
+    return conf.paths.jobs_dir / "inbox_ignored.json"
+
+
+def ignored(conf: Config) -> set[str]:
+    """Recordings the user stopped (resolved paths): the inbox leaves them alone until added by hand."""
+    path = _ignored_file(conf)
+    return set(read_json(path) or []) if path.exists() else set()
+
+
+def ignore(conf: Config, media: Path) -> None:
+    from .util import write_json
+
+    conf.paths.jobs_dir.mkdir(parents=True, exist_ok=True)
+    write_json(_ignored_file(conf), sorted(ignored(conf) | {str(Path(media).resolve())}))
+
+
+def unignore(conf: Config, media: Path) -> None:
+    from .util import write_json
+
+    left = ignored(conf) - {str(Path(media).resolve())}
+    if _ignored_file(conf).exists():
+        write_json(_ignored_file(conf), sorted(left))
+
+
 def known_media(conf: Config) -> set[str]:
-    """Recordings already in a job or in the queue (resolved paths)."""
+    """Recordings already in a job or in the queue, or stopped by the user (resolved paths)."""
     from .queue import Queue
 
-    known = set()
+    known = ignored(conf)
     if conf.paths.jobs_dir.exists():
         for mf in conf.paths.jobs_dir.glob("*/manifest.json"):
             if media := read_json(mf).get("input", {}).get("media"):

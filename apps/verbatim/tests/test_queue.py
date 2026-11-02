@@ -161,3 +161,76 @@ def test_clear_done_keeps_unfinished(env):
     q.work(conf, queue, once=True)
     queue.add(media[1], "dep")
     assert queue.clear_done() == 1 and _statuses(queue) == ["queued"]
+
+
+# --- Stop (UI: Stop on a lecture in progress) ------------------------------------------------------------------
+
+@pytest.fixture
+def stop_env(env, tmp_path):
+    conf, queue, clock, media, calls = env
+    conf.paths.jobs_dir = tmp_path / "jobs"   # never the user's real ~/Lectures/jobs (ignore list lives there)
+    conf.paths.jobs_dir.mkdir()
+    return conf, queue, clock, media, calls
+
+
+def test_stop_only_applies_to_work_in_progress(stop_env):
+    conf, queue, clock, media, calls = stop_env
+    item = queue.add(media[0], "dep")
+    with pytest.raises(KeyError):
+        queue.request_stop(item["id"])          # queued: Remove is the button for that
+    queue.claim_transcription(pid=1)
+    queue.request_stop(item["id"])
+    assert queue.stop_requested(item["id"])
+    with pytest.raises(q.Stopped):
+        q.QueueReporter(queue, item["id"]).stage("chunk")
+
+
+def test_stopping_a_transcription_removes_its_progress_and_the_inbox_leaves_it(stop_env, monkeypatch):
+    from lecture import inbox
+
+    conf, queue, clock, media, calls = stop_env
+    item = queue.add(media[0], "dep")
+    job_root = conf.paths.jobs_dir / "les0"
+
+    def run_job(job, conf_, rep):
+        job_root.mkdir()
+        (job_root / "chunk_01.json").write_text("{}")
+        queue.request_stop(item["id"])          # the user presses Stop while it works
+        rep.progress(1, 10)                     # the next step notices
+        raise AssertionError("should have stopped")
+
+    monkeypatch.setattr(pipeline, "open_job", lambda conf, media, *a, **k: (type("J", (), {"root": job_root})(), True, []))
+    monkeypatch.setattr(pipeline, "run_job", run_job)
+    q.work(conf, queue, once=True)
+    assert not job_root.exists()
+    assert queue.snapshot()["items"] == []
+    assert str(media[0].resolve()) in inbox.known_media(conf)   # not picked up again by itself
+    inbox.unignore(conf, media[0])                               # added by hand: back
+    assert str(media[0].resolve()) not in inbox.ignored(conf)
+
+
+def test_stopping_notes_removes_only_this_runs_parts(stop_env, monkeypatch, tmp_path):
+    import os
+
+    conf, queue, clock, media, calls = stop_env
+    item = queue.add(media[0], "dep")
+    queue.claim_transcription(pid=1)
+    job_root = tmp_path / "jobs" / "les0"
+    (job_root / "notes").mkdir(parents=True)
+    old = job_root / "notes" / "batch_00.json"
+    old.write_text("{}")
+    earlier = datetime(2026, 10, 1).timestamp()
+    os.utime(old, (earlier, earlier))
+    queue.update(item["id"], status="transcribed", job=str(job_root))
+    clock.t = datetime.now()  # the notes run starts now; files from before it stay
+
+    def run_notes(job, conf_, rep):
+        (job_root / "notes" / "batch_01.json").write_text("{}")
+        queue.request_stop(item["id"])
+        rep.stage("notes")
+
+    monkeypatch.setattr(pipeline, "run_notes", run_notes)
+    q.work(conf, queue, once=True)
+    assert sorted(p.name for p in (job_root / "notes").iterdir()) == ["batch_00.json"]
+    assert queue.snapshot()["items"] == []
+    assert job_root.exists()                    # the transcript stays

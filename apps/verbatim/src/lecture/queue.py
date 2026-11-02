@@ -14,6 +14,7 @@ Status flow: queued → transcribing → transcribed → notes → done
 from __future__ import annotations
 
 import fcntl
+import shutil
 import os
 import threading
 import time
@@ -33,6 +34,11 @@ from .util import read_json, write_json
 
 NOTES_POLICIES = ("now", "tonight", "never")
 ACTIVE = ("transcribing", "notes", "latex")
+
+
+class Stopped(BaseException):
+    """The user stopped this item (UI: Stop). A BaseException, like Ctrl+C, so the providers' fallbacks
+    (`except Exception`: try the next model) can't swallow it."""
 
 
 def queue_path() -> Path:
@@ -124,6 +130,23 @@ class Queue:
                     return
         raise KeyError(f"{item_id}: no failed or pending item with this id")
 
+    def request_stop(self, item_id: str) -> None:
+        """Ask the worker to stop an item it is working on; it stops at its next progress step."""
+        with self._locked() as state:
+            for item in state["items"]:
+                if item["id"] == item_id and item["status"] in ACTIVE:
+                    item["stop"] = True
+                    return
+        raise KeyError(f"{item_id}: not being worked on right now")
+
+    def stop_requested(self, item_id: str) -> bool:
+        return any(i["id"] == item_id and i.get("stop") for i in self.snapshot()["items"])
+
+    def forget(self, item_id: str) -> None:
+        """Drop an item whatever its status (after the worker stopped it)."""
+        with self._locked() as state:
+            state["items"] = [i for i in state["items"] if i["id"] != item_id]
+
     def remove(self, item_id: str) -> None:
         with self._locked() as state:
             before = len(state["items"])
@@ -173,7 +196,8 @@ class Queue:
         with self._locked() as state:
             for item in state["items"]:  # oldest first
                 if item["status"] == "queued" and self._due(item):
-                    item.update(status="transcribing", pid=pid, error=None, resume_at=None)
+                    item.update(status="transcribing", pid=pid, error=None, resume_at=None, stop=False,
+                                started_at=self.clock().isoformat(timespec="seconds"))
                     return dict(item)
         return None
 
@@ -186,7 +210,8 @@ class Queue:
                     continue
                 if item["notes"] == "tonight" and not schedule_allows(conf.notes.tonight, self.clock())[0]:
                     continue
-                item.update(status="notes", pid=pid, error=None, resume_at=None)
+                item.update(status="notes", pid=pid, error=None, resume_at=None, stop=False,
+                            started_at=self.clock().isoformat(timespec="seconds"))
                 return dict(item)
         return None
 
@@ -194,7 +219,8 @@ class Queue:
         with self._locked() as state:
             for item in state["items"]:
                 if item["status"] == "latex_queued" and self._due(item):
-                    item.update(status="latex", pid=pid, error=None, resume_at=None)
+                    item.update(status="latex", pid=pid, error=None, resume_at=None, stop=False,
+                                started_at=self.clock().isoformat(timespec="seconds"))
                     return dict(item)
         return None
 
@@ -218,16 +244,23 @@ class QueueReporter:
         self.queue, self.item_id, self.min_interval_s = queue, item_id, min_interval_s
         self._last = 0.0
 
+    def _check_stop(self) -> None:
+        if self.queue.stop_requested(self.item_id):
+            raise Stopped(self.item_id)
+
     def stage(self, name: str) -> None:
+        self._check_stop()
         self.queue.update(self.item_id, stage=name, progress=None)
 
     def progress(self, done: float, total: float, text: str = "") -> None:
         now = time.monotonic()
         if now - self._last >= self.min_interval_s:
             self._last = now
+            self._check_stop()
             self.queue.update(self.item_id, progress=round(done / total, 3) if total else None, message=text)
 
     def info(self, message: str) -> None:
+        self._check_stop()
         self.queue.update(self.item_id, message=message)
         print(f"[{self.item_id}] {message}", flush=True)
 
@@ -293,6 +326,9 @@ def transcribe_item(queue: Queue, item: dict, conf: Config) -> None:
         queue.update(item["id"], status="queued", resume_at=exc.resume_at.isoformat(timespec="minutes"),
                      message=str(exc))
         return
+    except Stopped:
+        stopped_transcription(queue, item, conf)
+        return
     except KeyboardInterrupt:
         queue.update(item["id"], status="queued", message="interrupted; resumes on the next worker start")
         raise
@@ -300,7 +336,11 @@ def transcribe_item(queue: Queue, item: dict, conf: Config) -> None:
         queue.update(item["id"], status="failed", failed_at="transcription", error=f"{type(exc).__name__}: {exc}")
         notify("Lecture failed", f"{_title(item)}: {exc}", urgency="critical")
         return
-    suggestions(job.root, conf, rep)
+    try:
+        suggestions(job.root, conf, rep)
+    except Stopped:
+        stopped_transcription(queue, item, conf)
+        return
     if item["notes"] == "never":
         queue.update(item["id"], status="done", stage=None, progress=None)
         notify("Lecture transcribed", _title(item))
@@ -309,6 +349,28 @@ def transcribe_item(queue: Queue, item: dict, conf: Config) -> None:
         queue.update(item["id"], status="transcribed", stage=None, progress=None,
                      message="transcribed; notes " + ("tonight" if item["notes"] == "tonight" else "next"))
         notify("Lecture transcribed", f"{_title(item)} — notes {'tonight' if item['notes'] == 'tonight' else 'next'}")
+
+
+def stopped_transcription(queue: Queue, item: dict, conf: Config) -> None:
+    """Stopped by the user: what was done goes, and the inbox won't pick the recording up again by itself."""
+    from . import inbox
+
+    job = next((i.get("job") for i in queue.snapshot()["items"] if i["id"] == item["id"]), None)
+    if job and Path(job).is_dir() and Path(job).resolve().parent == conf.paths.jobs_dir.resolve():
+        shutil.rmtree(job, ignore_errors=True)
+    inbox.ignore(conf, Path(item["media"]))
+    queue.forget(item["id"])
+    print(f"[{item['id']}] stopped by the user; progress removed", flush=True)
+
+
+def _remove_newer(folder: Path, since: str | None, pattern: str) -> None:
+    """Files of this run only: the ones written since it started (earlier runs' results stay)."""
+    if not since or not folder.is_dir():
+        return
+    start = datetime.fromisoformat(since).timestamp()
+    for f in folder.glob(pattern):
+        if f.stat().st_mtime >= start:
+            f.unlink(missing_ok=True)
 
 
 def suggestions(job_root: Path, conf: Config, rep: QueueReporter) -> None:
@@ -343,6 +405,11 @@ def notes_item(queue: Queue, item: dict, conf: Config) -> None:
         if first:
             notify("Lecture notes waiting", f"{_title(item)}: {str(exc)[:150]}")
         return
+    except Stopped:
+        _remove_newer(Path(item["job"]) / "notes", item.get("started_at"), "batch_*.json")
+        queue.forget(item["id"])
+        print(f"[{item['id']}] notes stopped by the user; this run's parts removed", flush=True)
+        return
     except KeyboardInterrupt:
         queue.update(item["id"], status="transcribed", message="interrupted; notes resume on the next worker start")
         raise
@@ -365,6 +432,10 @@ def latex_item(queue: Queue, item: dict, conf: Config) -> None:
         resume = exc.resume_at or (queue.clock() + timedelta(hours=1))
         queue.update(item["id"], status="latex_queued", resume_at=resume.isoformat(timespec="minutes"),
                      stage=None, message=str(exc)[:300])
+        return
+    except Stopped:
+        queue.forget(item["id"])
+        print(f"[{item['id']}] LaTeX notes stopped by the user", flush=True)
         return
     except KeyboardInterrupt:
         queue.update(item["id"], status="latex_queued", stage=None, message="interrupted; resumes on the next worker start")

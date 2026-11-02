@@ -4,7 +4,7 @@ import { $, $$, view } from "../core/dom.js";
 import { esc } from "../core/format.js";
 import { S, courseKey, courseName } from "../core/state.js";
 import { drawSidebar, markSideLoaded } from "../core/sidebar.js";
-import { paint, poll, toast } from "../core/ui.js";
+import { paint, poll, toast, toastAction } from "../core/ui.js";
 import { progressHtml, statusText } from "../shared/jobstatus.js";
 import { drawLibrary, setLibrarySel } from "./library.js";
 
@@ -44,16 +44,42 @@ window.addEventListener("lt:folders", () => { if ($("#lib-wrap")) { $("#lib-wrap
 
 // --- in progress --------------------------------------------------------------------------------------------
 
-const activeJobs = () => S.queue.items.filter((i) => i.status !== "done").reverse();
-const waitingJobs = () => S.inbox?.waiting || [];  // watch folder: recordings that can't be queued yet
+// Stop: the row goes at once; the request only goes out once the Undo toast is gone (5 s). Stays hidden until the
+// worker has stopped it (it notices at its next step, within about a minute).
+const stopping = new Set();
+const RUNNING = ["transcribing", "notes", "latex"];
+const activeJobs = () => S.queue.items.filter((i) => i.status !== "done" && !stopping.has(i.id)).reverse();
+const waitingJobs = () => (S.inbox?.waiting || []).filter((w) => !stopping.has(w.media));  // watch folder
+const combining = (w) => w.why.startsWith("combining");
+
+function forgetStopped() {
+  const present = new Set([...S.queue.items.map((i) => i.id), ...(S.inbox?.waiting || []).map((w) => w.media)]);
+  for (const key of stopping) if (!present.has(key)) stopping.delete(key);
+}
+
+function stop(key, request) {
+  stopping.add(key);
+  drawJobs();
+  drawBusyLink();
+  toastAction(t("stopped_toast"), t("undo"), {
+    onAction: () => { stopping.delete(key); drawJobs(); drawBusyLink(); },
+    onTimeout: async () => {
+      try { await request(); } catch (e) { stopping.delete(key); toast(e.message, true); }
+      refreshDashboard();
+    },
+  });
+}
 
 // The tab bar has no Bezig, so the library always leads there.
 function drawBusyLink() {
+  if (!$("#lib-busy")) return;  // only on the library
   const n = activeJobs().length + waitingJobs().length;
   paint($("#lib-busy"), n ? `<a class="btn btn-block" href="#/progress">${t("nav_progress")} · ${n}</a>` : "");
 }
 
 function drawJobs() {
+  if (!$("#jobs-wrap")) return;
+  forgetStopped();
   const items = activeJobs();
   const waiting = waitingJobs();
   const wrap = $("#jobs-wrap");
@@ -63,6 +89,10 @@ function drawJobs() {
     try { await post(`/api/queue/${b.dataset.id}/${b.dataset.qa}`); } catch (e) { toast(e.message, true); }
     refreshDashboard();
   }));
+  $$("[data-stop]", wrap).forEach((b) => b.addEventListener("click", () =>
+    stop(b.dataset.stop, () => post(`/api/queue/${b.dataset.stop}/stop`))));
+  $$("[data-stop-media]", wrap).forEach((b) => b.addEventListener("click", () =>
+    stop(b.dataset.stopMedia, () => post("/api/inbox/stop", { media: b.dataset.stopMedia }))));
 }
 function jobHtml(i) {
   const job = i.job ? i.job.split("/").pop() : null;
@@ -76,6 +106,7 @@ function jobHtml(i) {
         ${job && i.status !== "queued" ? `<a class="btn btn-small" href="#/lecture/${encodeURIComponent(job)}">${t("open")}</a>` : ""}
         ${canRetry ? `<button class="btn btn-small" data-qa="retry" data-id="${i.id}">${t("retry")}</button>` : ""}
         ${canRemove ? `<button class="btn btn-small btn-plain" data-qa="remove" data-id="${i.id}">${t("remove")}</button>` : ""}
+        ${RUNNING.includes(i.status) ? `<button class="btn btn-small btn-plain" data-stop="${i.id}">${t("stop")}</button>` : ""}
       </div>
     </div>
     <div class="prog-state"><span>${esc(statusText(i))}</span>${i.step_model ? `<span class="muted">${esc(i.step_model)}</span>` : ""}</div>
@@ -89,7 +120,9 @@ function inboxHtml(w) {
     <div class="prog-top">
       <span class="dot" data-course="${courseKey(w.course)}"></span><div class="prog-what"><div class="prog-title">${esc(w.title)}</div>
         <div class="prog-sub">${esc(courseName(w.course))} · ${t("inbox_label")}</div></div>
-      <div class="prog-actions"><a class="btn btn-small" href="#/add">${t("inbox_add")}</a></div>
+      <div class="prog-actions">${combining(w)
+        ? `<button class="btn btn-small btn-plain" data-stop-media="${esc(w.media)}">${t("stop")}</button>`
+        : `<a class="btn btn-small" href="#/add">${t("inbox_add")}</a>`}</div>
     </div>
     <div class="prog-state"><span>${t("inbox_waiting")}</span><span class="muted">${esc(w.why)}</span></div>
   </div>`;

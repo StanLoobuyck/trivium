@@ -281,3 +281,31 @@ def test_mac_address_and_test_in_settings(env, monkeypatch):
     t = client.post("/api/setup/mac/test", headers=W).json()
     assert t["ok"] and t["whisper"].startswith("large-v3 ready") and t["llm"] == "qwen3.8:27b ready"
     assert seen == ["http://mac-mini:7900"]
+
+
+def test_stop_buttons_reach_the_worker_and_the_inbox(env, tmp_path):
+    import time as _time
+    from lecture import inbox
+    from lecture.api import queue as queue_api
+
+    client, queue, video, job = env
+    item = queue.add(video, "digitale-elektronica")
+    assert client.post(f"/api/queue/{item['id']}/stop", headers=W).status_code == 409   # nothing running yet
+    queue.claim_transcription(pid=1)
+    assert client.post(f"/api/queue/{item['id']}/stop", headers=W).json() == {"ok": True}
+    assert queue.stop_requested(item["id"])
+
+    # A pair being combined in the watch folder: Stop puts it on the inbox's ignore list.
+    folder = tmp_path / "inbox" / "digitale-elektronica"
+    folder.mkdir(parents=True)
+    for name in ("les 9.webcam.mp4", "les 9.mp4"):
+        (folder / name).write_bytes(b"x")
+    old = _time.time() - 600
+    import os
+    for f in folder.iterdir():
+        os.utime(f, (old, old))
+    queue_api._inbox_cache["data"] = None
+    assert client.post("/api/inbox/stop", json={"media": str(folder / "nope.mp4")}, headers=W).status_code == 404
+    assert client.post("/api/inbox/stop", json={"media": str(folder / "les 9.mp4")}, headers=W).json() == {"ok": True}
+    from lecture.config import load_config
+    assert str((folder / "les 9.mp4").resolve()) in inbox.ignored(load_config())

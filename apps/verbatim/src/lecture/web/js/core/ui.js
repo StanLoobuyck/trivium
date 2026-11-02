@@ -30,6 +30,23 @@ export function watchBarEdge() {
   update();
 }
 
+// A toast with one action (Undo): `onTimeout` runs when the time is up without a tap, `onAction` after a tap.
+// One tap, no confirmation dialog: the action only happens once the toast is gone.
+let pending = null;
+export function toastAction(msg, label, { onAction, onTimeout, ms = 5000 }) {
+  if (pending) pending.finish();  // a second Stop doesn't cancel the first
+  const el = $("#toast");
+  el.replaceChildren(Object.assign(document.createElement("span"), { textContent: msg }));
+  const button = Object.assign(document.createElement("button"), { type: "button", textContent: label });
+  el.append(button);
+  el.classList.add("is-open");
+  clearTimeout(toastTimer);
+  const close = () => { el.classList.remove("is-open"); pending = null; };
+  const timer = setTimeout(() => { close(); onTimeout(); }, ms);
+  pending = { finish: () => { clearTimeout(timer); close(); onTimeout(); } };
+  button.addEventListener("click", () => { clearTimeout(timer); close(); onAction(); }, { once: true });
+}
+
 // Polled parts are only rebuilt when their HTML changed: rebuilding unchanged DOM every few seconds made the
 // page flicker (hover states, focus and animations reset). Returns false when nothing changed.
 export function paint(el, html) {

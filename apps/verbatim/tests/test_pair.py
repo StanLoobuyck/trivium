@@ -96,3 +96,13 @@ def test_combine_failure_is_marked_and_keeps_the_originals(tmp_path, monkeypatch
     webcam = put(tmp_path / "les 5.webcam.mp4", 0, b"not a video")
     assert not pair.combine(slides, webcam, use_mac=False)
     assert pair.failed(slides) and slides.read_bytes() == b"not a video" and webcam.is_file()
+
+
+def test_a_stopped_pair_stops_combining_and_keeps_both_originals(tmp_path, monkeypatch):
+    monkeypatch.setattr(pair, "amd_render_node", lambda: None)
+    slides = clip(tmp_path / "les 6.mp4", "1280x720", audio=True)
+    webcam = clip(tmp_path / "les 6.webcam.mp4", "640x480", audio=False)
+    monkeypatch.setattr(pair, "stopped", lambda video: True)   # Stop pressed (in the UI's process)
+    assert not pair.combine(slides, webcam, use_mac=False)
+    assert slides.is_file() and webcam.is_file() and not (tmp_path / "les 6.slides.mp4").exists()
+    assert not list(tmp_path.glob(".*"))         # no half file, no "failed" mark
