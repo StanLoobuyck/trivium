@@ -49,7 +49,7 @@ def test_prompt_is_for_a_run_without_questions(tmp_path):
     assert "$ARGUMENTS" not in text and "~/.claude/skills" not in text and str(latex.SKILL_DIR) in text
     assert not text.lstrip().startswith("name:")
     assert "<skill>" not in text and "main.pdf had 0 pages" in text
-    assert "Density" in text and "5 pages per hour" in text and "at most 3 tries" in text
+    assert "Density" in text and "3 pages per hour" in text and "next to the slides" in text
     assert "being redone" in latex.prompt(Path("/jobs/j"), tmp_path / "w", tmp_path / "Vak", tex, MANIFEST, None)
 
 
@@ -145,5 +145,16 @@ def test_check_finds_bad_moments_and_own_macros():
 def test_check_page_budget():
     check = load_check().check
     tex = "\\les{1}{x}{y}\n"
-    assert check(tex, PARTS, 3) == []          # a short recording still gets 3 pages
-    assert "over the budget" in check(tex, PARTS, 4)[0]
+    assert check(tex, PARTS, 2) == []          # a short recording still gets 2 pages
+    assert "over the budget" in check(tex, PARTS, 3)[0]
+
+
+def test_check_wants_notes_next_to_the_slides():
+    check = load_check().check
+    short = "\\begin{verbatim}\na\nb\nc\nd\n\\end{verbatim}\n"
+    good = "\\les{1}{x}{y}\n\\onderwerp{A}\n\\kernpunt{k}\n" + short
+    assert check(good, PARTS, None) == []
+    copied = good.replace("d\n", "d\ne\n") + "\\onderwerp{B}\n\\slidefig{.5}{3}{0 0 0 0}{s.pdf}{c}\n"
+    found = check(copied, PARTS, None)
+    assert len(found) == 3 and "code block of 5 lines" in found[0]
+    assert any("figure from the slides" in p for p in found) and any("without \\kernpunt: B" in p for p in found)

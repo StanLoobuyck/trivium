@@ -53,6 +53,10 @@
 % \opm{...}: small grey remark next to a formula or line, like the pencil notes
 \newcommand{\@lnopm}[1]{{\small\color{opm}\,(#1)}}
 \newcommand{\opm}[1]{\ifmmode\quad\text{\@lnopm{#1}}\else\@lnopm{#1}\fi}  % works in text and in align*
+% \kernpunt{...}: the one line to remember from a topic, right under its heading
+\newcommand{\kernpunt}[1]{\par\noindent{\color{accent}\textbf{\if@ln@en Key\else Kern\fi.}}\ #1\par}
+% \valkuil{...}: a warning or common mistake the lecturer points out
+\newcommand{\valkuil}[1]{\par\noindent{\color{accent}$\triangle$\,\textbf{\if@ln@en Pitfall\else Let op\fi.}}\ #1\par}
 % \pijl / \dus: arrows used as words
 \newcommand{\pijl}{\ensuremath{\rightarrow}\ }
 \newcommand{\dus}{\ensuremath{\Rightarrow}\ }

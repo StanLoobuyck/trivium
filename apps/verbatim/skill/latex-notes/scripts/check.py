@@ -14,9 +14,10 @@ import argparse
 import re
 from pathlib import Path
 
-PAGES_PER_HOUR = 5
+PAGES_PER_HOUR = 3  # the notes sit next to the slides: no copied code or figures
 MARGIN = 1.2
-MIN_BUDGET = 3  # a short recording still needs its figures and code: 2 pages made Opus drop circuits
+MIN_BUDGET = 2
+CODE_LINES = 4  # longer than this is a listing copied from a slide
 PART = re.compile(r"^## Part \d+: .*\[([\d:]+)–([\d:]+)\] · slides (.*?)(?: \(slide match uncertain\))?$", re.M)
 STAMP = re.compile(r"^\[([\d:]+)\]", re.M)
 SLIDE = re.compile(r"\\slide\{([^}]*)\}\{([^}]*)\}")
@@ -61,6 +62,16 @@ def check(tex: str, parts: str, pages: int | None) -> list[str]:
         problems.append("the lecture file isn't written: no \\les")
     if re.search(r"\\providecommand|\\newcommand|\\setlength", body):
         problems.append("own macros or lengths in the lecture file: use lesnotities.sty")
+    for block in re.findall(r"\\begin\{(?:verbatim|lstlisting)\}(.*?)\\end\{", body, re.S):
+        lines = [line for line in block.strip("\n").splitlines() if line.strip()]
+        if len(lines) > CODE_LINES:
+            problems.append(f"code block of {len(lines)} lines ({lines[0].strip()[:40]}): it is on the slide; "
+                            f"refer to it and quote at most {CODE_LINES} lines")
+    if re.search(r"\\includegraphics|\\slidefig", body):
+        problems.append("figure from the slides: the reader has the slides open, refer with \\slide instead")
+    for topic in re.split(r"\\onderwerp\{", body)[1:]:
+        if "\\kernpunt{" not in topic:
+            problems.append(f"topic without \\kernpunt: {topic.split('}', 1)[0]}")
     if pages is not None:
         budget = max(MIN_BUDGET, end / 3600 * PAGES_PER_HOUR)
         print(f"{pages} pages, budget {budget:.1f}")

@@ -11,10 +11,11 @@ allowed-tools: Bash(uv run *) Bash(tectonic *) Bash(mkdir *) Bash(cp *) Bash(ls 
 
 Input: $ARGUMENTS
 
-Goal: notes a strong student would want to study from: as compact and visual as good handwritten notes,
-and complete in information. Every fact, formula, derivation idea, example and warning goes in, including
-what is said but not on the slides; the words around them are what gets squeezed (see Density).
-Nothing invented: every statement comes from the transcript or the slides.
+Goal: notes a strong student studies **next to the slides**: the slides are always open beside them, so the
+notes add what the slides don't say and point to the slide for the rest. Compact and structured like good
+handwritten notes: every explanation, reason, example, warning and exam hint the lecturer gives goes in; what is
+already on the slide (code, figures, tables, slide text) does not, except a short piece the explanation is about.
+Formulas the lecturer derives or works with do go in: they are what the notes are for. Nothing invented: every statement comes from the transcript or the slides.
 
 `<skill>` below = the folder this SKILL.md is in (scripts in `scripts/`, templates in `templates/`). The source is
 `apps/verbatim/skill/latex-notes` in the Trivium repo: change it there.
@@ -53,8 +54,7 @@ for an app lecture take the name from `~/.config/lecture-transcriber/courses.yam
 main.tex              course document; \input's every lecture, sorted by date
 lesnotities.sty       copied from templates/ (don't edit it per lecture)
 lessen/<date>_<slug>.tex   one file per lecture, e.g. lessen/2026-03-05_les-6.tex
-slides/<pdf>          copy of each slide PDF used for figure crops
-figures/              pictures from PPTX files, TikZ is inline
+slides/, figures/     crops of older lectures; new lectures don't use them
 .work/                prepare.py output (may be deleted afterwards)
 ```
 New course: create the folder, copy `templates/lesnotities.sty`, and fill `templates/main.tex`
@@ -79,8 +79,19 @@ really says it, so moments only go forward; a topic that isn't in the transcript
 Write `\slide` straight after its heading. No own `\newcommand` or `\setlength` in the lecture file: `\tijd{<m:ss>}` in
 the margin and the rest are in `lesnotities.sty`. With several decks: `\\slide{d2 p56}{…}`.
 
+**Same shape for every topic**, so the reader finds the core at a glance:
+1. `\onderwerp{…}` + `\slide{…}{…}`.
+2. `\kernpunt{…}`: the one thing to remember from this topic, one line.
+3. `itemize` with what the lecturer adds to the slide: one idea per bullet, at most ~15 words, starting with the
+   keyword (`\textbf{default}: rare toestand \pijl terug S0`). Several bullets on one sub-idea: nest them.
+4. Where it applies: `formule`, `align*` derivation, `voorbeeld`, `vergelijk`, `kader`.
+5. `\valkuil{…}` for each warning, common mistake or confusion the lecturer points out; exam hints get `\belangrijk`.
+No prose paragraphs between these: a sentence that isn't a bullet, a formula or a box usually belongs in a bullet.
+
 **Style of good handwritten notes**, in LaTeX:
 - Short phrases and keywords instead of full paragraphs; full sentences only where an explanation needs it.
+- Refer instead of copy: "code p296: state register" or `\opm{zie slide}`, never the code or figure itself. When the
+  lecturer explains specific lines, quote only those lines (at most 4) with `\texttt{}` or a small `verbatim`.
 - Logic as arrows: `\pijl` (leads to, so), `\dus` (therefore), `$\Leftrightarrow$`; one step per line.
 - Derivations in `align*`, one line per non-trivial step the lecturer takes, with `\opm{…}` grey remarks
   saying what happens (`\opm{substitueer $u=RC$}`). Pure bookkeeping (expanding, collecting terms) is one
@@ -100,8 +111,9 @@ the margin and the rest are in `lesnotities.sty`. With several decks: `\\slide{d
 - Complete: every concept, formula, example, trick, warning and exam hint from the lecture. A part with no
   slide at all is still lecture content: write it from the transcript.
 - What is only on a slide (`parts.md` has those slides' text at the end, and a "discussed" slide can be a wrong match):
-  at most one line per slide, together in one last topic `\onderwerp{Alleen op de slides}`, never between what was
-  said. In a lecture in parts ("deel 3") those slides are often the subject of another part: keep only what fits this one.
+  the reader has it already. End the lecture with one line `\opm{Niet besproken: p259, p260, p303}` (English: "Not
+  discussed"); only an exam or "te kennen" hint from such a slide gets its own bullet there, with `\belangrijk`.
+  In a lecture in parts ("deel 3") those slides are often the subject of another part: list only the ones that fit this one.
 - Correct: check every formula against the slide text; the transcript has speech-to-text errors (a
   misheard term, a dropped "niet"). When slide and transcript disagree, follow the slide and fix obvious
   transcription errors silently. When you can't tell, write the most likely version and add
@@ -111,38 +123,31 @@ the margin and the rest are in `lesnotities.sty`. With several decks: `\\slide{d
 - Never invent results, numbers or explanations that are not in the material.
 
 **Density**: compress words, never information. The notes must stay short enough to review.
-- Budget: about 5 pages per hour of recording (recording length = last time stamp in `parts.md`; a 2 h
-  lecture ≈ 10 pages). Derivation- or figure-heavy lectures may run ~20% over, talk-heavy ones should come
-  in well under, and any recording may take 3. It is a ceiling, not a target to fill. Figures and circuits the
-  lecture works with stay: cut words first.
+- Budget: about 3 pages per hour of recording (recording length = last time stamp in `parts.md`; a 2 h
+  lecture ≈ 6 pages). Derivation-heavy lectures may run ~20% over, talk-heavy ones should come in well under,
+  and any recording may take 2. It is a ceiling, not a target to fill.
 - Write each idea once. Where the lecturer repeats, rephrases or recaps, keep the clearest version (and
   `\belangrijk` if the repetition signals importance). Slide text the lecturer only reads out is not
-  written twice.
+  written at all: the slide is beside the notes.
 - One line per idea: keyword or short phrase plus formula. No "de lector legt uit dat…".
 - When something is too long, cut in this order: (1) repetition and recaps, (2) anecdotes and motivation →
   one line, or a `kader` of at most 3 lines, (3) routine algebra and arithmetic → result plus `\opm`,
   (4) prose that duplicates a formula or figure, (5) a figure that adds nothing beyond a formula.
 - Never cut: definitions, formulas with their conditions, results, worked-example numbers, warnings and
   pitfalls, exam hints, and the reason behind a non-obvious step.
-- Use compact forms: `vergelijk` for two-sided comparisons, one `align*` per derivation, `\pijl` chains,
-  small TikZ instead of a large crop. No manual vertical space (`\\[…]`, `\bigskip`, blank-line stacks).
+- Use compact forms: `vergelijk` for two-sided comparisons, one `align*` per derivation, `\pijl` chains.
+  No manual vertical space (`\\[…]`, `\bigskip`, blank-line stacks).
 
 ## 4. Figures
 
-Look at the previews in `WORK/slides/` for the slides of each topic (p162.png = slide page 162).
-- **Real figures** (circuits, layouts, measured plots, photos, complex diagrams): crop them from the PDF as
-  a vector image. Copy the PDF to `<course>/slides/` once, then read the box off the preview as fractions
-  of the page (0,0 = top left) and run
-  `uv run <skill>/scripts/crop.py <course>/slides/<pdf> <page> X0 Y0 X1 Y1 --preview WORK/crop.png`.
-  Look at the preview; adjust until only the figure (with its labels) is in it, at most 3 tries per figure.
-  Still wrong: redraw it in TikZ, or keep the best crop with a `% CHECK`. Use the printed
-  `\includegraphics` line inside `\begin{center} … \end{center}`, or `\slidefig{width}{page}{trim}{slides/<pdf>}{caption}`.
-- **Simple sketches** (axes with a curve, potential wells, energy levels, timing diagrams, block diagrams,
-  a small gate network): redraw in TikZ / pgfplots / circuitikz, small and clean, like a hand sketch.
-- PPTX: there are no page previews, only the pictures in the deck, extracted to `WORK/slides/<file>_sNNN_k.<ext>`
-  (sNNN = slide). Look at them, copy the ones you need to `<course>/figures/` and include them. Shapes drawn in
-  PowerPoint are not in there: redraw those in TikZ when they matter.
-- At most one figure per idea; no decorative pictures, logos or photos of the lecturer.
+The slides are beside the notes: a figure, circuit or code listing that is on a slide is **not** copied or cropped
+into the notes; point to it (`\slide{…}`, "schema p299"). Look at the previews in `WORK/slides/` (p162.png = page
+162; for PPTX the extracted pictures `WORK/slides/<file>_sNNN_k.<ext>`) to know what the slide already shows.
+Draw a figure only for what the slides don't have:
+- something the lecturer draws on the board or describes in words (a sketch, a timing diagram, a derivation's picture);
+- a slide figure the lecturer changes or annotates (extra arrow, other values): redraw only what is needed to show
+  the change, small, in TikZ / pgfplots / circuitikz, like a hand sketch.
+At most one figure per idea; no decorative pictures. A lecture with no such figure has none, and that is fine.
 
 ## 5. Compile and check
 
@@ -170,5 +175,5 @@ was lost.
 
 - Paths: the lecture file, main.tex, the PDF (if compiled), and this lecture's pages against the budget
   (e.g. "9 pages, budget 10").
-- Topics covered (one line), number of figures (cropped / TikZ).
+- Topics covered (one line), number of TikZ figures.
 - The last line of `check.py`. Every `% CHECK` with its line, and parts of the recording you couldn't follow (garbled transcript).
