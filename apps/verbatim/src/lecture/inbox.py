@@ -12,6 +12,7 @@ pick_slides():
      that wait: some lectures have no deck of their own and continue on an earlier one.
      An empty shelf waits EMPTY_SHELF_WAIT_S first, so slides moved in just after the video are still used.
 Recordings stay where they are (the job keeps their path); a recording already in a job or the queue is skipped.
+A recording with a webcam picture next to it ("<title>.webcam.mp4", from Velox) is first combined with it: pair.py.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ import time
 from pathlib import Path
 
 from . import config as cfgmod
+from . import pair
 from .config import Config, Course
 from .naming import SLIDE_EXT, VIDEO_EXT, guess_date, guess_title
 from .util import read_json
@@ -113,10 +115,19 @@ def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[
     for folder, course_id in course_folders(conf, courses):
         files = [p for p in folder.iterdir() if p.is_file() and not p.name.startswith(".")]
         decks = [p for p in files if p.suffix.lower() in SLIDE_EXT]
-        for video in sorted(p for p in files if p.suffix.lower() in VIDEO_EXT):
+        for video in sorted(p for p in files if p.suffix.lower() in VIDEO_EXT and not pair.is_part(p)):
             if str(video.resolve()) in known:
                 continue
             st = video.stat()
+            webcam = pair.webcam_of(video)
+            if webcam and not pair.failed(video):
+                both_stable = min(now - st.st_mtime, now - webcam.stat().st_mtime) >= STABLE_S
+                out.append({"media": str(video), "course": course_id, "title": guess_title(video.stem),
+                            "date": guess_date(video.stem, st.st_mtime), "slides": [], "ready": False,
+                            "combine": str(webcam) if both_stable else None,
+                            "why": "combining slides and webcam" if both_stable or pair.busy(video)
+                            else "still being copied or downloaded"})
+                continue
             # A moved or copied file keeps its old mtime; ctime tells when it landed here.
             waited = now - max(st.st_mtime, st.st_ctime)
             slides, why = pick_slides(video, decks, waited)
@@ -140,6 +151,8 @@ def tick(queue, conf: Config, rep=None) -> list[dict]:
         ensure_folders(conf, courses)
         added = []
         for found in scan(conf, courses):
+            if found.get("combine"):
+                pair.start(Path(found["media"]), Path(found["combine"]), rep)
             if found["ready"]:
                 added.append(queue.add(Path(found["media"]), found["course"], [Path(s) for s in found["slides"]],
                                        found["title"], found["date"], notes="never"))

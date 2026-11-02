@@ -8,6 +8,14 @@
 5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — slides en webcam naast elkaar; kopbalk Verbatim
+- Eigenaar: Kaltura-opnames met slides en webcam als twee beelden gaven vaak alleen de webcam. Oorzaak: Velox hield de laatst geladen stream bij en zag de tweede entry als een andere les.
+- Velox 5.1.0: `shared/streams.js` houdt hoofdbeeld (de entry uit de URL van de speler, standaard groot = slides) en tweede beeld bij. Zonder Verbatim alleen de slides; met Verbatim-downloads eerst `<titel>.webcam.mp4`, dan `<titel>.mp4`, één voortgangsbalk (0–50 %, 50–100 %).
+- Verbatim `pair.py`: wacht tot beide klaar zijn, zet ze naast elkaar (slides 1080 px hoog, webcam 640 px breed, gecentreerd op zwart), geluid van de slides of anders van de webcam. AMD-chip via VA-API, anders libx264. Gemeten: 11× realtime (60 s in 5,5 s), dus ~11 min voor 2 u. Resultaat krijgt de naam van de slides; originelen blijven als `.slides`/`.webcam`. Lukt het niet, dan de slides alleen.
+- Niet getest op een echte Toledo-opname met twee beelden: de regel "entry uit de speler-URL = slides" is een aanname.
+- Verbatim-kopbalk: doorzichtig in rust (geen grijze band in donker), materiaal in paginakleur + haarlijn als er inhoud onder schuift; zijbalk boven de balk zodat zijn schaduw niet wordt afgesneden (`packages/design`).
+- Getest: 141 unit, 106 Velox + 33 e2e, 270 Verbatim, 134 schermtests.
+
 ## 2026-11-02 — twee actieve semesters, DNS op de laptop
 - Eigenaar laadde het rooster op twee toestellen voor ze gesynct waren: twee actieve semesters (één met 7 vakken en 0 lessen), de hub gaf 14 vakken aan Verbatim. Nu wint overal de nieuwste upload (`domain/semesters.js`, zelfde regel in `hub/store.py`); Sequo zet de oudere uit en synct dat. Hub geeft nu 6 vakken (1 verborgen). 141 unit, 17 hub, 134 schermtests.
 - Verbatim: `~/Lectures/jobs/hub_sent.json` opzij (`.oud`), alle 10 lessen opnieuw gemeld aan de nieuwe hub.

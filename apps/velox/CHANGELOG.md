@@ -3,6 +3,12 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.1.0
+
+**New**
+- Recordings with slides and webcam as two pictures: Velox now always downloads the slides, no longer sometimes only the webcam
+- With downloads to Verbatim on, the webcam is saved too, and Verbatim puts both side by side in one video
+
 ## 5.0.0
 
 **Changed**

@@ -97,3 +97,58 @@ test("a lecture switch inside the player moves the download to the new lecture",
   await frame.waitForTimeout(500);
   expect(await storedUrl()).toMatch(/entryId=0_second$/);
 });
+
+// A recording with two pictures (slides + webcam): two entries playing at once. The webcam is a second
+// picture, not another lecture; it is only downloaded for Verbatim, which puts both side by side.
+async function addSecondPicture(frame) {
+  await frame.evaluate(async () => {
+    const webcam = document.createElement("video");
+    webcam.muted = true;
+    document.querySelector(".player").append(webcam);
+    await fetch("media/hls/index.m3u8?entryId=0_webcam");
+  });
+}
+
+const storedStreams = (serviceWorker) =>
+  serviceWorker.evaluate(async () => {
+    const stored = await chrome.storage.session.get(null);
+    const state = Object.entries(stored).find(([key]) => key.startsWith("tab:"))?.[1];
+    return { url: state?.url, companionUrl: state?.companionUrl };
+  });
+
+test("two pictures: without Verbatim only the slides are saved", async ({ context, serviceWorker }) => {
+  const downloads = await recordDownloads(serviceWorker);
+  const { frame } = await openLecture(context);
+  await addSecondPicture(frame);
+  await expect
+    .poll(() => storedStreams(serviceWorker))
+    .toEqual({
+      url: expect.stringMatching(/\/media\/hls\/index\.m3u8$/),
+      companionUrl: expect.stringMatching(/entryId=0_webcam$/),
+    });
+
+  await frame.locator(".ss-dl-main").click();
+  await expect(frame.locator("#velox-download")).toHaveAttribute("data-mode", "done", { timeout: 30_000 });
+  expect(await downloads.names()).toEqual(["Velox Testvak - Les 2 (2026-09-24) - e2e.mp4"]);
+});
+
+test("two pictures with Verbatim: webcam first, then the slides, one progress bar", async ({
+  context,
+  serviceWorker,
+}) => {
+  await serviceWorker.evaluate(() => chrome.storage.sync.set({ downloadsToVerbatim: true }));
+  const downloads = await recordDownloads(serviceWorker);
+  const { frame } = await openLecture(context, { slow: true });
+  await addSecondPicture(frame);
+  await expect.poll(async () => (await storedStreams(serviceWorker)).companionUrl).toMatch(/0_webcam$/);
+
+  await frame.locator(".ss-dl-main").click();
+  // The first file finishing is halfway, not done.
+  await expect.poll(async () => (await downloads.names()).length, { timeout: 30_000 }).toBe(1);
+  await expect(frame.locator("#velox-download")).toHaveAttribute("data-mode", "busy");
+  await expect(frame.locator("#velox-download")).toHaveAttribute("data-mode", "done", { timeout: 60_000 });
+  expect(await downloads.names()).toEqual([
+    "Verbatim/T01E5T/Velox Testvak - Les 2 (2026-09-24) - e2e.webcam.mp4",
+    "Verbatim/T01E5T/Velox Testvak - Les 2 (2026-09-24) - e2e.mp4",
+  ]);
+});

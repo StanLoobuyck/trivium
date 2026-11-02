@@ -51,6 +51,8 @@ function createState(tabId) {
     active: false,
     jobId: null,
     url: null,
+    companionUrl: null, // second picture (webcam) of a recording with two, see shared/streams.js
+    pairStep: null, // while both pictures download: "companion" (0–50 %) or "main" (50–100 %)
     title: null, // Kaltura's name for the recording
     context: {}, // { course, lecture } from the Toledo page around the player
     phase: "No lecture detected",
@@ -109,17 +111,22 @@ export function reportProgress(progress) {
   if (progress.jobId && state.jobId && progress.jobId !== state.jobId) return;
 
   const numberOr = (value, fallback) => (Number.isFinite(value) ? value : fallback);
-  const phase = progress.phase || state.phase;
+  let phase = progress.phase || state.phase;
+  let percent = progress.percent;
+  // Two pictures, one after the other: one bar, and the first one finishing isn't the end.
+  if (state.pairStep && Number.isFinite(percent))
+    percent = (state.pairStep === "main" ? 50 : 0) + percent / 2;
+  if (state.pairStep === "companion" && phase === "Complete") phase = "Saving";
   setDownloadState(
     progress.tabId,
     {
       phase,
       downloaded: numberOr(progress.downloaded, state.downloaded),
       total: numberOr(progress.total, state.total),
-      percent: numberOr(progress.percent, state.percent),
+      percent: numberOr(percent, state.percent),
       speed: numberOr(progress.speed, 0),
       eta: numberOr(progress.eta, null),
-      active: !["Complete", "Canceled"].includes(progress.phase),
+      active: !["Complete", "Canceled"].includes(phase),
     },
     // Progress arrives several times a second; storing every step isn't needed.
     { persist: phase !== state.phase },
@@ -136,8 +143,13 @@ export async function downloadFile({ url, filename, saveAs = false }) {
 // because in Chrome the file is saved from a separate document.
 const downloadFolders = new Map();
 
+export const COMPANION_SUFFIX = ".webcam"; // Verbatim pairs "<title>.webcam.mp4" with "<title>.mp4"
+
 export function saveFile(url, title, extension) {
-  const name = `${sanitizeFilename(title)}.${extension}`;
+  // Shortening a long title must not cut the suffix off: it pairs the webcam with the slides.
+  const companion = title.endsWith(COMPANION_SUFFIX);
+  const base = sanitizeFilename(companion ? title.slice(0, -COMPANION_SUFFIX.length) : title);
+  const name = `${base}${companion ? COMPANION_SUFFIX : ""}.${extension}`;
   const folder = downloadFolders.get(title);
   return downloadFile({ url, filename: folder ? `${folder}/${name}` : name, saveAs: false });
 }
@@ -214,11 +226,14 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
     buildLectureTitle({ ...state.context, recording: title || state.title }),
   );
   const resolvedJobId = jobId || createJobId();
+  // Only with the stream this tab detected: a URL from elsewhere has no known second picture.
+  const knownCompanion = resolvedUrl === state.url ? state.companionUrl : null;
 
   setDownloadState(tabId, {
     ...createState(tabId),
     context: state.context,
     pageUrl: state.pageUrl,
+    companionUrl: state.companionUrl,
     available: true,
     active: true,
     jobId: resolvedJobId,
@@ -229,21 +244,39 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
 
   const { downloadsToVerbatim } = await loadSettings();
   const folder = downloadsToVerbatim ? verbatimFolder(state.context?.code) : null;
+  // Two pictures: Verbatim puts them side by side, so only then the webcam too. It goes first: Verbatim waits
+  // for "<title>.webcam.mp4" once "<title>.mp4" is there. Without Verbatim only the main picture (the slides).
+  const companionUrl = folder ? knownCompanion : null;
+  const companionTitle = `${resolvedTitle}${COMPANION_SUFFIX}`;
   if (folder) downloadFolders.set(resolvedTitle, folder);
+  if (companionUrl) downloadFolders.set(companionTitle, folder);
+
+  const run = async (downloadUrl, downloadTitle) => {
+    try {
+      return await runDownload({ url: downloadUrl, title: downloadTitle, tabId, jobId: resolvedJobId });
+    } catch (error) {
+      return { ok: false, ...describeError(error) };
+    }
+  };
 
   let response;
-  try {
-    response = await runDownload({
-      url: resolvedUrl,
-      title: resolvedTitle,
-      tabId,
-      jobId: resolvedJobId,
-    });
-  } catch (error) {
-    response = { ok: false, ...describeError(error) };
+  if (companionUrl) {
+    setDownloadState(tabId, { pairStep: "companion" });
+    response = await run(companionUrl, companionTitle);
+    // A webcam that fails is no reason to skip the slides; a cancel stops both.
+    if (response && response.ok === false && !response.canceled)
+      console.warn("Velox: webcam download failed, saving the slides only:", response.error);
+    if (!response?.canceled) {
+      setDownloadState(tabId, { pairStep: "main" });
+      response = await run(resolvedUrl, resolvedTitle);
+    }
+  } else {
+    response = await run(resolvedUrl, resolvedTitle);
   }
+  setDownloadState(tabId, { pairStep: null });
 
   downloadFolders.delete(resolvedTitle);
+  downloadFolders.delete(companionTitle);
 
   if (response && response.canceled) {
     return setDownloadState(tabId, {
@@ -302,6 +335,7 @@ export function startBackground({ runDownload, cancelDownload, extraHandlers = {
         state: setDownloadState(tabId, {
           available: true,
           url: msg.url,
+          companionUrl: msg.companionUrl ?? null,
           title: msg.title || null,
           phase: state.active ? state.phase : "Ready",
           error: state.active ? state.error : null,

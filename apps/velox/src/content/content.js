@@ -13,7 +13,7 @@ import {
   watchSettings,
 } from "../shared/storage.js";
 import { NO_REPEAT, buildShortcutMap, findAction } from "../shared/shortcuts.js";
-import { isLectureManifestUrl } from "../shared/hls.js";
+import { trackStreams } from "../shared/streams.js";
 import {
   MAX_SPEED,
   accumulateSkip,
@@ -120,7 +120,8 @@ import { createSlideButtons } from "./slide-buttons.js";
     barFillEl = null;
   let currentOsdType = null;
   let detectedLectureUrl = null;
-  let detectedEntryId = null; // Kaltura entry of detectedLectureUrl, if any
+  // The lecture's streams: main (slides on Toledo) and, for a recording with two pictures, the companion (webcam).
+  let lectureStreams = { main: null, companion: null };
   let downloadControl = null; // see download-control.js
   let downloadWrapEl = null; // downloadControl.el
   let downloadResetTimer = null;
@@ -167,20 +168,19 @@ import { createSlideButtons } from "./slide-buttons.js";
     return document.title;
   }
 
-  // The first playlist seen is the lecture's (master) playlist; the player
-  // then loads its variant playlists, which belong to the same lecture. Only
-  // a playlist of a different Kaltura entry means the player switched to
-  // another lecture without reloading.
+  // The first playlist seen is the lecture's (master) playlist; the player then loads its variant playlists, which
+  // belong to the same lecture. A recording with two pictures adds the companion's playlist (see shared/streams.js);
+  // any other entry means the player switched to another lecture without reloading.
   function rememberLectureUrl(url) {
-    if (!isLectureManifestUrl(url)) return false;
-    const entryId = kalturaEntryId(url);
-    if (detectedLectureUrl && (!entryId || entryId === detectedEntryId)) return false;
-
-    const switched = Boolean(detectedLectureUrl);
-    detectedLectureUrl = url;
-    detectedEntryId = entryId;
+    const { streams, change } = trackStreams(lectureStreams, url, {
+      frameEntry: kalturaEntryId(window.location.href),
+      videoCount: findVideos().length,
+    });
+    if (!change) return false;
+    lectureStreams = streams;
+    detectedLectureUrl = streams.main.url;
     // A finished/failed download shown for the previous lecture is stale now.
-    if (switched && downloadControl && downloadControl.mode !== "busy") {
+    if (change === "switch" && downloadControl && downloadControl.mode !== "busy") {
       clearTimeout(downloadResetTimer);
       downloadControl.reset();
     }
@@ -188,7 +188,8 @@ import { createSlideButtons } from "./slide-buttons.js";
 
     chrome.runtime.sendMessage({
       action: "registerLectureDownloadUrl",
-      url: detectedLectureUrl,
+      url: streams.main.url,
+      companionUrl: streams.companion?.url ?? null,
       title: getPageTitle(),
     });
     return true;
