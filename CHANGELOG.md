@@ -1,12 +1,15 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** fase 0 t/m 5; Velox 4.4.1 uit, oude repo's en mappen weg. Geverifieerd: `.xpi` en updatefeed van 4.4.1 online gelezen, 128 unit, 134 schermtests, 89 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** update naar 4.4.1 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
+1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 uit met slides-knop, Verbatim-fix geïnstalleerd. Geverifieerd: `.xpi` van 4.5.0 online gelezen, 128 unit, 94 + 31 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
+2. **Niet getest:** update naar 4.5.0 in Zen, opname plus slides samen door Verbatim, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
-4. **Volgende stap:** Velox 4.5.0 uitbrengen; de Verbatim-fix installeren met `apps/verbatim/scripts/install.sh` en de worker herstarten. Daarna de LaTeX-skill in Verbatim, dan fase 6.
-5. **Wacht op eigenaar:** akkoord voor release en herstart; de dubbele opname uit de vakmap verwijderen vóór de herstart; de twee vrienden de link naar 4.5.0 sturen.
+4. **Volgende stap:** de LaTeX-skill in Verbatim, dan fase 6.
+5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — Velox 4.5.0 uit
+- Dubbele opname verwijderd, Verbatim geïnstalleerd, worker herstart (daemon-reload nodig). De webinterface `lecture ui` draait nog de oude code tot die herstart.
 
 ## 2026-11-02 — slides-knop getest, Verbatim wacht niet meer zonder lesnummer
 - Eigenaarstest in Zen: knop werkt op echt Toledo, ook met PPTX. Tabbalk op de iPhone is goed. Namen: volgens de eigenaar klaar.
