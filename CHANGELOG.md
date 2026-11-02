@@ -1,14 +1,16 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** fase 0 t/m 5; fase 6 grotendeels: landingspagina, privacypagina en READMEs in NL en EN. LaTeX-notities naast de slides, per vak instelbaar. Geverifieerd: 137 unit, 94 + 31 Velox, 265 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** landings- en privacypagina op echte toestellen; Velox-download van de pagina in Zen; nieuwe notitiestijl (eigenaar maakt Les 11 deel 3 opnieuw); modus "Zonder slides" op een echte les; LaTeX op een PPTX-les en een lange les; Safari, Lighthouse.
+1. **Klaar:** fase 0 t/m 6 (alle fasen uit `PLAN.md`). Fase 6: landingspagina, privacypagina, READMEs in NL en EN, Sequo 1.0.0 als release (`inhaal-v1.0.0`). LaTeX-notities naast de slides, per vak instelbaar. Geverifieerd: 137 unit, 94 + 31 Velox, 265 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
+2. **Niet getest:** nieuwe notitiestijl op meer dan één les; modus "Zonder slides" op een echte les; LaTeX op een PPTX-les en een lange les; Safari, Lighthouse.
 3. **Onafgewerkt:** slidekoppeling in Verbatim mislukt bij lessen in delen (skill omzeilt dat); schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) onbetrouwbaar; fase 2 in `PLAN.md` noemt nog Cloudflare.
-4. **Volgende stap:** fase 6 afronden: oordeel van de eigenaar over pagina's en Les 11; daarna eventueel een eerste Sequo-release (`inhaal-v1.0.0`) en de vinkjes in `PLAN.md`.
-5. **Wacht op eigenaar:** oordeel over Les 11 in de nieuwe stijl; pagina's nakijken op iPhone en laptop; `~/Downloads/latex-notes.zip` opnieuw maken en uploaden op claude.ai (skill veranderd); de twee vrienden de link sturen (nu de Trivium-pagina).
+4. **Volgende stap:** geen fase meer open. Kies met de eigenaar uit punt 3 en 6, of nieuwe wensen.
+5. **Wacht op eigenaar:** `~/Downloads/latex-notes.zip` opnieuw maken en uploaden op claude.ai (skill veranderd); de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
 ## 2026-11-02 — fase 6: landingspagina, privacy en READMEs
+- Eigenaar: pagina's, Velox-download en Les 11 in de nieuwe stijl in orde. Sequo 1.0.0 uitgebracht als `inhaal-v1.0.0` (zonder "Latest": dat blijft bij Velox). Fase 6 afgevinkt in `PLAN.md`.
+- CI: één publicatie faalde omdat de vorige nog bezig was; die commit raakte alleen `CHANGELOG.md`, de site was al juist.
 - Keuzes eigenaar: geschreven voor KU Leuven-studenten, link zelf delen (`noindex` blijft); één pagina met drie kaarten.
 - Landingspagina in NL en EN (browsertaal, NL/EN-knop, keuze bewaard). Velox-versie en downloads komen bij de build uit `updates.json` (`scripts/build-site.mjs`), dus elke release werkt de pagina bij. Op brede schermen drie kolommen.
 - Privacypagina `/privacy/` met een stuk per app, ankers vanaf elke kaart. Feiten nagekeken in de code: Sequo heeft geen netwerkverkeer buiten een eigen hub; Velox alleen bij downloads (nu ook slides) en de updatecheck van de browser; Verbatim stuurt alleen naar diensten die je zelf instelt.
