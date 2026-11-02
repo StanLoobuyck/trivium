@@ -44,6 +44,6 @@ Lecture recordings belong to their makers. Only download recordings you're allow
 
 ## Contact
 
-Questions or concerns: open an issue at https://github.com/StanLoobuyck/SwiftSkip/issues.
+Questions or concerns: open an issue at https://github.com/StanLoobuyck/trivium/issues.
 
 SwiftSkip is an independent student project, not affiliated with, endorsed by or supported by KU Leuven.

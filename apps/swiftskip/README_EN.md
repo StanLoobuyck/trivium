@@ -15,7 +15,7 @@ Works in **Zen, Firefox, LibreWolf** and **Chrome, Edge, Brave, Opera, Vivaldi, 
 
 ### Zen, Firefox or LibreWolf (recommended: updates itself)
 
-1. Download **[swiftskip-firefox.xpi](https://github.com/StanLoobuyck/SwiftSkip/releases/latest/download/swiftskip-firefox.xpi)**.
+1. Download **[swiftskip-firefox.xpi](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-firefox.xpi)**.
 2. Open `about:addons`, click the **gear** (⚙) → **Install Add-on From File…** and choose the downloaded file. (Dragging the file into the window works too.)
 3. Click **Add**.
 
@@ -23,7 +23,7 @@ New versions are then installed **automatically**.
 
 ### Chrome, Edge, Brave, Opera, Vivaldi or Arc
 
-1. Download **[swiftskip-chrome.zip](https://github.com/StanLoobuyck/SwiftSkip/releases/latest/download/swiftskip-chrome.zip)** and unzip it into a folder you'll **keep** (e.g. `Documents/SwiftSkip`). Deleting the folder removes the extension.
+1. Download **[swiftskip-chrome.zip](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-chrome.zip)** and unzip it into a folder you'll **keep** (e.g. `Documents/SwiftSkip`). Deleting the folder removes the extension.
 2. Open `chrome://extensions` (Edge: `edge://extensions`).
 3. Turn on **Developer mode** (top right; in Edge on the left).
 4. Click **Load unpacked** and choose the unzipped folder.
@@ -79,7 +79,7 @@ Click the icon → **Settings**:
 **The icon isn't visible (Zen)**
 - Zen sometimes hides the extensions button. In `about:config`, set `zen.theme.hide-unified-extensions-button` to `false`, then pin SwiftSkip.
 
-**Something else?** Report it on [GitHub](https://github.com/StanLoobuyck/SwiftSkip/issues), or via SwiftSkip's menu → Settings → *Report a problem*.
+**Something else?** Report it on [GitHub](https://github.com/StanLoobuyck/trivium/issues), or via SwiftSkip's menu → Settings → *Report a problem*.
 
 ---
 

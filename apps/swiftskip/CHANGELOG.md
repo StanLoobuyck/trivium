@@ -3,6 +3,10 @@
 All notable changes to SwiftSkip. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 4.4.1
+
+- Links to report a problem, the source code and the privacy policy now point to the Trivium repository.
+
 ## 4.4.0
 
 **Changed**

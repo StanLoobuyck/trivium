@@ -9,6 +9,10 @@
 6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini);
    repo `studie-ecosysteem` bewaart het update-adres van Velox t/m 4.3.0, verwijderen kan zodra niemand die nog gebruikt.
 
+## 2026-11-02 — oude repo's voorbereid om te verwijderen
+- Eigenaar: `studie-ecosysteem` en `SwiftSkip` mogen weg. Links in Velox en README's wijzen nu naar `trivium`, de 4.0.x-regels met downloads uit de oude repo zijn uit `updates.json`. Velox 4.4.1 moet dit nog uitbrengen; daarna de repo's verwijderen en de valkuilen in `CLAUDE.md` bijwerken.
+- `gh`-token mist nog de scope `delete_repo`.
+
 ## 2026-11-02 — tabbalk lager op de iPhone, oude Verbatim-map weg
 - Tabbalk: nieuw token `--dock-bottom`, de balk gaat 12 px in de safe area. Gemeten met gesimuleerde safe area van 34 px: 46 → 22 px van de onderrand; zonder safe area 12 px. Plusknop, toast en selectiebalk rekenen op hetzelfde token.
 - `~/Documents/lecture-transcriber` verwijderd (3,0 GB, had geen remote). Eerst gecontroleerd: notities byte-gelijk in `apps/verbatim`, geen actieve verwijzingen. Repo's `studie-ecosysteem` en `SwiftSkip` blijven, die bedienen oude Velox-installaties.

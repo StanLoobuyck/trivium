@@ -3,21 +3,6 @@
     "swiftskip@stanloobuyck.github.io": {
       "updates": [
         {
-          "version": "4.0.0",
-          "update_link": "https://github.com/StanLoobuyck/SwiftSkip/releases/download/v4.0.0/swiftskip-firefox.xpi",
-          "update_hash": "sha256:3bd4e38839b608bcdf32adc05fbb72a8ee347fd5512273714c668c2b57f90cf4"
-        },
-        {
-          "version": "4.0.1",
-          "update_link": "https://github.com/StanLoobuyck/SwiftSkip/releases/download/v4.0.1/swiftskip-firefox.xpi",
-          "update_hash": "sha256:bd5624852fbb39ef0bb89e70de1a2624e07befc2d6aea3ac4e2b25599aeef80c"
-        },
-        {
-          "version": "4.0.2",
-          "update_link": "https://github.com/StanLoobuyck/SwiftSkip/releases/download/v4.0.2/swiftskip-firefox.xpi",
-          "update_hash": "sha256:ee6721c16b39d8ffe61d8f800a731679af5c60a17bab24e4bd2fec0bcf452b02"
-        },
-        {
           "version": "4.1.0",
           "update_link": "https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.1.0/swiftskip-firefox.xpi",
           "update_hash": "sha256:d16f41ec906643d11b0b015abaa75cc01ed219200bceaaa8e05ac61493f3ff1a"

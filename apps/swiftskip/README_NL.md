@@ -15,7 +15,7 @@ Werkt in **Zen, Firefox, LibreWolf** en **Chrome, Edge, Brave, Opera, Vivaldi, A
 
 ### Zen, Firefox of LibreWolf (aanbevolen: updatet vanzelf)
 
-1. Download **[swiftskip-firefox.xpi](https://github.com/StanLoobuyck/SwiftSkip/releases/latest/download/swiftskip-firefox.xpi)**.
+1. Download **[swiftskip-firefox.xpi](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-firefox.xpi)**.
 2. Open in je browser `about:addons`, klik op het **tandwiel** (⚙) → **Add-on installeren via bestand…** en kies het gedownloade bestand. (Het bestand in het venster slepen werkt ook.)
 3. Klik op **Toevoegen**.
 
@@ -23,7 +23,7 @@ Nieuwe versies worden daarna **automatisch** geïnstalleerd.
 
 ### Chrome, Edge, Brave, Opera, Vivaldi of Arc
 
-1. Download **[swiftskip-chrome.zip](https://github.com/StanLoobuyck/SwiftSkip/releases/latest/download/swiftskip-chrome.zip)** en pak het uit naar een map die je **laat staan** (bv. `Documenten/SwiftSkip`). Als je de map verwijdert, verdwijnt de extensie.
+1. Download **[swiftskip-chrome.zip](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-chrome.zip)** en pak het uit naar een map die je **laat staan** (bv. `Documenten/SwiftSkip`). Als je de map verwijdert, verdwijnt de extensie.
 2. Open `chrome://extensions` (Edge: `edge://extensions`).
 3. Zet **Ontwikkelaarsmodus** aan (rechtsboven; in Edge links).
 4. Klik op **Uitgepakte extensie laden** en kies de uitgepakte map.
@@ -79,7 +79,7 @@ Klik op het icoon → **Instellingen**:
 **Het icoon is niet zichtbaar (Zen)**
 - Zen verbergt de extensieknop soms. Zet in `about:config` `zen.theme.hide-unified-extensions-button` op `false`, en zet SwiftSkip daarna vast.
 
-**Iets anders?** Meld het via [GitHub](https://github.com/StanLoobuyck/SwiftSkip/issues) of het menu van SwiftSkip → Instellingen → *Probleem melden*.
+**Iets anders?** Meld het via [GitHub](https://github.com/StanLoobuyck/trivium/issues) of het menu van SwiftSkip → Instellingen → *Probleem melden*.
 
 ---
 
