@@ -118,6 +118,11 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - De repo en de map heten `trivium`. Updates van Velox lopen via `site/velox/updates.json`; de oude repo's en de releases met de oude namen zijn weg (2026-11-02).
 - Map of repo hernoemd: venvs wijzen nog naar het oude pad. Herstel met `uv sync --reinstall` in `apps/hub` en `apps/verbatim`.
 - Headless Zen (Marionette) laat CSS-animaties niet lopen en tekent soms een oude positie: vertrouw `getComputedStyle`/`getBoundingClientRect`, niet de schermafbeelding. Gedrag bij "minder beweging" test je met `user_pref("ui.prefersReducedMotion", 1)`. De eigenaar heeft animaties uit (GTK), dus Zen vraagt altijd minder beweging; `packages/design` zet dan alle animaties uit, ook die van Velox op Trivium-pagina's.
+- Headless Zen weigert `requestFullscreen` (ook na een klik): volledig scherm test je in Chromium.
+- Slides + webcam: Velox slaat met Verbatim-downloads eerst `<titel>.webcam.mp4` op, dan `<titel>.mp4`. Verbatim (`pair.py`) voegt samen op de Mac (`/v1/video/side-by-side`, libx264), anders AMD-chip, CPU als laatste; daarna `<titel>.slides.*` ernaast, en dan nooit opnieuw. Een tweede download krijgt `(1)` en vormt geen paar.
+- Modelserver op de Mac herstarten zonder sudo: proces stoppen, `KeepAlive` start het opnieuw (vraag eerst). Sudo op de Mac kan niet via `!`: de eigenaar tikt het in een eigen terminal.
+- Stop in Verbatim zet de opname op `~/Lectures/jobs/inbox_ignored.json`; met de hand toevoegen haalt hem eraf. Tests moeten `jobs_dir` naar een tijdelijke map zetten.
+- Velox draait op lokale pagina's alleen op poort 7861 (Verbatim); het manifest kan geen poort noemen, `content.js` controleert dat.
 - Zen verbergt het Extensies-paneel: zet `extensions.unifiedExtensions.button.always_visible` op true om een add-on vast te maken.
 - LaTeX-skill: bron is `apps/verbatim/skill/latex-notes`; `~/.claude/skills/latex-notes` is een link. De gesyncte kopie onder `~/.claude/skills/synced/` komt van claude.ai en verandert alleen door opnieuw te uploaden: vergelijk die eerst.
 - De worker bewaart `latex.py` in zijn geheugen na de eerste LaTeX-taak: wijzigingen daar vragen een herstart (`SKILL.md` en het sjabloon niet).

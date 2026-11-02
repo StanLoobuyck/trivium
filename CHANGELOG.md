@@ -1,13 +1,12 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** fase 0 t/m 6, en alles hernoemd naar Sequo en Velox (ook mappen, id's, opslag, adressen; hub = `trivium-hub`). Releases: `sequo-v1.0.0`, `velox-v5.0.0`; oude releases en tags weg. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** nieuwe notitiestijl op meer dan één les; modus "Zonder slides" op een echte les; LaTeX op een PPTX-les en een lange les; Safari, Lighthouse.
-3. **Onafgewerkt:** slidekoppeling in Verbatim mislukt bij lessen in delen (skill omzeilt dat); schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) onbetrouwbaar; fase 2 in `PLAN.md` noemt nog Cloudflare.
-4. **Volgende stap:** geen fase meer open. Kies met de eigenaar uit punt 3 en 6, of nieuwe wensen.
-5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
-6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
-
+1. **Klaar (2026-11-02):** alles heet Sequo/Velox; hub = `trivium-hub` (Mac, `be.trivium.hub`). Velox 5.2.2: slides+webcam (met Verbatim-downloads beide, Verbatim voegt samen op de Mac), draait op Verbatim (poort 7861), overlay ook bij minder beweging en op een video op volledig scherm. Verbatim: Stop-knop in Bezig, kopbalk doorzichtig in rust. Sequo: delen van een les in het lesvenster. Geverifieerd: 145 unit, 137 schermtests, 101 + 33 Velox, 276 Verbatim; samenvoegen op de Mac echt gezien (Les 11 deel 1, 30 min, ~5 min).
+2. **Niet getest:** overlay op volledig scherm in echte Zen (headless Zen weigert fullscreen); Stop op een echt lopende les; Verbatim-knop per deel in Sequo met echte hubdata; nieuwe notitiestijl op meer dan één les, PPTX-les, Safari, Lighthouse.
+3. **Onafgewerkt:** Velox-downloads hebben "duur onbekend" in de mp4-kop (andere spelers dan mpv tonen 13 u); slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig.
+4. **Volgende stap:** eigenaar bevestigt het overlay op volledig scherm in Zen (Velox 5.2.2); daarna kiezen uit punt 3 of nieuwe wensen.
+5. **Wacht op eigenaar:** Velox 5.2.2 installeren en testen; `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
+6. **Open:** notitiemodel in Verbatim (nu Gemini). Niet te fixen: hoeken van de Velox-popup in Zen.
 ## 2026-11-02 — Velox-overlay op een video op volledig scherm
 - Eigenaar: overlay werkt in de kleine speler van Verbatim, niet op volledig scherm. Oorzaak: daar is de `<video>` zelf het fullscreen-element; het overlay kan er niet in en hing in `<html>`, onder de bovenste laag.
 - Velox 5.2.2: is de video zelf fullscreen, dan wordt het overlay een popover (`popover="manual"`, `showPopover()`), boven de video in de bovenste laag; na het verdwijnen weer gewoon. Op Toledo (fullscreen op een omhullend vak) verandert niets.
