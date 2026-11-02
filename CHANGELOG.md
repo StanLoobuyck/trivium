@@ -14,7 +14,7 @@
 - Verbatim `pair.py`: wacht tot beide klaar zijn, zet ze naast elkaar (slides 1080 px hoog, webcam 640 px breed, gecentreerd op zwart), geluid van de slides of anders van de webcam. AMD-chip via VA-API, anders libx264. Gemeten: 11× realtime (60 s in 5,5 s), dus ~11 min voor 2 u. Resultaat krijgt de naam van de slides; originelen blijven als `.slides`/`.webcam`. Lukt het niet, dan de slides alleen.
 - Niet getest op een echte Toledo-opname met twee beelden: de regel "entry uit de speler-URL = slides" is een aanname.
 - Verbatim-kopbalk: doorzichtig in rust (geen grijze band in donker), materiaal in paginakleur + haarlijn als er inhoud onder schuift; zijbalk boven de balk zodat zijn schaduw niet wordt afgesneden (`packages/design`).
-- Getest: 141 unit, 106 Velox + 33 e2e, 270 Verbatim, 134 schermtests.
+- Getest: 141 unit, 100 Velox + 33 e2e, 270 Verbatim, 134 schermtests.
 
 ## 2026-11-02 — twee actieve semesters, DNS op de laptop
 - Eigenaar laadde het rooster op twee toestellen voor ze gesynct waren: twee actieve semesters (één met 7 vakken en 0 lessen), de hub gaf 14 vakken aan Verbatim. Nu wint overal de nieuwste upload (`domain/semesters.js`, zelfde regel in `hub/store.py`); Sequo zet de oudere uit en synct dat. Hub geeft nu 6 vakken (1 verborgen). 141 unit, 17 hub, 134 schermtests.
