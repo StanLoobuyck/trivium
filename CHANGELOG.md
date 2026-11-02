@@ -8,6 +8,12 @@
 5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — Velox-overlay op een video op volledig scherm
+- Eigenaar: overlay werkt in de kleine speler van Verbatim, niet op volledig scherm. Oorzaak: daar is de `<video>` zelf het fullscreen-element; het overlay kan er niet in en hing in `<html>`, onder de bovenste laag.
+- Velox 5.2.2: is de video zelf fullscreen, dan wordt het overlay een popover (`popover="manual"`, `showPopover()`), boven de video in de bovenste laag; na het verdwijnen weer gewoon. Op Toledo (fullscreen op een omhullend vak) verandert niets.
+- Nagekeken in Chromium met minder beweging: 5.2.1 overlay in `<html>`, niet bovenaan; 5.2.2 popover open, midden op het scherm. Headless Zen weigert volledig scherm (ook na een klik): niet in Zen getest.
+- Getest: 101 Velox, 33 e2e, lint schoon.
+
 ## 2026-11-02 — Velox-overlay onzichtbaar in Verbatim
 - Eigenaar: in Verbatim werken de sneltoetsen, maar het overlay (1,25× enz.) is onzichtbaar. Oorzaak: het systeem heeft animaties uit (`gtk-enable-animations=false`), dus Zen vraagt "minder beweging"; `packages/design` zet dan `* { animation: none !important }`, en het overlay werd alleen via zijn animatie zichtbaar (basis opacity 0). Op Toledo bestaat die regel niet.
 - Velox 5.2.1: de eindtoestanden staan nu ook in de gewone stijl; de animatie is alleen in- en uitgang. Nagekeken in headless Zen met `ui.prefersReducedMotion`: 5.2.0 opacity 0, 5.2.1 opacity 1, midden op de video.

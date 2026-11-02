@@ -472,10 +472,34 @@ import { createSlideButtons } from "./slide-buttons.js";
     if (osdEl.parentElement !== parent) parent.appendChild(osdEl);
   }
 
+  // A <video> that is itself fullscreen (Verbatim, plain players) can't hold
+  // the OSD. Then it goes in the browser's top layer as a popover: shown after
+  // the video went fullscreen, it sits above it.
+  function videoIsFullscreen() {
+    const fs = document.fullscreenElement || document.webkitFullscreenElement;
+    return Boolean(fs && fs.tagName === "VIDEO");
+  }
+
+  function syncOSDLayer(visible) {
+    if (!osdEl || typeof osdEl.showPopover !== "function") return;
+    const open = osdEl.matches(":popover-open");
+    if (visible && videoIsFullscreen()) {
+      if (!osdEl.hasAttribute("popover")) osdEl.setAttribute("popover", "manual");
+      if (open) osdEl.hidePopover(); // again on top, above the video
+      osdEl.showPopover();
+    } else if (osdEl.hasAttribute("popover")) {
+      if (open) osdEl.hidePopover();
+      osdEl.removeAttribute("popover");
+    }
+  }
+
   // Re-parent OSD whenever fullscreen state changes
   ["fullscreenchange", "webkitfullscreenchange"].forEach((evt) => {
     document.addEventListener(evt, () => {
-      if (osdEl) getOSDParent().appendChild(osdEl);
+      if (osdEl) {
+        getOSDParent().appendChild(osdEl);
+        syncOSDLayer(osdEl.style.display === "flex");
+      }
       placeDownloadControl();
     });
   });
@@ -541,6 +565,7 @@ import { createSlideButtons } from "./slide-buttons.js";
 
     osdEl.classList.remove("velox-fade-out");
     osdEl.style.display = "flex";
+    syncOSDLayer(true);
     positionOverPlayer(osdEl, "center");
 
     clearTimeout(osdTimeout);
@@ -549,7 +574,10 @@ import { createSlideButtons } from "./slide-buttons.js";
     osdTimeout = setTimeout(() => {
       osdEl.classList.add("velox-fade-out");
       osdFadeTimeout = setTimeout(() => {
-        if (osdEl) osdEl.style.display = "none";
+        if (osdEl) {
+          osdEl.style.display = "none";
+          syncOSDLayer(false);
+        }
         skipAccumulator = 0;
         currentOsdType = null;
       }, 350);

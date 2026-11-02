@@ -3,6 +3,11 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.2.2
+
+**Fixed**
+- The on-screen display now also shows when the video itself is fullscreen, as in Verbatim's player
+
 ## 5.2.1
 
 **Fixed**

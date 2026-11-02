@@ -343,6 +343,15 @@
 /* The end states are set here too, not only in the animations: a page may switch
    animations off altogether (Trivium's own pages do, with "reduce motion" on), and
    the overlay must still show. The animations are only the way in and out. */
+/* In the top layer (a fullscreen <video>): undo the browser's popover box. */
+#velox-osd[popover] {
+  right: auto;
+  bottom: auto;
+  margin: 0;
+  border: 0;
+  overflow: visible;
+}
+
 #velox-osd.velox-bump {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
