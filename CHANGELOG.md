@@ -8,6 +8,11 @@
 5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — twee actieve semesters, DNS op de laptop
+- Eigenaar laadde het rooster op twee toestellen voor ze gesynct waren: twee actieve semesters (één met 7 vakken en 0 lessen), de hub gaf 14 vakken aan Verbatim. Nu wint overal de nieuwste upload (`domain/semesters.js`, zelfde regel in `hub/store.py`); Sequo zet de oudere uit en synct dat. Hub geeft nu 6 vakken (1 verborgen). 141 unit, 17 hub, 134 schermtests.
+- Verbatim: `~/Lectures/jobs/hub_sent.json` opzij (`.oud`), alle 10 lessen opnieuw gemeld aan de nieuwe hub.
+- Laptop: NetworkManager overschreef `/etc/resolv.conf`, `macbook-pro-stan` onbereikbaar. Nu `systemd-resolved` met `dns=systemd-resolved`; naam en modelserver weer bereikbaar.
+
 ## 2026-11-02 — oude namen weg: alles heet Sequo en Velox
 - Keuze eigenaar: ook technisch geen `inhaal` of `swiftskip` meer, verse start (nog niemand gebruikte de apps echt). Mappen `apps/sequo` en `apps/velox`, Dexie-database `sequo`, opslagsleutels, berichtkanaal `velox-sequo`, event-bron `velox`, Pages-pad `/trivium/sequo/`, feed `site/velox/updates.json`, add-on-id `velox@stanloobuyck.github.io`. Hub heet `trivium-hub` (map, LaunchDaemon `be.trivium.hub`, `/api`-antwoord).
 - "Inhaalplan" en "inhalen" blijven: gewoon Nederlands. Historische regels in de changelogs en de git-geschiedenis houden de oude namen.
