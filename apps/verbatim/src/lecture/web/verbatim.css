@@ -314,6 +314,9 @@ mark { padding-inline: 2px; border-radius: 3px; background: var(--course-yellow-
   .bar-actions { flex-wrap: nowrap; }
   #open-folder { display: none; }
 }
+@media (max-width: 1099px) {
+  #make-latex, #open-latex { display: none; }  /* the bar is full; a laptop window is wider */
+}
 @media (prefers-reduced-motion: reduce) {
   .flip-inner { transition: none; }
   .prog-bar > span.indet { width: 100%; animation: fade-pulse 2s ease-in-out infinite; }

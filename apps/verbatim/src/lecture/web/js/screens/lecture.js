@@ -21,7 +21,7 @@ export async function renderLecture(id, tab) {
   $("#bar-actions").innerHTML = `
     ${canNotes ? `<button class="btn btn-small ${lec.notes ? "" : "btn-primary"}" id="make-notes">${lec.notes ? t("remake_notes") : t("make_notes")}</button>` : ""}
     ${lec.files.includes("flashcards_anki.csv") ? `<a class="btn btn-small" href="/api/lectures/${encodeURIComponent(lec.id)}/files/flashcards_anki.csv">${t("anki")}</a>` : ""}
-    ${lec.latex_pdf ? `<a class="btn btn-small" href="/api/lectures/${encodeURIComponent(lec.id)}/latex.pdf" target="_blank" rel="noopener">${t("latex_open")}</a>` : ""}
+    ${lec.latex_pdf ? `<a class="btn btn-small" id="open-latex" href="/api/lectures/${encodeURIComponent(lec.id)}/latex.pdf" target="_blank" rel="noopener">${t("latex_open")}</a>` : ""}
     ${lec.can_latex ? `<button class="btn btn-small" id="make-latex">${t(lec.latex_pdf ? "latex_remake" : "latex_make")}</button>` : ""}
     <button class="btn btn-small" id="open-folder">${t("files")}</button>
     <button class="btn btn-small btn-plain btn-danger" id="delete-lecture">${t("delete")}</button>`;
