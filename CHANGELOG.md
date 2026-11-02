@@ -2,13 +2,14 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
-2. **Klaar:** fase 0 t/m 5, Trivium (Sequo, Verbatim, Velox 4.4.0), vakkleuren, zelfde opbouw en instellingen-tabs in Sequo en Verbatim. Eigenaar testte kleuren, overlay en Velox in Zen.
+2. **Klaar:** fase 0 t/m 5, Trivium (Sequo, Verbatim, Velox 4.4.1), vakkleuren, zelfde opbouw en instellingen-tabs in Sequo en Verbatim. Eigenaar testte kleuren, overlay en Velox in Zen.
 3. **Niet te fixen:** de hoeken van de Velox-popup in Zen komen van de browser zelf (eigenaar akkoord).
 4. **Niet getest:** look op de echte Kaltura-speler in alle gevallen, badges in Sequo zelf, Safari.
-5. **Eerst:** Velox 4.4.1 uitbrengen (proefrun goed, wacht op akkoord eigenaar), dan repo's `studie-ecosysteem` en `SwiftSkip` verwijderen (scope `delete_repo` ontbreekt nog) en de valkuilen in `CLAUDE.md` bijwerken.
-   **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
-6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini);
-   repo `studie-ecosysteem` bewaart het update-adres van Velox t/m 4.3.0, verwijderen kan zodra niemand die nog gebruikt.
+5. **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
+6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini).
+
+## 2026-11-02 — Velox 4.4.1, oude repo's weg
+- Velox 4.4.1 gereleased: gecontroleerd in de echte `.xpi` (geen links naar de oude repo) en in de updatefeed. GitHub-repo's `studie-ecosysteem` en `SwiftSkip` verwijderd. Eén contributor op `trivium`.
 
 ## 2026-11-02 — oude repo's voorbereid om te verwijderen
 - Eigenaar: `studie-ecosysteem` en `SwiftSkip` mogen weg. Links in Velox en README's wijzen nu naar `trivium`, de 4.0.x-regels met downloads uit de oude repo zijn uit `updates.json`. Velox 4.4.1 moet dit nog uitbrengen; daarna de repo's verwijderen en de valkuilen in `CLAUDE.md` bijwerken.

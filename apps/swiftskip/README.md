@@ -15,8 +15,8 @@ Downloaded recordings are for your personal study only — please don't share th
 
 ## Install
 
-- **Zen / Firefox / LibreWolf:** [swiftskip-firefox.xpi](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-firefox.xpi) — updates itself
-- **Chrome / Edge / Brave / …:** [swiftskip-chrome.zip](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.0/swiftskip-chrome.zip) — "Load unpacked"
+- **Zen / Firefox / LibreWolf:** [swiftskip-firefox.xpi](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.1/swiftskip-firefox.xpi) — updates itself
+- **Chrome / Edge / Brave / …:** [swiftskip-chrome.zip](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.1/swiftskip-chrome.zip) — "Load unpacked"
 
 Step-by-step guide: [Nederlands](README_NL.md#installeren) · [English](README_EN.md#installing). What's new: [CHANGELOG.md](CHANGELOG.md).
 
