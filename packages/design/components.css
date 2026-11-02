@@ -69,7 +69,7 @@ h1, h2, h3, p { margin: 0; }
   position: fixed;
   left: calc(var(--space-4) + var(--safe-left));
   right: calc(var(--space-4) + 56px + var(--space-3) + var(--safe-right));
-  bottom: calc(var(--space-3) + var(--safe-bottom));
+  bottom: var(--dock-bottom);
   z-index: 10;
   display: flex;
   gap: var(--space-1);
@@ -172,7 +172,7 @@ h1, h2, h3, p { margin: 0; }
 .fab {
   position: fixed;
   right: calc(var(--space-4) + var(--safe-right));
-  bottom: calc(var(--space-3) + (var(--dock-height) - 56px) / 2 + var(--safe-bottom));
+  bottom: calc(var(--dock-bottom) + (var(--dock-height) - 56px) / 2);
   z-index: 10;
   display: grid;
   place-items: center;
@@ -432,7 +432,7 @@ kbd {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--dock-height) + var(--space-5) + var(--safe-bottom));
+  bottom: calc(var(--dock-height) + var(--space-2) + var(--dock-bottom));
   z-index: 30;
   display: flex;
   align-items: center;
@@ -487,7 +487,7 @@ kbd {
 
 /* ---- Strook onder de statusbalk: de inhoud schuift eronder, niet achter de klok ---- */
 .topbar { position: absolute; inset: 0 0 auto 0; z-index: 10; height: var(--safe-top); background: var(--bg); }
-.view { min-width: 0; padding-top: var(--safe-top); padding-bottom: calc(var(--dock-height) + var(--space-8) + var(--safe-bottom)); }
+.view { min-width: 0; padding-top: var(--safe-top); padding-bottom: calc(var(--dock-height) + var(--space-5) + var(--dock-bottom)); }
 @media (min-width: 900px) {
   .topbar { display: none; }
   .view { padding-bottom: var(--space-12); }
@@ -562,7 +562,7 @@ body.app .topbar { position: fixed; }
 .course-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .finished > summary { cursor: pointer; padding-block: var(--space-3); min-height: var(--row-min); display: flex; align-items: center; }
 .stack-tight > * + * { margin-top: var(--space-2); }
-.select-bar { position: sticky; bottom: calc(var(--dock-height) + var(--space-5) + var(--safe-bottom)); }
+.select-bar { position: sticky; bottom: calc(var(--dock-height) + var(--space-2) + var(--dock-bottom)); }
 @media (min-width: 900px) { .select-bar { bottom: var(--space-4); } }
 .banner { flex-wrap: wrap; }
 .banner > span:first-child { flex: 1 1 220px; min-width: 0; }

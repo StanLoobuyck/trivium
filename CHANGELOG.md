@@ -7,7 +7,15 @@
 4. **Niet getest:** look op de echte Kaltura-speler in alle gevallen, badges in Sequo zelf, Safari.
 5. **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
 6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini);
-   `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft; repo `studie-ecosysteem` bewaart het update-adres van Velox t/m 4.3.0, verwijderen kan zodra niemand die nog gebruikt.
+   repo `studie-ecosysteem` bewaart het update-adres van Velox t/m 4.3.0, verwijderen kan zodra niemand die nog gebruikt.
+
+## 2026-11-02 — tabbalk lager op de iPhone, oude Verbatim-map weg
+- Tabbalk: nieuw token `--dock-bottom`, de balk gaat 12 px in de safe area. Gemeten met gesimuleerde safe area van 34 px: 46 → 22 px van de onderrand; zonder safe area 12 px. Plusknop, toast en selectiebalk rekenen op hetzelfde token.
+- `~/Documents/lecture-transcriber` verwijderd (3,0 GB, had geen remote). Eerst gecontroleerd: notities byte-gelijk in `apps/verbatim`, geen actieve verwijzingen. Repo's `studie-ecosysteem` en `SwiftSkip` blijven, die bedienen oude Velox-installaties.
+- Na de maphernoeming wezen de venvs van hub en Verbatim nog naar het oude pad: opnieuw geïnstalleerd.
+- Velox in Zen: een tijdelijke add-on wint van de geïnstalleerde 4.3.0 met het oude logo. Gepubliceerde 4.4.0 gecontroleerd: nieuw logo, updatefeed geeft 4.4.0.
+- Eenmalig mislukte schermtest "knop Bekeken ... overleeft herladen" (wacht vast 200 ms op de opslag): daarna 6/6 goed, ook zonder deze wijziging. Niet aangepast.
+- Tests: 128 unit, 134 schermtests, 233 Verbatim.
 
 ## 2026-11-02 — menu altijd zichtbaar, instellingen in tabs, map Trivium
 - Verbatim: het menu blijft ook op het lesscherm staan. De twee kolommen van het lesscherm beginnen nu vanaf 1300 px.

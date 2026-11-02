@@ -43,6 +43,8 @@
   --content-width: 720px;
   --sidebar-width: 288px;
   --dock-height: 60px;
+  /* Afstand tot de onderrand: de balk gaat tot 12 px in de safe area, net boven de home-indicator. */
+  --dock-bottom: max(var(--space-3), calc(var(--safe-bottom) - var(--space-3)));
 
   /* Veer met stijfheid 400 en demping 30 (ζ = 0,75, overshoot 2,8%), uitgerekend tot ze stilligt en
      geschaald naar 300 ms. Oudere browsers vallen terug op de cubic-bezier. */
