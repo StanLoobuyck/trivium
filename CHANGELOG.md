@@ -8,6 +8,10 @@
 5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — slides over meerdere lessen
+- Keuze eigenaar: een les zonder eigen slides wacht 30 minuten en krijgt dan alle slides van het vak; de uitlijning kiest. Voorheen wachtte ze voor altijd.
+- `Les 3-6` telt nu voor les 3 t/m 6 (ook `t/m`, `tot`, `–`). Wachttijd loopt vanaf de aankomst in de map, niet vanaf de oude bestandsdatum.
+
 ## 2026-11-02 — Verbatim toont weer wat het doet
 - Eigenaarstest: keten werkt, opname en slides samen opgepikt ("19 pages, 40 terms"). De run hergebruikte de bestaande lesmap, audio en transcript: geen dubbele les, de eerdere waarschuwing was fout.
 - Eigenaar vond de voortgang onduidelijk. Oorzaken: percentage alleen bij transcriberen, stap "termen" ontbrak (scherm toonde dan Audio), bij minder animatie was de balk vol.

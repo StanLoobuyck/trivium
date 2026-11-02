@@ -21,6 +21,27 @@ def test_lecture_number(stem, n):
     assert inbox.lecture_number(stem) == n
 
 
+@pytest.mark.parametrize("stem,covers", [
+    ("Les 4", {4}), ("Deel 2 (Les 3-6)", {3, 4, 5, 6}), ("HC 03 - 05", {3, 4, 5}), ("les 2 t/m 4", {2, 3, 4}),
+    ("Les 3–4", {3, 4}), ("Slides Hoofdstuk 3", set()), ("les 4 - 16 - 05", {4}), ("Les 5-3", {5}),
+    ("Les 3-2026", {3}),
+])
+def test_deck_lectures(stem, covers):
+    assert inbox.deck_lectures(stem) == covers
+
+
+def test_one_deck_serves_several_lectures():
+    span = [Path("Deel 2 (Les 3-6).pdf"), Path("Les 7.pdf")]
+    assert inbox.pick_slides(Path("Les 5.mp4"), span) == ([span[0]], "lecture 5")
+    assert inbox.pick_slides(Path("DEP les 7.mp4"), span) == ([span[1]], "lecture 7")
+
+
+def test_missing_deck_waits_then_takes_all():
+    decks = [Path("Les 1.pdf"), Path("Les 2.pdf")]
+    assert inbox.pick_slides(Path("Les 3.mp4"), decks, inbox.MISSING_DECK_WAIT_S - 1)[0] is None
+    assert inbox.pick_slides(Path("Les 3.mp4"), decks, inbox.MISSING_DECK_WAIT_S) == (decks, "all decks of the course")
+
+
 def test_pick_slides():
     v = Path("DEP les 4 - Aula.mp4")
     big = [Path("Slides_Part1.pdf"), Path("Slides_Part2.pdf")]
@@ -79,3 +100,15 @@ def test_empty_shelf_waits_then_goes_without_slides(box, monkeypatch):
     assert not f["ready"] and "10 min" in f["why"]
     (f,) = inbox.scan(conf, load_courses(), now=time.time() + inbox.EMPTY_SHELF_WAIT_S)
     assert f["ready"] and f["slides"] == []
+
+
+def test_moved_old_recording_still_gets_its_full_wait(box, monkeypatch):
+    conf, root, queue, tick = box
+    monkeypatch.setattr(q, "Queue", lambda: queue)
+    dep = root / "digitale-elektronica"
+    put(dep / "les 1.pdf", 3600)
+    put(dep / "les 3.mp4", 90 * 24 * 3600)                  # old mtime, as after moving a file in
+    (f,) = inbox.scan(conf, load_courses())
+    assert not f["ready"] and "30 min" in f["why"]
+    (f,) = inbox.scan(conf, load_courses(), now=time.time() + inbox.MISSING_DECK_WAIT_S)
+    assert f["ready"] and [Path(s).name for s in f["slides"]] == ["les 1.pdf"]

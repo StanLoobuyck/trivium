@@ -38,9 +38,9 @@ after `scripts/install.sh`), or by hand with `lecture worker`.
 Watch folder: move a downloaded recording into `~/Lectures/inbox/<course-id>/` (made for every current
 course) and the worker queues it once it stops changing (30 s). Keep the course's slides in the same folder:
 a deck with the same name or lecture number ("les 4", "HC 4", "week 4") is used; courses with a few big decks
-get all of them (the slide alignment finds what was shown); a numbered lecture whose own deck isn't there yet waits and
-shows on the dashboard ("Add by hand" opens the Add page with the course filled in). A recording without a number
-never waits for a deck: it gets all of them.
+get all of them (the slide alignment finds what was shown); a deck named "les 3-6" counts for each of those lectures. A numbered lecture whose own deck
+isn't there yet waits 30 minutes and shows on the dashboard ("Add by hand" opens the Add page with the course filled
+in), then gets all decks. A recording without a number never waits for a deck: it gets all of them.
 Settings → Mac at home: the model server's address and token, with a connection test.
 
 Study notes (uses your Claude subscription via `claude -p`, Gemini as fallback; one call of ~2 min per
