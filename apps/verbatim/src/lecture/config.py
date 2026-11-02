@@ -330,6 +330,8 @@ class Course(_Strict):
     # "2026-27 S1" (none = from the newest lecture) and archived: true/false (none = automatic, semesters.py)
     semester: str | None = Field(default=None, pattern=r"^\d{4}-\d{2} S[12]$")
     archived: bool | None = None
+    # LaTeX notes: false = studied next to the slides (refer, don't copy); true = readable without them
+    notes_without_slides: bool = False
 
 
 def deep_merge(base: dict, override: dict) -> dict:

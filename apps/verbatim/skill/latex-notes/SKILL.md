@@ -17,12 +17,20 @@ handwritten notes: every explanation, reason, example, warning and exam hint the
 already on the slide (code, figures, tables, slide text) does not, except a short piece the explanation is about.
 Formulas the lecturer derives or works with do go in: they are what the notes are for. Nothing invented: every statement comes from the transcript or the slides.
 
+**Mode.** The rules below are for the default mode, *next to the slides*. It adapts by itself: sparse slides (a talk
+course, a title and a quote per slide) leave most of the content to the notes. Mode *without slides* (Verbatim says
+so in the input; for loose files ask, default next to the slides) is for a course whose slides the reader doesn't
+keep at hand: the notes must be readable alone, so also summarise what is only on the slides, include the code the
+lecture works with and the figures it needs (crop with `uv run <skill>/scripts/crop.py <pdf> <page> X0 Y0 X1 Y1
+--preview WORK/crop.png`, box as page fractions, top left = 0,0, at most 3 tries; or redraw in TikZ), budget 5
+pages per hour (minimum 3), and run `check.py` with `--without-slides`. Structure and density rules stay the same.
+
 `<skill>` below = the folder this SKILL.md is in (scripts in `scripts/`, templates in `templates/`). The source is
 `apps/verbatim/skill/latex-notes` in the Trivium repo: change it there.
 
 **Started from Verbatim** (the input says so): nobody is there to answer, so never ask. Verbatim has already done
 steps 1 and 2: the work folder, course folder, `main.tex` and the `\\input` line exist, and the lecture file is
-named in the input. Go straight to step 3 and write that file; the lecture number is given too. End with the
+named in the input. Go straight to step 3 and write that file; the lecture number and the mode are given too. End with the
 report of step 6.
 
 ## 1. Find the material
@@ -161,7 +169,7 @@ Page budget: this lecture's pages = pages of `main.pdf` now minus before you add
 the title page; Verbatim gives the number before in the input). Count with
 `uv run --with pypdf python -c "import pypdf;print(len(pypdf.PdfReader('<course folder>/main.pdf').pages))"`.
 
-Then run `uv run <skill>/scripts/check.py <lecture file> WORK --pages <N>` and fix everything it prints: wrong moments,
+Then run `uv run <skill>/scripts/check.py <lecture file> WORK --pages <N>` (plus `--without-slides` in that mode) and fix everything it prints: wrong moments,
 own macros. Over budget: do one compression pass on the .tex (tighten wording, merge, remove duplication; delete no
 facts), recompile, recount and rerun the check. Only one pass; if still over, leave it and report the numbers.
 Look at two rendered pages of this lecture too (`uv run --with pymupdf python -c "import pymupdf;pymupdf.open('<pdf>')[<n>].get_pixmap(dpi=80).save('WORK/page.png')"`,

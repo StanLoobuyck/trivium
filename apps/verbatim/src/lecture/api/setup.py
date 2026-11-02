@@ -44,6 +44,7 @@ class CourseIn(BaseModel):
     # must be listed here: fields missing from this model were silently dropped on every save (2026-10-20)
     semester: str | None = None
     archived: bool | None = None
+    notes_without_slides: bool = False
 
 
 class Flag(BaseModel):

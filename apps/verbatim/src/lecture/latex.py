@@ -96,13 +96,15 @@ def pdf_pages(pdf: Path) -> int:
     return pymupdf.open(pdf).page_count if pdf.exists() else 0
 
 
-def prompt(job_root: Path, work: Path, folder: Path, tex: Path, manifest: dict, pages_before: int | None = 0) -> str:
+def prompt(job_root: Path, work: Path, folder: Path, tex: Path, manifest: dict, pages_before: int | None = 0,
+           without_slides: bool = False) -> str:
     body = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").split("---", 2)[2]
     number = lecture_nr(manifest)
     given = (f"Started from Verbatim. Lecture: {manifest.get('title')} ({manifest.get('date')}), "
              f"lecture number: {number if number else 'none: use the title'}. Job folder: {job_root}. "
              f"Work folder, already prepared: {work}. Course folder, already set up: {folder}. "
              f"Lecture file to write: {tex.relative_to(folder)}. "
+             + ("Mode: without slides. " if without_slides else "Mode: next to the slides. ")
              + (f"main.pdf had {pages_before} pages before this lecture." if pages_before is not None else
                 "This lecture is being redone, so main.pdf already holds an older version: judge the page budget "
                 "from the page where the lecture starts and the next one."))
@@ -194,7 +196,9 @@ def run(job_root: Path, conf: Config, rep: Reporter) -> Path:
         errors: list[str] = []
         reader = threading.Thread(target=lambda: errors.extend(proc.stderr), daemon=True)  # a full pipe would block
         reader.start()
-        proc.stdin.write(prompt(job_root, work, folder, tex, manifest, pages_before))
+        course = next((c for c in cfgmod.load_courses() if c.id == manifest["course"]), None)
+        proc.stdin.write(prompt(job_root, work, folder, tex, manifest, pages_before,
+                                bool(course and course.notes_without_slides)))
         proc.stdin.close()
         result = follow(proc.stdout, rep)
         proc.wait()

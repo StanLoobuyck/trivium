@@ -3,7 +3,7 @@
 # ///
 """Checks a finished lecture file against its parts.md: what a model reports about itself is not proof.
 
-  uv run check.py <lecture.tex> <WORK folder> [--pages N]
+  uv run check.py <lecture.tex> <WORK folder> [--pages N] [--without-slides]
 
 Prints one line per problem and exits 1 when there are any. N = this lecture's pages in the PDF.
 """
@@ -17,6 +17,7 @@ from pathlib import Path
 PAGES_PER_HOUR = 3  # the notes sit next to the slides: no copied code or figures
 MARGIN = 1.2
 MIN_BUDGET = 2
+ALONE = (5, 3)  # pages per hour and minimum when the notes must work without the slides
 CODE_LINES = 4  # longer than this is a listing copied from a slide
 PART = re.compile(r"^## Part \d+: .*\[([\d:]+)–([\d:]+)\] · slides (.*?)(?: \(slide match uncertain\))?$", re.M)
 STAMP = re.compile(r"^\[([\d:]+)\]", re.M)
@@ -34,7 +35,7 @@ def page_of(label: str) -> str:
     return re.sub(r"\s+", " ", label).strip().removeprefix("p")
 
 
-def check(tex: str, parts: str, pages: int | None) -> list[str]:
+def check(tex: str, parts: str, pages: int | None, without_slides: bool = False) -> list[str]:
     problems = []
     body = "\n".join(line for line in tex.splitlines() if not line.lstrip().startswith("%"))
     stamps = [seconds(s) for s in STAMP.findall(parts)]
@@ -62,18 +63,19 @@ def check(tex: str, parts: str, pages: int | None) -> list[str]:
         problems.append("the lecture file isn't written: no \\les")
     if re.search(r"\\providecommand|\\newcommand|\\setlength", body):
         problems.append("own macros or lengths in the lecture file: use lesnotities.sty")
-    for block in re.findall(r"\\begin\{(?:verbatim|lstlisting)\}(.*?)\\end\{", body, re.S):
+    for block in [] if without_slides else re.findall(r"\\begin\{(?:verbatim|lstlisting)\}(.*?)\\end\{", body, re.S):
         lines = [line for line in block.strip("\n").splitlines() if line.strip()]
         if len(lines) > CODE_LINES:
             problems.append(f"code block of {len(lines)} lines ({lines[0].strip()[:40]}): it is on the slide; "
                             f"refer to it and quote at most {CODE_LINES} lines")
-    if re.search(r"\\includegraphics|\\slidefig", body):
+    if not without_slides and re.search(r"\\includegraphics|\\slidefig", body):
         problems.append("figure from the slides: the reader has the slides open, refer with \\slide instead")
     for topic in re.split(r"\\onderwerp\{", body)[1:]:
         if "\\kernpunt{" not in topic:
             problems.append(f"topic without \\kernpunt: {topic.split('}', 1)[0]}")
     if pages is not None:
-        budget = max(MIN_BUDGET, end / 3600 * PAGES_PER_HOUR)
+        per_hour, minimum = ALONE if without_slides else (PAGES_PER_HOUR, MIN_BUDGET)
+        budget = max(minimum, end / 3600 * per_hour)
         print(f"{pages} pages, budget {budget:.1f}")
         if pages > budget * MARGIN:
             problems.append(f"{pages} pages is over the budget of {budget:.1f}: compress")
@@ -85,8 +87,10 @@ def main() -> None:
     ap.add_argument("tex", type=Path)
     ap.add_argument("work", type=Path)
     ap.add_argument("--pages", type=int)
+    ap.add_argument("--without-slides", action="store_true")
     a = ap.parse_args()
-    problems = check(a.tex.read_text(encoding="utf-8"), (a.work / "parts.md").read_text(encoding="utf-8"), a.pages)
+    problems = check(a.tex.read_text(encoding="utf-8"), (a.work / "parts.md").read_text(encoding="utf-8"), a.pages,
+                     a.without_slides)
     for problem in problems:
         print(problem)
     print(f"check: {len(re.findall('% CHECK', a.tex.read_text(encoding='utf-8')))} % CHECK lines, {len(problems)} problems")

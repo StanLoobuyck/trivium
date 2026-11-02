@@ -144,3 +144,5 @@ def test_course_saves_through_the_api_keep_semester_and_archived(xdg):
     course = next(c for c in client.get("/api/courses").json() if c["id"] == "dep")
     client.post("/api/courses", json={**course, "corrections": {"Carnot-kaart": "Karnaugh-kaart"}}, headers=w)
     assert (dep().semester, dep().archived, dep().corrections) == ("2026-27 S1", True, {"Carnot-kaart": "Karnaugh-kaart"})
+    client.post("/api/courses", json={**course, "notes_without_slides": True}, headers=w)
+    assert dep().notes_without_slides is True and dep().semester == "2026-27 S1"

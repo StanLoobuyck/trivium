@@ -158,3 +158,12 @@ def test_check_wants_notes_next_to_the_slides():
     found = check(copied, PARTS, None)
     assert len(found) == 3 and "code block of 5 lines" in found[0]
     assert any("figure from the slides" in p for p in found) and any("without \\kernpunt: B" in p for p in found)
+    assert check(copied, PARTS, None, without_slides=True) == ["topic without \\kernpunt: B"]
+    assert check("\\les{1}{x}{y}\n", PARTS, 3, without_slides=True) == []
+
+
+def test_prompt_names_the_mode(tmp_path):
+    tex = latex.setup_course(tmp_path / "Vak", "Vak", MANIFEST, None)
+    assert "Mode: next to the slides." in latex.prompt(Path("/jobs/j"), tmp_path / "w", tmp_path / "Vak", tex, MANIFEST)
+    alone = latex.prompt(Path("/jobs/j"), tmp_path / "w", tmp_path / "Vak", tex, MANIFEST, 0, True)
+    assert "Mode: without slides." in alone and "--without-slides" in alone

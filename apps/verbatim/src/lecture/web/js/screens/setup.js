@@ -177,6 +177,9 @@ function drawCourses() {
         <option value="">${esc(t("c_sem_auto", { sem: S.sem?.courses[c.id] && !c.semester ? fmtSem(S.sem.courses[c.id].semester) : "…" }))}</option>
         ${semesterChoices(c.semester).map((x) => `<option value="${x}" ${x === c.semester ? "selected" : ""}>${esc(fmtSem(x))}</option>`).join("")}
       </select></label>
+      <label class="form-field">${t("c_latex")}<select id="cf-latex">
+        <option value="next" ${!c.notes_without_slides ? "selected" : ""}>${t("c_latex_next")}</option>
+        <option value="alone" ${c.notes_without_slides ? "selected" : ""}>${t("c_latex_alone")}</option></select></label>
       <label class="form-field wide">${t("c_terms")}<input type="text" id="cf-terms" value="${esc((c.extra_terms || []).join(", "))}"></label>
       <label class="form-field wide">${t("c_fixes")}<textarea id="cf-fixes" rows="3" placeholder="nent = NAND">${esc(Object.entries(c.corrections || {}).map(([a, b]) => `${a} = ${b}`).join("\n"))}</textarea></label>
       <div class="row-end"><button class="btn btn-small" id="cf-cancel">${t("cancel")}</button><button class="btn btn-small btn-primary" id="cf-save">${t("c_save")}</button></div>
@@ -205,6 +208,7 @@ function drawCourses() {
       // a chosen semester decides archiving again (archived: automatic), so "2026-27 S1" puts it in your list
       semester: $("#cf-sem").value || null, archived: ($("#cf-sem").value || null) !== (old.semester || null) ? null : old.archived ?? null,
       extra_terms: $("#cf-terms").value.split(",").map((x) => x.trim()).filter(Boolean),
+      notes_without_slides: $("#cf-latex").value === "alone",
       corrections: fixes };
     if (!body.name) return;
     try { await post("/api/courses", body); toast(t("saved")); editingCourse = null; S.courses = await api("/api/courses"); drawCourses(); }
