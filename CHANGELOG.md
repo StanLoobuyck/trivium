@@ -5,13 +5,15 @@
 2. **Klaar:** fase 0 t/m 5, Trivium (Sequo, Verbatim, Velox 4.4.0), vakkleuren, zelfde opbouw en instellingen-tabs in Sequo en Verbatim. Eigenaar testte kleuren, overlay en Velox in Zen.
 3. **Niet te fixen:** de hoeken van de Velox-popup in Zen komen van de browser zelf (eigenaar akkoord).
 4. **Niet getest:** look op de echte Kaltura-speler in alle gevallen, badges in Sequo zelf, Safari.
-5. **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
+5. **Eerst:** Velox 4.4.1 uitbrengen (proefrun goed, wacht op akkoord eigenaar), dan repo's `studie-ecosysteem` en `SwiftSkip` verwijderen (scope `delete_repo` ontbreekt nog) en de valkuilen in `CLAUDE.md` bijwerken.
+   **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
 6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini);
    repo `studie-ecosysteem` bewaart het update-adres van Velox t/m 4.3.0, verwijderen kan zodra niemand die nog gebruikt.
 
 ## 2026-11-02 — oude repo's voorbereid om te verwijderen
 - Eigenaar: `studie-ecosysteem` en `SwiftSkip` mogen weg. Links in Velox en README's wijzen nu naar `trivium`, de 4.0.x-regels met downloads uit de oude repo zijn uit `updates.json`. Velox 4.4.1 moet dit nog uitbrengen; daarna de repo's verwijderen en de valkuilen in `CLAUDE.md` bijwerken.
 - `gh`-token mist nog de scope `delete_repo`.
+- Lokale mappen `~/Documents/SwiftSkip` en `SwiftSkip_Firefox` verwijderd (eerst gecontroleerd: niets ongepusht, `.env` gelijk aan die in `apps/swiftskip`).
 
 ## 2026-11-02 — tabbalk lager op de iPhone, oude Verbatim-map weg
 - Tabbalk: nieuw token `--dock-bottom`, de balk gaat 12 px in de safe area. Gemeten met gesimuleerde safe area van 34 px: 46 → 22 px van de onderrand; zonder safe area 12 px. Plusknop, toast en selectiebalk rekenen op hetzelfde token.
