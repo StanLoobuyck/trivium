@@ -117,6 +117,7 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Popup testen in echte Zen kan zonder venster: `--headless --marionette -remote-allow-system-access` met een eigen profiel, `Addon:Install` en `browserActionFor(ext).openPopup`.
 - De repo en de map heten `trivium`. Updates van Velox lopen via `site/velox/updates.json`; de oude repo's en de releases met de oude namen zijn weg (2026-11-02).
 - Map of repo hernoemd: venvs wijzen nog naar het oude pad. Herstel met `uv sync --reinstall` in `apps/hub` en `apps/verbatim`.
+- Headless Zen (Marionette) laat CSS-animaties niet lopen en tekent soms een oude positie: vertrouw `getComputedStyle`/`getBoundingClientRect`, niet de schermafbeelding. Gedrag bij "minder beweging" test je met `user_pref("ui.prefersReducedMotion", 1)`. De eigenaar heeft animaties uit (GTK), dus Zen vraagt altijd minder beweging; `packages/design` zet dan alle animaties uit, ook die van Velox op Trivium-pagina's.
 - Zen verbergt het Extensies-paneel: zet `extensions.unifiedExtensions.button.always_visible` op true om een add-on vast te maken.
 - LaTeX-skill: bron is `apps/verbatim/skill/latex-notes`; `~/.claude/skills/latex-notes` is een link. De gesyncte kopie onder `~/.claude/skills/synced/` komt van claude.ai en verandert alleen door opnieuw te uploaden: vergelijk die eerst.
 - De worker bewaart `latex.py` in zijn geheugen na de eerste LaTeX-taak: wijzigingen daar vragen een herstart (`SKILL.md` en het sjabloon niet).
