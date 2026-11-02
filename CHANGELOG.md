@@ -4,7 +4,7 @@
 1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 uit met slides-knop, Verbatim-fix geïnstalleerd. Geverifieerd: `.xpi` van 4.5.0 online gelezen, 128 unit, 94 + 31 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
 2. **Niet getest:** update naar 4.5.0 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) zijn onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
-4. **Volgende stap:** worker herstarten (nu nog Sonnet in geheugen), Les 11 in de PDF beoordelen, dan fase 6.
+4. **Volgende stap:** Les 11 in de PDF beoordelen, dan fase 6.
 5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
