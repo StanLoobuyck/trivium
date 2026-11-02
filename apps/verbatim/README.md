@@ -41,6 +41,9 @@ a deck with the same name or lecture number ("les 4", "HC 4", "week 4") is used;
 get all of them (the slide alignment finds what was shown); a deck named "les 3-6" counts for each of those lectures. A numbered lecture whose own deck
 isn't there yet waits 30 minutes and shows on the dashboard ("Add by hand" opens the Add page with the course filled
 in), then gets all decks. A recording without a number never waits for a deck: it gets all of them.
+LaTeX notes: the button on a finished lecture runs the `latex-notes` skill (`skill/latex-notes`) with Claude Sonnet 5.5
+through Claude Code, in the background (Bezig shows the steps). Result: `~/Documents/Lesnotities/<course>/`, one
+`.tex` per lecture and one `main.pdf` per course, compiled with Tectonic. It uses the slides stored with the lecture.
 Settings → Mac at home: the model server's address and token, with a connection test.
 
 Study notes (uses your Claude subscription via `claude -p`, Gemini as fallback; one call of ~2 min per

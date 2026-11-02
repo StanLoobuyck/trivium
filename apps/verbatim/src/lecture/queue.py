@@ -32,7 +32,7 @@ from .providers.claude_cli import schedule_allows
 from .util import read_json, write_json
 
 NOTES_POLICIES = ("now", "tonight", "never")
-ACTIVE = ("transcribing", "notes")
+ACTIVE = ("transcribing", "notes", "latex")
 
 
 def queue_path() -> Path:
@@ -89,6 +89,19 @@ class Queue:
             state["items"].append(item)
             return dict(item)
 
+    def add_latex(self, job_root: Path, media: str, course: str) -> dict[str, Any]:
+        """Queue the LaTeX notes of a finished lecture (latex.py)."""
+        with self._locked() as state:
+            for item in state["items"]:
+                if item.get("job") == str(job_root) and item["status"] in ("latex_queued", "latex"):
+                    return dict(item)
+            item = {"id": uuid.uuid4().hex[:8], "media": media, "course": course, "slides": [], "title": None,
+                    "date": None, "notes": "never", "status": "latex_queued", "kind": "latex",
+                    "added": self.clock().isoformat(timespec="seconds"), "job": str(job_root), "stage": None,
+                    "progress": None, "message": "LaTeX requested", "error": None, "resume_at": None}
+            state["items"].append(item)
+            return dict(item)
+
     def update(self, item_id: str, **fields: Any) -> None:
         with self._locked() as state:
             for item in state["items"]:
@@ -106,8 +119,8 @@ class Queue:
         with self._locked() as state:
             for item in state["items"]:
                 if item["id"] == item_id and item["status"] in ("failed", "notes_pending"):
-                    item.update(status="transcribed" if item.get("failed_at") == "notes" else "queued",
-                                error=None, resume_at=None)
+                    back = {"notes": "transcribed", "latex": "latex_queued"}.get(item.get("failed_at"), "queued")
+                    item.update(status=back, error=None, resume_at=None)
                     return
         raise KeyError(f"{item_id}: no failed or pending item with this id")
 
@@ -149,7 +162,7 @@ class Queue:
         with self._locked() as state:
             for item in state["items"]:
                 if item["status"] in ACTIVE and not alive(item.get("pid") or -1):
-                    item["status"] = "queued" if item["status"] == "transcribing" else "transcribed"
+                    item["status"] = {"transcribing": "queued", "latex": "latex_queued"}.get(item["status"], "transcribed")
                     back.append(item["id"])
         return back
 
@@ -175,6 +188,14 @@ class Queue:
                     continue
                 item.update(status="notes", pid=pid, error=None, resume_at=None)
                 return dict(item)
+        return None
+
+    def claim_latex(self, pid: int) -> dict | None:
+        with self._locked() as state:
+            for item in state["items"]:
+                if item["status"] == "latex_queued" and self._due(item):
+                    item.update(status="latex", pid=pid, error=None, resume_at=None)
+                    return dict(item)
         return None
 
     def next_notes_time(self, conf: Config) -> datetime | None:
@@ -334,6 +355,28 @@ def notes_item(queue: Queue, item: dict, conf: Config) -> None:
     hub.report_quietly()
 
 
+def latex_item(queue: Queue, item: dict, conf: Config) -> None:
+    from . import latex
+    from .providers.llm import LLMLimit
+
+    try:
+        latex.run(Path(item["job"]), conf, QueueReporter(queue, item["id"]))
+    except LLMLimit as exc:
+        resume = exc.resume_at or (queue.clock() + timedelta(hours=1))
+        queue.update(item["id"], status="latex_queued", resume_at=resume.isoformat(timespec="minutes"),
+                     stage=None, message=str(exc)[:300])
+        return
+    except KeyboardInterrupt:
+        queue.update(item["id"], status="latex_queued", stage=None, message="interrupted; resumes on the next worker start")
+        raise
+    except Exception as exc:  # noqa: BLE001
+        queue.update(item["id"], status="failed", failed_at="latex", stage=None, error=f"{type(exc).__name__}: {exc}")
+        notify("LaTeX notes failed", f"{_title(item)}: {exc}", urgency="critical")
+        return
+    queue.update(item["id"], status="done", stage=None, progress=None, message="LaTeX notes ready")
+    notify("LaTeX notes ready", _title(item))
+
+
 def watch_inbox(queue: Queue, conf: Config) -> bool:
     """Queue new recordings from ~/Lectures/inbox/<course>/ (inbox.py); True when something was added."""
     from . import inbox
@@ -361,6 +404,10 @@ def _loop(queue: Queue, conf: Config, pid: int, once: bool, idle_s: float, sleep
                 item = queue.claim_notes(pid, conf)
                 if item:
                     notes_item(queue, item, conf)
+                else:
+                    item = queue.claim_latex(pid)
+                    if item:
+                        latex_item(queue, item, conf)
             finally:
                 notes_lock.release()
             if item:

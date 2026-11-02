@@ -1,0 +1,82 @@
+% lesnotities.sty: lecture notes in the style of handwritten course notes (latex-notes skill).
+% Option: nl (default) or en, for the labels.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{lesnotities}[2026/10/18 lecture notes style]
+
+\newif\if@ln@en
+\DeclareOption{en}{\@ln@entrue}
+\DeclareOption{nl}{\@ln@enfalse}
+\ProcessOptions\relax
+
+% --- page: wide right margin for slide references and stars -----------------------------------------
+\RequirePackage[a4paper, left=22mm, right=42mm, marginparwidth=30mm, marginparsep=5mm, top=22mm, bottom=24mm]{geometry}
+\RequirePackage{fontspec}            % Tectonic = XeTeX; Latin Modern by default
+\if@ln@en\RequirePackage[english]{babel}\else\RequirePackage[dutch]{babel}\fi
+\RequirePackage{amsmath, amssymb, mathtools, bm}
+\RequirePackage{siunitx}             % SI units: \qty{5}{\volt}, \unit{\ohm}
+\sisetup{output-decimal-marker={,}, per-mode=symbol}
+\if@ln@en\sisetup{output-decimal-marker={.}}\fi
+\RequirePackage{braket}              % \ket{\psi}, \bra{\phi}, \braket{a|b}
+\RequirePackage{xcolor, graphicx, float, enumitem, marginnote, booktabs, array}
+\RequirePackage{tikz, pgfplots, circuitikz}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta, calc, patterns, decorations.pathreplacing, positioning}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{titlesec}
+\RequirePackage[hidelinks]{hyperref}
+
+\definecolor{accent}{HTML}{E8731A}   % orange: stars, lecture titles
+\definecolor{opm}{gray}{0.45}        % grey side remarks
+\setlist{nosep, leftmargin=*, label=--}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+% --- headings: one \les per lecture, \onderwerp per topic (underlined, like the handwritten titles) ---
+\titleformat{\section}{\Large\bfseries\color{accent}}{}{0pt}{}[\vspace{-2pt}{\color{accent}\titlerule[0.8pt]}]
+\titleformat{\subsection}{\large\bfseries}{}{0pt}{\underline}
+\titleformat{\subsubsection}{\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+
+% \les{6}{Fysische implementatie}{5 maart 2026}
+\newcommand{\les}[3]{\clearpage\section[\if@ln@en Lecture\else Les\fi\ #1: #2]{\if@ln@en Lecture\else Les\fi\ #1\quad #2\hfill{\normalsize\normalfont\color{opm}#3}}}
+\newcommand{\onderwerp}[1]{\subsection{#1}}
+
+% --- margin and side remarks ----------------------------------------------------------------------
+% \slide{162}{25:23}: where this is on the slides / in the recording (grey, in the margin)
+\newcommand{\slide}[2]{\marginnote{\footnotesize\color{opm}\if@ln@en slide\else slide\fi\ #1\ifx\relax#2\relax\else\ $\cdot$ #2\fi}}
+% \belangrijk: orange star in the margin (exam-relevant, the lecturer stressed it)
+\newcommand{\belangrijk}{\marginnote{\color{accent}\Large$\bigstar$}}
+% \opm{...}: small grey remark next to a formula or line, like the pencil notes
+\newcommand{\@lnopm}[1]{{\small\color{opm}\,(#1)}}
+\newcommand{\opm}[1]{\ifmmode\quad\text{\@lnopm{#1}}\else\@lnopm{#1}\fi}  % works in text and in align*
+% \pijl / \dus: arrows used as words
+\newcommand{\pijl}{\ensuremath{\rightarrow}\ }
+\newcommand{\dus}{\ensuremath{\Rightarrow}\ }
+
+% --- boxes ---------------------------------------------------------------------------------------
+% kader: dashed box for asides ("laatste jaren: ...", context, history)
+\newtcolorbox{kader}[1][]{enhanced, breakable, colback=white, colframe=black!45, boxrule=0.5pt, arc=0pt,
+  borderline={0.5pt}{0pt}{black!45, dashed}, frame hidden, left=6pt, right=6pt, top=4pt, bottom=4pt,
+  fonttitle=\bfseries\small, coltitle=black, colbacktitle=white, title={#1}, attach title to upper={\ }}
+% vergelijk: two columns with a dashed line in between (bound vs free, classical vs quantum, ...)
+%   \begin{vergelijk} left \tcblower right \end{vergelijk}
+\newtcolorbox{vergelijk}{enhanced, sidebyside, sidebyside align=top seam, sidebyside gap=10mm, colback=white,
+  frame hidden, boxrule=0pt, left=0pt, right=0pt, top=2pt, bottom=2pt,
+  segmentation style={black!45, dashed, line width=0.5pt}}
+% formule: framed key result
+\newtcolorbox{formule}{colback=accent!6, colframe=accent!70, boxrule=0.6pt, arc=1pt, left=6pt, right=6pt,
+  top=2pt, bottom=2pt, hbox, center}
+
+% Stelling / Bewijs / Voorbeeld / Definitie: inline bold labels, no big boxes
+\newcommand{\@lnlabel}[1]{\par\smallskip\noindent\textbf{#1.}\ }
+\newenvironment{stelling}[1][]{\@lnlabel{\if@ln@en Theorem\else Stelling\fi\ifx\relax#1\relax\else\ (#1)\fi}\itshape}{\par\smallskip}
+\newenvironment{bewijs}{\@lnlabel{\if@ln@en Proof\else Bewijs\fi}}{\hfill$\square$\par\smallskip}
+\newenvironment{voorbeeld}[1][]{\@lnlabel{\if@ln@en Example\else Voorbeeld\fi\ifx\relax#1\relax\else: #1\fi}}{\par\smallskip}
+\newenvironment{definitie}[1][]{\@lnlabel{\if@ln@en Definition\else Definitie\fi\ifx\relax#1\relax\else\ (#1)\fi}}{\par\smallskip}
+
+% figures from the slides: \slidefig{width}{page}{trim}{file}{caption}
+\newcommand{\slidefig}[5]{\begin{center}\includegraphics[page=#2, trim=#3, clip, width=#1\linewidth]{#4}\\[-2pt]
+  {\footnotesize\color{opm}#5}\end{center}}
+
+\endinput

@@ -67,7 +67,7 @@ function drawJobs() {
 function jobHtml(i) {
   const job = i.job ? i.job.split("/").pop() : null;
   const canRetry = ["failed", "notes_pending"].includes(i.status);
-  const canRemove = !["transcribing", "notes"].includes(i.status);
+  const canRemove = !["transcribing", "notes", "latex"].includes(i.status);
   return `<div class="prog-row">
     <div class="prog-top">
       <span class="dot" data-course="${courseKey(i.course)}"></span><div class="prog-what"><div class="prog-title">${esc(i.display_title)}</div>

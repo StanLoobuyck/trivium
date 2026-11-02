@@ -43,8 +43,9 @@ class Paths(_Strict):
     inbox_dir: Path
     # SwiftSkip can only save inside Downloads: <this folder>/<course code>/
     downloads_inbox: Path = Field(default=Path("~/Downloads/Verbatim"), validate_default=True)
+    latex_dir: Path = Field(default=Path("~/Documents/Lesnotities"), validate_default=True)  # one folder per course
 
-    @field_validator("jobs_dir", "inbox_dir", "downloads_inbox", mode="after")
+    @field_validator("jobs_dir", "inbox_dir", "downloads_inbox", "latex_dir", mode="after")
     @classmethod
     def _expand(cls, v: Path) -> Path:
         return v.expanduser()

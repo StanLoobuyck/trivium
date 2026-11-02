@@ -72,9 +72,39 @@ def lecture(name: str):
             "sections_detail": sections["sections"] if sections else [],
             "slides_not_discussed": sections.get("slides_not_discussed", []) if sections else [],
             "notes": notes.model_dump() if notes else None, "review": review, "files": files,
+            "latex_pdf": bool(_latex_pdf(d)), "can_latex": (d / "sections.json").exists(),
             "media_available": bool(media and Path(media).is_file()),
             "media_on_mac": archive_status(d)["on_mac"],
             "media_name": Path(media).name if media else None}
+
+
+def _latex_pdf(d: Path) -> Path | None:
+    """The course document, once this lecture is in it."""
+    from .. import latex
+
+    manifest = read_json(d / "manifest.json")
+    folder = latex.course_folder(cfgmod.load_config(), manifest.get("course", ""))
+    written = folder / "lessen" / f"{latex.lecture_file(manifest)}.tex"
+    pdf = folder / "main.pdf"
+    return pdf if pdf.is_file() and written.is_file() else None
+
+
+@router.post("/api/lectures/{name}/latex")
+def make_latex(name: str):
+    d = job_dir(name)
+    if not (d / "sections.json").exists():
+        raise HTTPException(409, "the transcript isn't ready yet")
+    manifest = read_json(d / "manifest.json")
+    item = common.Queue().add_latex(d, manifest.get("input", {}).get("media", ""), manifest.get("course", ""))
+    return {"id": item["id"], "worker": common.worker_running()}
+
+
+@router.get("/api/lectures/{name}/latex.pdf")
+def latex_pdf(name: str):
+    path = _latex_pdf(job_dir(name))
+    if not path:
+        raise HTTPException(404, "no LaTeX notes yet")
+    return FileResponse(path, media_type="application/pdf")
 
 
 @router.get("/api/lectures/{name}/media")

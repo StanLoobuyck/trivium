@@ -33,6 +33,15 @@ install -m 644 packaging/verbatim.svg "$ICON_DIR/verbatim.svg"
 sed "s|@LECTURE@|$HOME/.local/bin/lecture|" packaging/lecture.desktop > "$APPS_DIR/lecture.desktop"
 install -m 644 packaging/lecture-worker.service "$UNIT_DIR/lecture-worker.service"
 
+# The latex-notes skill lives in this repo; Claude Code finds it through a link.
+SKILLS_DIR="$HOME/.claude/skills"
+mkdir -p "$SKILLS_DIR"
+if [[ -L "$SKILLS_DIR/latex-notes" || ! -e "$SKILLS_DIR/latex-notes" ]]; then
+    ln -sfn "$REPO/skill/latex-notes" "$SKILLS_DIR/latex-notes"
+else
+    echo "Note: $SKILLS_DIR/latex-notes is a folder, not a link to the repo; left as it is."
+fi
+
 mkdir -p "$CONFIG_DIR"
 chmod 700 "$CONFIG_DIR"
 if [[ ! -f "$CONFIG_DIR/.env" ]]; then

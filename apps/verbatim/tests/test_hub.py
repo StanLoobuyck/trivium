@@ -144,3 +144,13 @@ def test_alone_nothing_happens(xdg, tmp_path, monkeypatch):
     (xdg / "config.yaml").write_text(f"paths:\n  jobs_dir: {tmp_path}\n  inbox_dir: {tmp_path}\n")
     monkeypatch.setattr(httpx, "post", lambda *a, **k: pytest.fail("no hub configured"))
     assert hub.report() == 0
+
+
+@pytest.mark.parametrize("name,n", [
+    ("Religie, zingeving en levensbeschouwing - RZL Ingenieurswetenschappen 5 - 2026 (2026-10-19)", 5),
+    ("RZL Ingenieurswetenschappen 3 ", 3), ("Lessen 12", 12),
+    ("EBS - Aula 200L 00.06 2026-09-22 10 - 37", None), ("Slides202627_Part2", None),
+    ("Digitale signaalverwerking 2026", None), ("Hoofdstuk 0", None),
+])
+def test_trailing_number(name, n):
+    assert hub.trailing_number(name) == n

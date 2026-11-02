@@ -7,6 +7,7 @@ couldn't be delivered goes out later, and the settings are read fresh: a worker 
 
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -50,6 +51,17 @@ def course_colors(conf: Config, courses: list[Course]) -> dict[str, str]:
     return colors
 
 
+_NAME_NOISE = re.compile(r"\(.*?\)|\b\d{4}-\d{2}-\d{2}\b.*")
+_YEAR_AT_END = re.compile(r"[\s-]+\d{4}$")
+_LAST_NUMBER = re.compile(r"[^\W\d]\s+0*(\d{1,2})\s*$")
+
+
+def trailing_number(name: str) -> int | None:
+    """'RZL Ingenieurswetenschappen 5 - 2026 (2026-10-19)' → 5. Dates, years and clock times don't count."""
+    m = _LAST_NUMBER.search(_YEAR_AT_END.sub("", _NAME_NOISE.sub("", name).strip()))
+    return int(m[1]) if m and int(m[1]) else None
+
+
 def notes_event(job: dict, job_name: str, kind: str, course: Course) -> dict:
     title = job.get("title") or ""
     media = Path(job.get("input", {}).get("media", ""))
@@ -58,8 +70,11 @@ def notes_event(job: dict, job_name: str, kind: str, course: Course) -> dict:
                  # a date Verbatim only guessed from the file's age says nothing about the lecture
                  "recordedOn": date if date and date in media.stem else None,
                  "fileName": media.name or None,
-                 "lectureNumber": lecture_number(title) or lecture_number(media.stem)}
-    return {"id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"verbatim/{job_name}/{kind}")), "type": "notes.ready",
+                 "lectureNumber": (lecture_number(title) or lecture_number(media.stem)
+                                    or trailing_number(title) or trailing_number(media.stem))}
+    # The number is in the id: a lecture told again with a better number isn't dropped as a duplicate.
+    return {"id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"verbatim/{job_name}/{kind}/{recording['lectureNumber']}")),
+            "type": "notes.ready",
             "source": "verbatim", "occurredAt": datetime.now().astimezone().isoformat(timespec="seconds"),
             "payload": {"recording": {k: v for k, v in recording.items() if v}, "kind": kind,
                         "verbatimJob": job_name}}
