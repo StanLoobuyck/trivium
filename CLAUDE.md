@@ -116,6 +116,8 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
   SwiftSkip kopieert bij het bouwen. De speler-overlay heeft de donkere waarden letterlijk in `style.css`; ook die bewaakt een test. Geen eigen tokens of knoppen in een app.
 - Popup testen in echte Zen kan zonder venster: `--headless --marionette -remote-allow-system-access` met een eigen profiel, `Addon:Install` en `browserActionFor(ext).openPopup`.
 - De repo en de map heten `trivium`. Updates van Velox lopen via `site/swiftskip/updates.json`; de oude repo's `studie-ecosysteem` en `SwiftSkip` zijn weg (2026-11-02).
+- Map of repo hernoemd: venvs wijzen nog naar het oude pad. Herstel met `uv sync --reinstall` in `apps/hub` en `apps/verbatim`.
+- Zen verbergt het Extensies-paneel: zet `extensions.unifiedExtensions.button.always_visible` op true om een add-on vast te maken.
 - Node-werkruimtes: `npm` (workspaces) vanuit de root; er is geen pnpm op deze machine.
 - SwiftSkip is geen werkruimte: `npm ci`, `npm test` en releases vanuit `apps/swiftskip`. `.env` met de AMO-sleutels staat
   daar lokaal.

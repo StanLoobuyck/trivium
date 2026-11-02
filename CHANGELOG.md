@@ -1,14 +1,16 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
-2. **Klaar:** fase 0 t/m 5, Trivium (Sequo, Verbatim, Velox 4.4.1), vakkleuren, zelfde opbouw en instellingen-tabs in Sequo en Verbatim. Eigenaar testte kleuren, overlay en Velox in Zen.
-3. **Niet te fixen:** de hoeken van de Velox-popup in Zen komen van de browser zelf (eigenaar akkoord).
-4. **Niet getest:** look op de echte Kaltura-speler in alle gevallen, badges in Sequo zelf, Safari.
-5. **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
-6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini).
+1. **Klaar:** fase 0 t/m 5; Velox 4.4.1 uit, oude repo's en mappen weg. Geverifieerd: `.xpi` en updatefeed van 4.4.1 online gelezen, 128 unit, 134 schermtests, 89 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
+2. **Niet getest:** tabbalk op een echte iPhone (alleen gesimuleerde safe area), update naar 4.4.1 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
+3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
+4. **Volgende stap:** de slides-stroom ontwerpen in `apps/swiftskip` (Velox haalt slides mee bij de download), daarna de LaTeX-skill in Verbatim, dan fase 6.
+5. **Wacht op eigenaar:** voorstel slides-stroom bevestigen; de twee vrienden de link naar 4.4.1 sturen; tabbalk op de iPhone beoordelen.
+6. **Open:** beschikbaarheid van de namen, notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
 ## 2026-11-02 — Velox 4.4.1, oude repo's weg
+- Keuze eigenaar: niemand gebruikt nog oude Velox-versies, dus de repo's mochten weg. Volgorde: eerst 4.4.1, anders hadden de knoppen in 4.4.0 naar een dode pagina gewezen.
+- Afwijking van de vorige aanname: Velox 4.3.0 stond in Zen op uitgeschakeld door de gebruiker, niet door de tijdelijke add-on. Oplossing: 4.4.0 rechtstreeks geïnstalleerd; knop vastgemaakt via het Extensies-paneel (`extensions.unifiedExtensions.button.always_visible`).
 - Velox 4.4.1 gereleased: gecontroleerd in de echte `.xpi` (geen links naar de oude repo) en in de updatefeed. GitHub-repo's `studie-ecosysteem` en `SwiftSkip` verwijderd. Eén contributor op `trivium`.
 
 ## 2026-11-02 — oude repo's voorbereid om te verwijderen
