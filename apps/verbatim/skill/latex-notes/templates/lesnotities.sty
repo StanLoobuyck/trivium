@@ -1,7 +1,7 @@
 % lesnotities.sty: lecture notes in the style of handwritten course notes (latex-notes skill).
 % Option: nl (default) or en, for the labels.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{lesnotities}[2026/10/18 lecture notes style]
+\ProvidesPackage{lesnotities}[2026/11/02 lecture notes style]
 
 \newif\if@ln@en
 \DeclareOption{en}{\@ln@entrue}
@@ -44,7 +44,10 @@
 
 % --- margin and side remarks ----------------------------------------------------------------------
 % \slide{162}{25:23}: where this is on the slides / in the recording (grey, in the margin)
-\newcommand{\slide}[2]{\marginnote{\footnotesize\color{opm}\if@ln@en slide\else slide\fi\ #1\ifx\relax#2\relax\else\ $\cdot$ #2\fi}}
+% In vertical mode (right after a heading) it adds no empty line of its own: the note hangs next to the first line.
+\newcommand{\@lnmargin}[1]{\ifvmode\leavevmode\marginnote{\footnotesize\color{opm}#1}\par\vspace{-\baselineskip}\vspace{-\parskip}\else\marginnote{\footnotesize\color{opm}#1}\fi}
+\newcommand{\slide}[2]{\@lnmargin{slide~#1\ifx\relax#2\relax\else\ $\cdot$\ #2\fi}\ignorespaces}
+\newcommand{\tijd}[1]{\@lnmargin{\if@ln@en recording\else opname\fi~#1}\ignorespaces}
 % \belangrijk: orange star in the margin (exam-relevant, the lecturer stressed it)
 \newcommand{\belangrijk}{\marginnote{\color{accent}\Large$\bigstar$}}
 % \opm{...}: small grey remark next to a formula or line, like the pencil notes

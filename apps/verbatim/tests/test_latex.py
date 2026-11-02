@@ -114,3 +114,36 @@ def test_queue_runs_retries_and_recovers(tmp_path, monkeypatch):
     q.latex_item(queue, queue.claim_latex(1), None)
     state = queue.snapshot()["items"][0]
     assert state["status"] == "latex_queued" and state["resume_at"]
+
+
+def load_check():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("check", latex.SKILL_DIR / "scripts" / "check.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+PARTS = """## Part 1: A  [0:00–2:00] · slides p10
+[0:00] tekst
+## Part 2: B  [2:00–4:00] · slides p20 (slide match uncertain)
+[3:59] tekst
+"""
+
+
+def test_check_finds_bad_moments_and_own_macros():
+    check = load_check().check
+    good = "\\les{1}{x}{y}\n\\slide{10}{0:30}\n\\slide{99}{}\n\\slide{21}{3:00}\n% CHECK: x\n"
+    assert check(good, PARTS, None) == []
+    found = check("\\les{1}{x}{y}\n\\slide{20}{1:00}\n\\slide{10}{0:30}\n\\slide{10}{9:00}\n\\slide{10}{alleen slide}\n"
+                  "\\newcommand{\\x}{y}\n", PARTS, None)
+    assert len(found) == 5 and any("back in time" in p for p in found) and any("end of the recording" in p for p in found)
+    assert any("own macros" in p for p in found) and any("parts.md has slides" in p for p in found)
+
+
+def test_check_page_budget():
+    check = load_check().check
+    tex = "\\les{1}{x}{y}\n"
+    assert check(tex, PARTS, 3) == []          # a short recording still gets 3 pages
+    assert "over the budget" in check(tex, PARTS, 4)[0]

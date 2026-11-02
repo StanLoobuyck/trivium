@@ -2,7 +2,7 @@
 name: latex-notes
 description: Turn a recorded lecture (transcript + PDF/PPTX slides) into complete LaTeX lecture notes in the style of good handwritten course notes, one file per lecture in a course document, compiled to PDF when Tectonic is installed. Use when the user asks for LaTeX notes, lesnotities, "notes in latex" or a .tex of a lecture, from a Verbatim lecture or from loose transcript and slide files.
 argument-hint: [lecture: job folder or name, e.g. "Les 6 DEP" | transcript file + slide files]
-model: claude-sonnet-5-5
+model: claude-opus-5-5
 effort: high
 allowed-tools: Bash(uv run *) Bash(tectonic *) Bash(mkdir *) Bash(cp *) Bash(ls *) Bash(command -v *) Read Write Edit Glob Grep
 ---
@@ -41,7 +41,9 @@ It writes `WORK/parts.md` (per part: time range, slide pages, slide text, transc
 `WORK/lecture.json` (course, title, date, language, lecturer, slide files, page sizes) and slide previews in
 `WORK/slides/`; with several decks, pages read "d2 p56" and previews `d2_p056.png`, and the top of `parts.md` says
 which deck is which. Read all of `parts.md` (in chunks if it is long) before writing anything.
-A part marked "slide match uncertain" may sit next to the wrong slide: trust the transcript.
+A part marked "slide match uncertain" may sit next to the wrong slide: trust the transcript. Several very short
+uncertain parts in a row mean the match failed there: read what is really said and take the topic from that. The
+transcript sets the order and the subject of the notes; slide order and part titles don't.
 
 ## 2. Course folder
 
@@ -72,7 +74,10 @@ Start with `\les{<number>}{<main subject of the lecture>}{<date written out>}`.
 **Structure per topic, not per slide.** Follow the lecture's line of thought: `\onderwerp{…}` per topic
 (several parts/slides on one subject = one topic), `\subsubsection*{…}` inside when useful. Put
 `\slide{<page>}{<m:ss>}` at the start of each topic (and wherever the lecture jumps to another slide that
-matters), so the reader can find the slide and the moment in the recording. With several decks: `\\slide{d2 p56}{…}`.
+matters), so the reader can find the slide and the moment in the recording. The moment is when the transcript
+really says it, so moments only go forward; a topic that isn't in the transcript gets `\slide{<page>}{}`, no time.
+Write `\slide` straight after its heading. No own `\newcommand` or `\setlength` in the lecture file: `\tijd{<m:ss>}` in
+the margin and the rest are in `lesnotities.sty`. With several decks: `\\slide{d2 p56}{…}`.
 
 **Style of good handwritten notes**, in LaTeX:
 - Short phrases and keywords instead of full paragraphs; full sentences only where an explanation needs it.
@@ -92,9 +97,11 @@ matters), so the reader can find the slide and the moment in the recording. With
 - Lists with `itemize` (dash bullets are the default); numbered steps with `enumerate`.
 
 **Content rules**
-- Complete: every concept, formula, example, trick, warning and exam hint from the lecture. What is only
-  on a slide and not discussed: add it briefly, marked `\opm{alleen op de slide}`; `parts.md` has those slides'
-  text at the end. A part with no slide at all is still lecture content: write it from the transcript.
+- Complete: every concept, formula, example, trick, warning and exam hint from the lecture. A part with no
+  slide at all is still lecture content: write it from the transcript.
+- What is only on a slide (`parts.md` has those slides' text at the end, and a "discussed" slide can be a wrong match):
+  at most one line per slide, together in one last topic `\onderwerp{Alleen op de slides}`, never between what was
+  said. In a lecture in parts ("deel 3") those slides are often the subject of another part: keep only what fits this one.
 - Correct: check every formula against the slide text; the transcript has speech-to-text errors (a
   misheard term, a dropped "niet"). When slide and transcript disagree, follow the slide and fix obvious
   transcription errors silently. When you can't tell, write the most likely version and add
@@ -106,7 +113,8 @@ matters), so the reader can find the slide and the moment in the recording. With
 **Density**: compress words, never information. The notes must stay short enough to review.
 - Budget: about 5 pages per hour of recording (recording length = last time stamp in `parts.md`; a 2 h
   lecture ≈ 10 pages). Derivation- or figure-heavy lectures may run ~20% over, talk-heavy ones should come
-  in well under. It is a ceiling, not a target to fill.
+  in well under, and any recording may take 3. It is a ceiling, not a target to fill. Figures and circuits the
+  lecture works with stay: cut words first.
 - Write each idea once. Where the lecturer repeats, rephrases or recaps, keep the clearest version (and
   `\belangrijk` if the repetition signals importance). Slide text the lecturer only reads out is not
   written twice.
@@ -147,9 +155,12 @@ the user `sudo pacman -S tectonic` and that the .tex is ready.
 Page budget: this lecture's pages = pages of `main.pdf` now minus before you added it (new course: minus
 the title page; Verbatim gives the number before in the input). Count with
 `uv run --with pypdf python -c "import pypdf;print(len(pypdf.PdfReader('<course folder>/main.pdf').pages))"`.
-More than 20% over the budget from Density: do one compression pass on the .tex (tighten wording, merge,
-remove duplication; delete no facts), recompile and recount. Only one pass; if still over, leave it and
-report the numbers.
+
+Then run `uv run <skill>/scripts/check.py <lecture file> WORK --pages <N>` and fix everything it prints: wrong moments,
+own macros. Over budget: do one compression pass on the .tex (tighten wording, merge, remove duplication; delete no
+facts), recompile, recount and rerun the check. Only one pass; if still over, leave it and report the numbers.
+Look at two rendered pages of this lecture too (`uv run --with pymupdf python -c "import pymupdf;pymupdf.open('<pdf>')[<n>].get_pixmap(dpi=80).save('WORK/page.png')"`,
+then Read the PNG): text running into the margin, a figure that is too large, a broken box.
 
 Then reread your lecture file once against `parts.md`, part by part: is every part covered, every
 formula checked, every `% CHECK` still needed? After a compression pass this also confirms nothing
@@ -160,4 +171,4 @@ was lost.
 - Paths: the lecture file, main.tex, the PDF (if compiled), and this lecture's pages against the budget
   (e.g. "9 pages, budget 10").
 - Topics covered (one line), number of figures (cropped / TikZ).
-- Every `% CHECK` with its line, and parts of the recording you couldn't follow (garbled transcript).
+- The last line of `check.py`. Every `% CHECK` with its line, and parts of the recording you couldn't follow (garbled transcript).

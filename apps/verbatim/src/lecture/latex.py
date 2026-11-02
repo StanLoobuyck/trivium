@@ -25,7 +25,7 @@ from .report import Reporter
 from .util import find_claude, read_json, slugify
 
 SKILL_DIR = Path(__file__).resolve().parents[2] / "skill" / "latex-notes"
-MODEL = "claude-sonnet-5-5"
+MODEL = "claude-opus-5-5"  # compared on one lecture: fewer errors than Sonnet, passes check.py by itself
 TIMEOUT_S = 3600.0
 TOOLS = ["Read", "Write", "Edit", "Glob", "Grep", "Bash(uv run *)", "Bash(tectonic *)", "Bash(cp *)",
          "Bash(mkdir *)", "Bash(ls *)", "Bash(command -v *)"]
@@ -72,8 +72,7 @@ def setup_course(folder: Path, course: str, manifest: dict, lecturer: str | None
     (folder / "lessen").mkdir(parents=True, exist_ok=True)
     (folder / "slides").mkdir(exist_ok=True)
     (folder / "figures").mkdir(exist_ok=True)
-    if not (folder / "lesnotities.sty").exists():
-        shutil.copy(SKILL_DIR / "templates" / "lesnotities.sty", folder)
+    shutil.copy(SKILL_DIR / "templates" / "lesnotities.sty", folder)  # never edited per course: always the newest
     main_tex = folder / "main.tex"
     english = manifest.get("language") == "en"
     if not main_tex.exists():
@@ -203,6 +202,7 @@ def run(job_root: Path, conf: Config, rep: Reporter) -> Path:
     finally:
         timer.cancel()
     check_result(result, proc.returncode, "".join(errors))
+    (work / "report.md").write_text(str(result.get("result") or ""), encoding="utf-8")
     if tex.read_text(encoding="utf-8").startswith("% Verbatim: being written"):
         raise LatexFailed("Claude finished without writing the lecture file")
     if not pdf.exists() or pdf.stat().st_mtime <= before:

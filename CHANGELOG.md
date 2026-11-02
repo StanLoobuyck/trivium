@@ -4,9 +4,15 @@
 1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 uit met slides-knop, Verbatim-fix geïnstalleerd. Geverifieerd: `.xpi` van 4.5.0 online gelezen, 128 unit, 94 + 31 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
 2. **Niet getest:** update naar 4.5.0 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) zijn onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
-4. **Volgende stap:** eerste echte LaTeX-run nakijken, dan fase 6.
+4. **Volgende stap:** worker herstarten (nu nog Sonnet in geheugen), Les 11 in de PDF beoordelen, dan fase 6.
 5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — LaTeX-skill getest op een echte les, Opus als standaard
+- Eerste echte run (Sonnet, Les 11 deel 3): tijdstempels overgenomen uit een foute slidekoppeling; de koppeling zelf in Verbatim is niet aangepast, 4 pagina's tegen budget 1,5, lege regels door `\slide`.
+- Nieuw: `scripts/check.py` (tijden, slides, eigen macro's, budget), transcript bepaalt volgorde, slide-only samen op het einde, `\slide{p}{}` zonder tijd, `\tijd` in het sjabloon, sjabloon altijd bijgewerkt, rapport in `.work/<les>/report.md`, Claude bekijkt twee pagina's.
+- Vergelijking zelfde les: Sonnet 3 pagina's, 1 checkprobleem, geen `% CHECK`; Opus 2 pagina's, 0 problemen, omgekeerde Mealy-regel in het transcript gevonden, `typedef wire` gemarkeerd, maar schrapte figuren om binnen 2 pagina's te blijven. Daarom minimum 3 pagina's. Duur Opus: 408-435 s.
+- Standaard nu Opus 5.5. Les 11 deel 3 opnieuw gemaakt: 3 pagina's, 0 problemen. Eén les nagekeken: de keuze rust op deze ene vergelijking.
 
 ## 2026-11-02 — één notatie voor duur
 - Keuze: `1u 55` (en: `1h 55`) in Sequo en Verbatim. Verbatim had `1:55` en `1 h 55 min`. Posities in een opname blijven `m:ss`.
