@@ -40,16 +40,18 @@ test("no build asks for all websites up front; other sites are optional", () => 
       "*://*.kuleuven.be/*",
       "*://*.kuleuven.cloud/*",
       "*://*.kaltura.com/*",
+      "http://127.0.0.1/*", // Verbatim (content.js only stays on its port)
+      "http://localhost/*",
     ]);
     assert.deepEqual(m.optional_permissions || m.optional_host_permissions, ["*://*/*"]);
   }
 });
 
-test("only dev builds run on localhost", () => {
-  assert.ok(
-    buildManifest("chrome", { ...opts, dev: true }).content_scripts[0].matches.includes("http://localhost/*"),
-  );
-  assert.ok(!buildManifest("chrome", opts).content_scripts[0].matches.includes("http://localhost/*"));
+test("every build covers local pages: Verbatim's in release builds (content.js checks the port)", () => {
+  for (const dev of [true, false]) {
+    const matches = buildManifest("chrome", { ...opts, dev }).content_scripts[0].matches;
+    assert.ok(matches.includes("http://localhost/*") && matches.includes("http://127.0.0.1/*"));
+  }
 });
 
 test("release Firefox builds point to the self-hosted update manifest; dev builds don't", () => {

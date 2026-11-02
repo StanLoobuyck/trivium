@@ -1,6 +1,6 @@
 // Generates manifest.json for each browser from one shared base.
 
-import { OPTIONAL_HOSTS, REQUIRED_HOSTS } from "../src/shared/sites.js";
+import { OPTIONAL_HOSTS, REQUIRED_HOSTS, VERBATIM_HOSTS } from "../src/shared/sites.js";
 
 const ICONS = {
   16: "icons/icon16.png",
@@ -18,11 +18,10 @@ const ACTION = {
 // Firefox/Zen check this for new versions (updated by `npm run release`).
 export const UPDATE_URL = "https://stanloobuyck.github.io/trivium/velox/updates.json";
 
-// Dev builds also run on the local test pages (npm run dev:*).
-const DEV_HOSTS = ["http://localhost/*", "http://127.0.0.1/*"];
-
+// Local pages: Verbatim's in release builds (content.js leaves other ports alone), every local test page in dev
+// builds (npm run dev:*).
 export function buildManifest(target, { version, dev }) {
-  const hosts = dev ? [...REQUIRED_HOSTS, ...DEV_HOSTS] : REQUIRED_HOSTS;
+  const hosts = [...REQUIRED_HOSTS, ...VERBATIM_HOSTS];
   const base = {
     name: dev ? "Velox (dev)" : "Velox",
     version,

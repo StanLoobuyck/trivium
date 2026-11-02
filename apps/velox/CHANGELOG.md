@@ -3,6 +3,12 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.2.0
+
+**New**
+- Velox also works on the recordings in Verbatim on your own laptop (127.0.0.1:7861): shortcuts, speed and the on-screen display. Other pages on your laptop are left alone
+- Your browser asks once for permission to run on pages on your own laptop
+
 ## 5.1.0
 
 **New**

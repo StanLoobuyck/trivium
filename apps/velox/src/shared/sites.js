@@ -5,6 +5,25 @@
 // Kaltura in their learning platform.
 export const REQUIRED_HOSTS = ["*://*.kuleuven.be/*", "*://*.kuleuven.cloud/*", "*://*.kaltura.com/*"];
 
+// Verbatim, the lecture tool on your own laptop, at its default address. Match patterns can't hold a port, so the
+// manifest covers all of 127.0.0.1 and localhost, and the content script only stays on Verbatim's port.
+export const VERBATIM_HOSTS = ["http://127.0.0.1/*", "http://localhost/*"];
+export const VERBATIM_PORT = "7861";
+
+function local(url) {
+  try {
+    const { protocol, hostname, port } = new URL(url);
+    return protocol === "http:" && ["127.0.0.1", "localhost"].includes(hostname) ? port : null;
+  } catch {
+    return null;
+  }
+}
+
+// A page on this laptop (127.0.0.1 / localhost)?
+export const isLocalPage = (url) => local(url) !== null;
+// Verbatim's own pages?
+export const isVerbatim = (url) => local(url) === VERBATIM_PORT;
+
 // Anything else is opt-in, one site at a time, from the popup.
 export const OPTIONAL_HOSTS = ["*://*/*"];
 
@@ -48,5 +67,5 @@ export function patternMatches(pattern, url) {
 
 // Is this URL one where Velox always runs?
 export function isBuiltInSite(url) {
-  return REQUIRED_HOSTS.some((pattern) => patternMatches(pattern, url));
+  return isVerbatim(url) || REQUIRED_HOSTS.some((pattern) => patternMatches(pattern, url));
 }

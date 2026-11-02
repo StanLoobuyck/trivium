@@ -14,6 +14,7 @@ import {
 } from "../shared/storage.js";
 import { NO_REPEAT, buildShortcutMap, findAction } from "../shared/shortcuts.js";
 import { trackStreams } from "../shared/streams.js";
+import { isLocalPage, isVerbatim } from "../shared/sites.js";
 import {
   MAX_SPEED,
   accumulateSkip,
@@ -48,7 +49,9 @@ import { createSlideButtons } from "./slide-buttons.js";
 
 (function () {
   // Where this runs is decided by the browser (manifest matches + sites the
-  // user enabled), so there's no domain check here.
+  // user enabled), so there's no domain check here — except on this laptop:
+  // the manifest can't name a port, and only Verbatim's pages are meant.
+  if (!__DEV__ && isLocalPage(window.location.href) && !isVerbatim(window.location.href)) return;
 
   // ─── One copy per frame ────────────────────────────────────────────────────
   // After an update (or enabling a site) a fresh copy is injected into open

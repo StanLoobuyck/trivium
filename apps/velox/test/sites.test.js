@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { isBuiltInSite, originPattern, patternHost, patternMatches } from "../src/shared/sites.js";
+import {
+  isBuiltInSite,
+  isLocalPage,
+  isVerbatim,
+  originPattern,
+  patternHost,
+  patternMatches,
+} from "../src/shared/sites.js";
 
 test("built-in sites: Toledo, KU Leuven's Kaltura, Kaltura players anywhere", () => {
   assert.ok(isBuiltInSite("https://ultra.edu.kuleuven.cloud/ultra/courses/_1/lti/launchFrame"));
@@ -37,4 +44,14 @@ test("originPattern / patternHost for 'Enable on this site'", () => {
   assert.equal(originPattern("chrome://extensions/"), null);
   assert.equal(originPattern("about:blank"), null);
   assert.equal(patternHost("https://canvas.example.edu/*"), "canvas.example.edu");
+});
+
+test("Verbatim on this laptop is a built-in site; other local pages are not", () => {
+  assert.ok(isVerbatim("http://127.0.0.1:7861/#/lecture/x"));
+  assert.ok(isVerbatim("http://localhost:7861/"));
+  assert.ok(!isVerbatim("http://127.0.0.1:5173/"));
+  assert.ok(!isVerbatim("https://127.0.0.1:7861/"));
+  assert.ok(isLocalPage("http://localhost:5173/") && !isLocalPage("https://toledo.kuleuven.be/"));
+  assert.ok(isBuiltInSite("http://127.0.0.1:7861/"));
+  assert.ok(!isBuiltInSite("http://127.0.0.1:8080/"));
 });

@@ -8,6 +8,12 @@
 5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — Velox in Verbatim
+- Velox 5.2.0 draait ook op Verbatim (`127.0.0.1` en `localhost`, poort 7861). Match-patronen kennen geen poort: het manifest dekt alle lokale pagina's en `content.js` stopt meteen buiten poort 7861 (`isVerbatim` in `shared/sites.js`). Dev-builds blijven overal lokaal draaien voor de tests.
+- Nagekeken met de release-build: in Verbatim zet een sneltoets de snelheid op 1,25× en verschijnt de overlay; op een andere lokale pagina (poort 7999) doet Velox niets. Geen Sequo-meldingen vanuit Verbatim (geen vakcode in de pagina), geen downloadknop (geen HLS).
+- De update vraagt een nieuwe toestemming in Zen.
+- Getest: 101 Velox + 33 e2e.
+
 ## 2026-11-02 — samenvoegen op de Mac, lus hersteld, stopknop in Verbatim
 - Fout: na het samenvoegen stonden `X.mp4` en `X.webcam.mp4` nog naast elkaar, dus de inbox voegde Les 11 deel 3 drie keer samen (2560 → 3200 → 3840 px) en overschreef de originele slides. Nu: een opname met `X.slides.*` ernaast wordt nooit opnieuw samengevoegd (regressietest). Bestanden van die run in `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/`; slides opnieuw downloaden.
 - Samenvoegen eerst op de Mac (`/v1/video/side-by-side`), dan AMD-chip, CPU als laatste. Gemeten op de Mac (19 min les): VideoToolbox 5,6× realtime en 193 MB, libx264 veryfast 11× en ~4× kleiner → libx264. Versturen 311 MB in 15 s, terug 193 MB in 14 s. Laptop → Mac op 60 s: 12 s. Mislukte pogingen loggen nu de reden van ffmpeg. Op de laptop viel VA-API eenmaal terug naar de CPU; niet na te bootsen.
