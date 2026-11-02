@@ -13,7 +13,7 @@
 - Samenvoegen eerst op de Mac (`/v1/video/side-by-side`), dan AMD-chip, CPU als laatste. Gemeten op de Mac (19 min les): VideoToolbox 5,6× realtime en 193 MB, libx264 veryfast 11× en ~4× kleiner → libx264. Versturen 311 MB in 15 s, terug 193 MB in 14 s. Laptop → Mac op 60 s: 12 s. Mislukte pogingen loggen nu de reden van ffmpeg. Op de laptop viel VA-API eenmaal terug naar de CPU; niet na te bootsen.
 - Velox-downloads hebben "duur onbekend" in de mp4-kop (mux.js): mpv toont 19 min, andere spelers 13 u 15. Niet aangepast (eigenaar: laat maar).
 - Keuze eigenaar: Stop op een lopende les = stoppen en vergeten. Transcriberen: map gewist, opname op `inbox_ignored.json` tot je hem met de hand toevoegt. Notities: alleen de delen van deze run weg. LaTeX: uit de wachtrij. Samenvoegen: stopt binnen 1 s op de laptop; op de Mac loopt ffmpeg uit en het resultaat wordt weggegooid. `Stopped` is een BaseException, zodat providers het niet opvangen. Knop in Bezig met 5 s Ongedaan maken. Bekeken op 375 en 1440 px, licht en donker.
-- Getest: 277 Verbatim, 141 unit.
+- Getest: 276 Verbatim, 141 unit.
 
 ## 2026-11-02 — slides en webcam naast elkaar; kopbalk Verbatim
 - Eigenaar: Kaltura-opnames met slides en webcam als twee beelden gaven vaak alleen de webcam. Oorzaak: Velox hield de laatst geladen stream bij en zag de tweede entry als een andere les.
