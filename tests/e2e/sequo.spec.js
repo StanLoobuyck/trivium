@@ -459,6 +459,46 @@ test.describe("Velox-koppeling", () => {
     await expect(page.getByRole("dialog")).toContainText("Halverwege · 0u 10 bekeken");
   });
 
+  test("een les in delen toont elk deel, op volgorde, met hoe ver je bent", async ({ page }, testInfo) => {
+    await start(page);
+    await bridge(page);
+    const { code } = await firstSession(page);
+    // Zoals Velox het stuurt ("DEP Les11, part3"): lesnummer en deel, geen datum. Delen komen samen via het lesnummer.
+    const part = (n) => recording({ courseCode: code, title: `Les 1, deel ${n}`, lectureNumber: 1, part: n, url: `https://example.test/deel${n}` });
+    await deliver(page, [
+      event("recording.progress", part(3), { positionSec: 0, durationSec: 1800 }),
+      event("recording.watched", part(1), { watchedFraction: 0.95, durationSec: 1800 }),
+      event("recording.progress", part(2), { positionSec: 720, durationSec: 1800 }),
+    ]);
+    await expect.poll(() => page.evaluate(() => window.acks.length)).toBe(3);
+    const id = await page.evaluate(async () => {
+      const open = indexedDB.open("sequo");
+      const db = await new Promise((resolve) => { open.onsuccess = () => resolve(open.result); });
+      const sessions = await new Promise((resolve) => { db.transaction("sessions").objectStore("sessions").getAll().onsuccess = (e) => resolve(e.target.result); });
+      const session = sessions.find((s) => (s.recordings ?? []).length === 3);
+      return { id: session.id, courseId: session.courseId };
+    }).then(({ id, courseId }) => page.goto(`/sequo/#/vak/${courseId}`).then(() => id));
+    await page.locator(`[data-options="${id}"]`).first().click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Delen");
+    const rows = dialog.locator(".list .row");
+    await expect(rows).toHaveCount(3);
+    await expect(rows.nth(0)).toContainText("Deel 1");
+    await expect(rows.nth(0)).toContainText("Bekeken · 0u 30");
+    await expect(rows.nth(1)).toContainText("0u 12 van 0u 30");
+    await expect(rows.nth(2)).toContainText("Nog niet bekeken");
+    await expect(rows.nth(1).getByRole("link", { name: "Opname" })).toHaveAttribute("href", "https://example.test/deel2");
+    await expect(dialog.locator("#session-link")).toHaveCount(0);   // geen los linkveld bij delen
+    for (const colorScheme of ["light", "dark"]) {
+      await page.emulateMedia({ colorScheme });
+      await page.waitForTimeout(600); // kleurovergang afwachten
+      const path = testInfo.outputPath(`delen-${colorScheme}.png`);
+      await page.screenshot({ path });
+      await testInfo.attach(`delen-${colorScheme}`, { path, contentType: "image/png" });
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  });
+
   test("instellingen tonen de koppellink en daarna de status", async ({ page }, testInfo) => {
     test.skip(!testInfo.project.name.startsWith("laptop"), "Velox bestaat niet op de gsm");
     await start(page);

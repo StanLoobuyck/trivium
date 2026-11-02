@@ -575,6 +575,7 @@ body.app .topbar { position: fixed; }
 .sheet-banner { flex-direction: column; align-items: flex-start; margin-top: var(--space-3); }
 .sheet .row-main > * { white-space: normal; }
 .sheet .list { margin-top: var(--space-4); }
+.sheet .group-label + .list { margin-top: 0; }  /* de titel geeft al ruimte */
 .sheet-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-5); }
 .chips-wrap { flex-wrap: wrap; overflow: visible; }
 .field-short { width: 72px; flex: none; text-align: center; padding-inline: var(--space-1); }

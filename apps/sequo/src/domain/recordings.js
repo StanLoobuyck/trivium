@@ -67,26 +67,60 @@ function addUnmatched(unmatched, event, key, course) {
   return entry ? unmatched.map((u) => (u === entry ? updated : u)) : [...unmatched, updated];
 }
 
+// "DEP Les11, part3 - 2024" → 3 ("deel 2" ook). Null zonder deelnummer.
+export function partNumber(recording) {
+  const match = /(?:\bpart|\bdeel)\s*(\d+)/i.exec(recording.title ?? recording.fileName ?? "");
+  return match ? Number(match[1]) : null;
+}
+
+// De delen van een les die in stukken is opgenomen, op volgorde, met hun nummer. Leeg voor een les uit één opname.
+export function lectureParts(session) {
+  const list = (session.recordings ?? []).filter((r) => r.key || r.fileName);
+  if (list.length < 2 && !list.some((r) => partNumber(r))) return [];
+  const sorted = [...list].sort((a, b) => (partNumber(a) ?? Infinity) - (partNumber(b) ?? Infinity)
+    || (a.title ?? "").localeCompare(b.title ?? ""));
+  return sorted.map((recording, i) => ({ ...recording, number: partNumber(recording) ?? i + 1 }));
+}
+
+// Hoe ver een deel bekeken is: "watched", "progress" of "none". Afgeleid, nooit opgeslagen.
+export function partState(part) {
+  if (part.durationSec && (part.watchedSec ?? 0) >= PARTS_FRACTION * part.durationSec) return "watched";
+  return part.watchedSec ? "progress" : "none";
+}
+
 // Lesnummers kunnen achteraf verschuiven (rooster aangevuld), dus een badge kan op de verkeerde les staan. Dit rekent
 // uit alle notes.ready-berichten uit waar elke badge hoort. Alleen badges uit die berichten worden weggehaald.
+// Per deel (opname) komt de Verbatim-les mee: die heeft dezelfde bestandsnaam als de download van Velox.
 export function reconcileNotes(events, { courses, sessions, numbers, now }) {
   const wanted = new Map();
+  const perFile = new Map(); // bestandsnaam → { verbatimJob, notesKind }
   const known = new Set();
+  const better = (kind, than) => (NOTE_RANK[kind] ?? 0) >= (NOTE_RANK[than?.notesKind] ?? 0);
   for (const event of [...events].sort((a, b) => a.occurredAt.localeCompare(b.occurredAt))) {
     if (event.type !== "notes.ready") continue;
     const { kind, verbatimJob } = event.payload;
     known.add(verbatimJob);
+    const { fileName } = event.payload.recording;
+    if (fileName && better(kind, perFile.get(fileName))) perFile.set(fileName, { verbatimJob, notesKind: kind });
     const { session } = findSession(event.payload.recording, { courses, sessions, numbers, now });
     if (!session) continue;
-    if ((NOTE_RANK[kind] ?? 0) >= (NOTE_RANK[wanted.get(session.id)?.notesKind] ?? 0)) {
-      wanted.set(session.id, { verbatimJob, notesKind: kind });
-    }
+    if (better(kind, wanted.get(session.id))) wanted.set(session.id, { verbatimJob, notesKind: kind });
   }
   const changes = new Map();
   for (const session of sessions.filter(isAlive)) {
     const target = wanted.get(session.id);
-    if (target && (target.verbatimJob !== session.verbatimJob || target.notesKind !== session.notesKind)) changes.set(session.id, target);
-    else if (!target && known.has(session.verbatimJob)) changes.set(session.id, { verbatimJob: null, notesKind: null });
+    const fields = {};
+    if (target && (target.verbatimJob !== session.verbatimJob || target.notesKind !== session.notesKind)) Object.assign(fields, target);
+    else if (!target && known.has(session.verbatimJob)) Object.assign(fields, { verbatimJob: null, notesKind: null });
+    const list = session.recordings ?? [];
+    const recordings = list.map((r) => {
+      const note = r.fileName ? perFile.get(r.fileName) : null;
+      if (note) return note.verbatimJob === r.verbatimJob && note.notesKind === r.notesKind ? r : { ...r, ...note };
+      if (r.verbatimJob && known.has(r.verbatimJob)) return { ...r, verbatimJob: null, notesKind: null };
+      return r;
+    });
+    if (recordings.some((r, i) => r !== list[i])) fields.recordings = recordings;
+    if (Object.keys(fields).length) changes.set(session.id, fields);
   }
   return changes;
 }

@@ -8,6 +8,12 @@
 5. **Wacht op eigenaar:** Velox 5.0.0 installeren (oude eerst weg), Sequo opnieuw op het beginscherm via `/trivium/sequo/`, rooster opnieuw uploaden, koppelen met hub en Velox; `~/inhaal-hub` op de Mac (back-up met oude data) mag weg na akkoord. Verder: `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — delen van een les in Sequo
+- Keuze eigenaar: in het venster van een les een lijst "Delen": per deel hoe ver je bent (bekeken / x van y / nog niet), knop naar de opname en (laptop) naar de Verbatim-les van dat deel. Bij delen geen los linkveld meer; opslaan raakt de opnames dan niet aan.
+- `domain/recordings.js`: `partNumber`, `lectureParts`, `partState` (afgeleid, niet opgeslagen); `reconcileNotes` zet de Verbatim-les per deel op bestandsnaam. Delen komen samen via het lesnummer (op datum koppelt Sequo maar één opname per les).
+- Design: geen dubbele ruimte tussen een groepstitel en een lijst in een venster.
+- Getest: 145 unit, 137 schermtests (nieuw: les in delen, iPhone + laptop, Chromium + Firefox), licht en donker bekeken. Niet getest: de Verbatim-knop per deel met echte hubdata.
+
 ## 2026-11-02 — Velox in Verbatim
 - Velox 5.2.0 draait ook op Verbatim (`127.0.0.1` en `localhost`, poort 7861). Match-patronen kennen geen poort: het manifest dekt alle lokale pagina's en `content.js` stopt meteen buiten poort 7861 (`isVerbatim` in `shared/sites.js`). Dev-builds blijven overal lokaal draaien voor de tests.
 - Nagekeken met de release-build: in Verbatim zet een sneltoets de snelheid op 1,25× en verschijnt de overlay; op een andere lokale pagina (poort 7999) doet Velox niets. Geen Sequo-meldingen vanuit Verbatim (geen vakcode in de pagina), geen downloadknop (geen HLS).

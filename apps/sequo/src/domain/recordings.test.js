@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findSession, planRecordings, reconcileNotes, recordingKey } from "./recordings.js";
+import { findSession, lectureParts, partNumber, partState, planRecordings, reconcileNotes, recordingKey } from "./recordings.js";
 
 const now = new Date("2026-11-01T12:00:00+01:00");
 const courses = [{ id: "c1", name: "DSV", codes: ["H01L6a"] }, { id: "c2", name: "DEP", codes: ["H01Z1a"] }];
@@ -120,6 +120,19 @@ describe("reconcileNotes", () => {
     expect(reconcileNotes(events, context).get("a").notesKind).toBe("notes");
   });
 
+  it("zet de Verbatim-les bij het juiste deel, op bestandsnaam", () => {
+    const recs = [{ key: "k1", title: "DEP Les11, part1", fileName: "les11 part1.mp4" },
+      { key: "k3", title: "DEP Les11, part3", fileName: "les11 part3.mp4" }];
+    const list = with_("a", { recordings: recs });
+    const events = [notes(recording({ lectureNumber: 1, fileName: "les11 part3.mp4" }), "job-3"),
+      notes(recording({ lectureNumber: 1, fileName: "les11 part1.mp4" }), "job-1", "notes", "2026-11-02T10:00:00+01:00")];
+    const { recordings } = reconcileNotes(events, { ...context, sessions: list }).get("a");
+    expect(recordings.map((r) => [r.key, r.verbatimJob, r.notesKind])).toEqual([["k1", "job-1", "notes"], ["k3", "job-3", "transcript"]]);
+    // Tweede ronde met het resultaat: niets meer te doen.
+    const done = with_("a", { recordings, verbatimJob: "job-1", notesKind: "notes" });
+    expect(reconcileNotes(events, { ...context, sessions: done }).has("a")).toBe(false);
+  });
+
   it("raakt een badge zonder bericht niet aan", () => {
     const list = with_("b", { verbatimJob: "ander", notesKind: "notes" });
     expect(reconcileNotes([notes(recording({ lectureNumber: 1 }), "job-1")], { ...context, sessions: list }).has("b")).toBe(false);
@@ -228,5 +241,28 @@ describe("planRecordings", () => {
     const plan = planRecordings([watched(recording({ courseCode: "H99" }))], context);
     expect(plan.ticked).toEqual([]);
     expect(plan.unmatched).toEqual([]);
+  });
+});
+
+describe("delen tonen", () => {
+  it("haalt het deelnummer uit de titel", () => {
+    expect(partNumber({ title: "DEP Les11, part3 - 2024" })).toBe(3);
+    expect(partNumber({ title: "Les 6 deel 2" })).toBe(2);
+    expect(partNumber({ title: "Les 6" })).toBe(null);
+    expect(partNumber({ title: "Departement" })).toBe(null);
+  });
+
+  it("zet de delen op volgorde en toont niets voor een les uit één opname", () => {
+    const s = { recordings: [{ key: "b", title: "Les11, part3" }, { key: "a", title: "Les11, part1" }] };
+    expect(lectureParts(s).map((p) => p.number)).toEqual([1, 3]);
+    expect(lectureParts({ recordings: [{ key: "a", title: "Les 4" }] })).toEqual([]);
+    expect(lectureParts({ recordings: [{ url: "https://x" }] })).toEqual([]);   // alleen een zelf geplakte link
+    expect(lectureParts({ recordings: [{ key: "a", title: "Les 4 deel 2" }] }).map((p) => p.number)).toEqual([2]);
+  });
+
+  it("weet hoe ver een deel bekeken is", () => {
+    expect(partState({ durationSec: 1800, watchedSec: 1500 })).toBe("watched");
+    expect(partState({ durationSec: 1800, watchedSec: 600 })).toBe("progress");
+    expect(partState({})).toBe("none");
   });
 });

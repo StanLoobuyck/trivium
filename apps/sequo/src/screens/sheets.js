@@ -5,8 +5,9 @@ import { parseNotes, planNotesImport } from "../domain/notes.js";
 import { currentCluster, parseRooster, proposeSemester, splitSemesters } from "../domain/rooster.js";
 import { readBackup } from "../domain/backup.js";
 import { COUNTED_TYPES, isOpen } from "../domain/sessions.js";
+import { lectureParts, partState } from "../domain/recordings.js";
 import * as store from "../db/store.js";
-import { chipDate, t } from "../i18n/index.js";
+import { chipDate, duration, t } from "../i18n/index.js";
 import { $, $$, esc, pickFiles } from "../ui/dom.js";
 import { closeSheet, openSheet, toast } from "../ui/feedback.js";
 import { numbersNow, progressText, sessionLabel, verbatimLink } from "../ui/rows.js";
@@ -68,6 +69,26 @@ export function openAdd() {
 }
 
 // ---- Sessie-opties ----
+function partText(part) {
+  const state = partState(part);
+  if (state === "watched") return t("partWatched", { time: duration(part.durationSec / 60) });
+  if (state === "progress") {
+    const done = duration(part.watchedSec / 60);
+    return part.durationSec ? t("partProgress", { done, total: duration(part.durationSec / 60) }) : t("partStarted", { done });
+  }
+  return t("partNotWatched");
+}
+
+function partsHtml(parts) {
+  return `<p class="group-label">${esc(t("parts"))}</p>
+    <ul class="list list-inset">${parts.map((p) => `<li><div class="row">
+      <span class="row-main"><span>${esc(t("part", { n: p.number }))}</span><span class="sub">${esc(partText(p))}</span></span>
+      <span class="row-trail">
+        ${p.url ? `<a class="btn btn-small" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t("partRecording"))}</a>` : ""}
+        ${p.verbatimJob ? `<a class="btn btn-small only-wide" href="${esc(verbatimLink(p))}" target="_blank" rel="noopener">Verbatim</a>` : ""}
+      </span></div></li>`).join("")}</ul>`;
+}
+
 export function openOptions(id) {
   const session = store.sessionById(id);
   if (!session) return;
@@ -76,6 +97,8 @@ export function openOptions(id) {
   const statuses = [["watched", "statusWatched"], ["processed", "statusProcessed"], ["attended", "statusAttended"], ["cancelled", "statusCancelled"], ["skipped", "statusSkipped"], ["upcoming", "statusMissed"]];
   const recording = session.recordings?.[0];
   const link = recording?.url ?? "";
+  // Een les in delen (Velox): per deel hoe ver je bent, de opname en de Verbatim-les. Dan geen los linkveld.
+  const parts = lectureParts(session);
   const sheet = openSheet(`<h2 class="title">${esc(label)}</h2>
     <p class="sub">${esc(course.name)}${session.location ? ` · ${esc(session.location)}` : ""}</p>
     ${progressText(session) ? `<p class="sub">${esc(progressText(session))}</p>` : ""}
@@ -84,11 +107,11 @@ export function openOptions(id) {
       `<button class="chip" aria-pressed="${session.status === value}" data-status="${value}">${esc(t(key))}</button>`).join("")}</div>
     <p class="group-label"><label for="session-note">${esc(t("note"))}</label></p>
     <textarea class="field" id="session-note" rows="2">${esc(session.note)}</textarea>
-    <p class="group-label"><label for="session-link">${esc(t("recordingLink"))}</label></p>
+    ${parts.length ? partsHtml(parts) : `<p class="group-label"><label for="session-link">${esc(t("recordingLink"))}</label></p>
     <input class="field" id="session-link" type="url" inputmode="url" value="${esc(link)}">
     ${link ? `<a class="btn btn-block sheet-action" href="${esc(link)}" target="_blank" rel="noopener">${esc(t("openRecording"))}</a>` : ""}
     ${session.verbatimJob ? `<a class="btn btn-block sheet-action only-wide" href="${esc(verbatimLink(session))}" target="_blank" rel="noopener">${esc(t("openVerbatim"))}</a>` : ""}
-    ${recording?.fileName ? `<p class="sub">${esc(t("downloadedAs", { name: recording.fileName }))}</p>` : ""}
+    ${recording?.fileName ? `<p class="sub">${esc(t("downloadedAs", { name: recording.fileName }))}</p>` : ""}`}
     <p class="group-label"><label for="session-date">${esc(t("date"))}</label></p>
     <input class="field" id="session-date" type="date" value="${dateValue(session.start)}">
     <div class="sheet-split">
@@ -98,9 +121,11 @@ export function openOptions(id) {
 
   const save = async () => {
     const note = $("#session-note", sheet).value.trim() || null;
-    const url = $("#session-link", sheet).value.trim();
-    const recordings = url ? [{ ...recording, url }, ...(session.recordings ?? []).slice(1)] : [];
-    const changes = { note, recordings };
+    const changes = { note };
+    if (!parts.length) {
+      const url = $("#session-link", sheet).value.trim();
+      changes.recordings = url ? [{ ...recording, url }, ...(session.recordings ?? []).slice(1)] : [];
+    }
     const date = $("#session-date", sheet).value;
     if (date && date !== dateValue(session.start)) {
       const shift = new Date(`${date}T12:00:00`) - new Date(`${dateValue(session.start)}T12:00:00`);

@@ -17,8 +17,8 @@ export const progressText = (session) => (session.status === "inProgress" && ses
 
 export const notesText = (session) => (session.verbatimJob ? t(session.notesKind === "transcript" ? "transcriptReady" : "notesReady") : "");
 
-// Verbatim draait op de eigen laptop.
-export const verbatimLink = (session) => `http://127.0.0.1:7861/#/lecture/${encodeURIComponent(session.verbatimJob)}`;
+// Verbatim draait op de eigen laptop. Werkt voor een les en voor een deel (beide hebben verbatimJob).
+export const verbatimLink = (item) => `http://127.0.0.1:7861/#/lecture/${encodeURIComponent(item.verbatimJob)}`;
 
 export const sessionLabel = (session, numbers) => `${sessionTitle(session, numbers)} · ${shortDate(new Date(session.start))}`;
 
