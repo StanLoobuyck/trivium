@@ -1,35 +1,31 @@
-// How a queue item's progress and status read: step bar (Audio · Transcript · Slides · Notes), status text, pill.
+// How a queue item's progress and status read: step bar (Audio · Transcript · Slides · Terms · Notes), status text, pill.
 import { when } from "../core/format.js";
 
-const STEP_OF_STAGE = { audio: 0, player: 0, slides: 1, chunk: 1, transcribe: 1, stitch: 1, sections: 2, study_pack: 2, review: 2, notes: 3 };
+const STEP_OF_STAGE = { audio: 0, player: 0, slides: 1, chunk: 1, transcribe: 1, stitch: 1, sections: 2, suggestions: 3, study_pack: 3, review: 3, notes: 4 };
+const STEP_NAMES = ["step_audio", "step_transcript", "step_slides", "step_terms", "step_notes"];
+const NOTES_STEP = STEP_NAMES.length - 1;
 
-export function stepsHtml(i) {
-  // which of Audio · Transcript · Slides · Notes is done / running / waiting
-  let current = -1;
-  if (i.status === "transcribing") current = STEP_OF_STAGE[i.stage] ?? 0;
-  if (["transcribed", "notes_pending", "notes"].includes(i.status)) current = 3;
-  if (i.status === "failed") current = i.failed_at === "notes" ? 3 : (STEP_OF_STAGE[i.stage] ?? 0);
-  const names = ["step_audio", "step_transcript", "step_slides", "step_notes"];
-  return `<div class="steps">${names.map((n, k) => {
-    let cls = "", bar = "";
-    if (k === 3 && i.notes === "never") cls = "skip";
-    else if (i.status === "queued") cls = "";
-    else if (k < current) cls = "done";
-    else if (k === current) {
-      cls = i.status === "failed" ? "" : "now";
-      const pct = i.stage === "transcribe" && i.progress != null && i.status === "transcribing" ? Math.round(i.progress * 100) : null;
-      bar = ["transcribing", "notes"].includes(i.status) ? (pct != null ? `<span style="width:${pct}%"></span>` : `<span class="indet"></span>`) : "";
-    }
-    return `<div class="step ${cls}"><span>${t(n)}</span><div class="bar">${bar || (cls === "done" ? "<span></span>" : "")}</div></div>`;
-  }).join("")}</div>`;
+function currentStep(i) {
+  if (["transcribed", "notes_pending", "notes"].includes(i.status)) return NOTES_STEP;
+  if (i.status === "failed") return i.failed_at === "notes" ? NOTES_STEP : (STEP_OF_STAGE[i.stage] ?? 0);
+  return i.status === "transcribing" ? (STEP_OF_STAGE[i.stage] ?? 0) : -1;
+}
+
+// How far the current step is, when that step reports it (a step can also just be running).
+const stepPct = (i) => (i.status === "transcribing" && i.progress != null ? Math.round(i.progress * 100) : null);
+
+// "chunk 7/40", "part 7/40" in the worker's message → "part 7 of 40" in the user's language.
+function partText(i) {
+  const m = /(?:chunk|part) (\d+)\/(\d+)/.exec(i.message || "");
+  return m ? t("st_part", { n: m[1], total: m[2] }) : "";
 }
 
 export function statusText(i) {
   switch (i.status) {
     case "queued": return i.resume_at ? t("st_waiting_until", { when: when(i.resume_at) }) : t("st_queued");
     case "transcribing": {
-      const pct = i.stage === "transcribe" && i.progress != null ? ` · ${Math.round(i.progress * 100)}%` : "";
-      return (t("stage_" + i.stage) || t("st_transcribing")) + pct;
+      const pct = stepPct(i);
+      return [t("stage_" + i.stage) || t("st_transcribing"), pct != null ? `${pct}%` : "", pct != null ? partText(i) : ""].filter(Boolean).join(" · ");
     }
     case "transcribed": return i.notes === "tonight" ? t("st_transcribed_tonight") : t("st_transcribed");
     case "notes": return t("st_notes");
@@ -42,16 +38,12 @@ export const pillClass = (st) => ({ transcribing: "active", notes: "active", tra
 
 // Thin progress bar + the step names below it (done steps in text colour, the current one bold), as in the design
 export function progressHtml(i) {
-  let current = -1;
-  if (i.status === "transcribing") current = STEP_OF_STAGE[i.stage] ?? 0;
-  if (["transcribed", "notes_pending", "notes"].includes(i.status)) current = 3;
-  if (i.status === "failed") current = i.failed_at === "notes" ? 3 : (STEP_OF_STAGE[i.stage] ?? 0);
-  const pct = i.stage === "transcribe" && i.progress != null && i.status === "transcribing" ? Math.round(i.progress * 100) : null;
+  const current = currentStep(i);
+  const pct = stepPct(i);
   const running = ["transcribing", "notes"].includes(i.status);
   const bar = pct != null ? `<span style="width:${pct}%"></span>` : running ? `<span class="indet"></span>` : "";
-  const names = ["step_audio", "step_transcript", "step_slides", "step_notes"];
-  const steps = names.map((n, k) => {
-    const cls = k === 3 && i.notes === "never" ? "skip" : i.status === "queued" ? "" : k < current ? "done" : k === current ? "now" : "";
+  const steps = STEP_NAMES.map((n, k) => {
+    const cls = k === NOTES_STEP && i.notes === "never" ? "skip" : i.status === "queued" ? "" : k < current ? "done" : k === current ? "now" : "";
     return `<span class="${cls}">${t(n)}</span>`;
   }).join("");
   return `<div class="prog-bar" role="progressbar" ${pct != null ? `aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"` : ""}

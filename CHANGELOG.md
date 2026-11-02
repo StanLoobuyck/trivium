@@ -2,14 +2,20 @@
 
 ## ▶ Start here (volgende sessie)
 1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 uit met slides-knop, Verbatim-fix geïnstalleerd. Geverifieerd: `.xpi` van 4.5.0 online gelezen, 128 unit, 94 + 31 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** update naar 4.5.0 in Zen, opname plus slides samen door Verbatim, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
+2. **Niet getest:** update naar 4.5.0 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
 4. **Volgende stap:** de LaTeX-skill in Verbatim, dan fase 6.
 5. **Wacht op eigenaar:** de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-02 — Verbatim toont weer wat het doet
+- Eigenaarstest: keten werkt, opname en slides samen opgepikt ("19 pages, 40 terms"). De run hergebruikte de bestaande lesmap, audio en transcript: geen dubbele les, de eerdere waarschuwing was fout.
+- Eigenaar vond de voortgang onduidelijk. Oorzaken: percentage alleen bij transcriberen, stap "termen" ontbrak (scherm toonde dan Audio), bij minder animatie was de balk vol.
+- Nu: statusregel met stap, percentage en deel ("Termen nakijken · 28% · deel 12 van 40"), vijf stappen, zachte puls bij minder animatie, oude `stepsHtml` weg.
+- Bekeken op 375 en 1440 px, licht en donker, met nagebootste taken: 0 px horizontale overloop, geen JS-fouten.
+
 ## 2026-11-02 — Velox 4.5.0 uit
-- Dubbele opname verwijderd, Verbatim geïnstalleerd, worker herstart (daemon-reload nodig). De webinterface `lecture ui` draait nog de oude code tot die herstart.
+- Dubbele opname verwijderd, Verbatim geïnstalleerd, worker herstart (daemon-reload nodig).
 
 ## 2026-11-02 — slides-knop getest, Verbatim wacht niet meer zonder lesnummer
 - Eigenaarstest in Zen: knop werkt op echt Toledo, ook met PPTX. Tabbalk op de iPhone is goed. Namen: volgens de eigenaar klaar.

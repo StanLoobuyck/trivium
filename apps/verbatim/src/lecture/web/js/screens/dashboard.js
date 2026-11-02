@@ -59,13 +59,13 @@ function jobHtml(i) {
     <div class="prog-top">
       <span class="dot" data-course="${courseKey(i.course)}"></span><div class="prog-what"><div class="prog-title">${esc(i.display_title)}</div>
         <div class="prog-sub">${esc(courseName(i.course))}</div></div>
-      <div class="prog-state"><div>${esc(statusText(i))}</div>${i.step_model ? `<div class="muted">${esc(i.step_model)}</div>` : ""}</div>
       <div class="prog-actions">
         ${job && i.status !== "queued" ? `<a class="btn btn-small" href="#/lecture/${encodeURIComponent(job)}">${t("open")}</a>` : ""}
         ${canRetry ? `<button class="btn btn-small" data-qa="retry" data-id="${i.id}">${t("retry")}</button>` : ""}
         ${canRemove ? `<button class="btn btn-small btn-plain" data-qa="remove" data-id="${i.id}">${t("remove")}</button>` : ""}
       </div>
     </div>
+    <div class="prog-state"><span>${esc(statusText(i))}</span>${i.step_model ? `<span class="muted">${esc(i.step_model)}</span>` : ""}</div>
     ${progressHtml(i)}
     ${i.status === "notes_pending" && i.message ? `<div class="muted small">${esc(i.message.slice(0, 160))}</div>` : ""}
     ${i.status === "failed" && i.error ? `<div class="job-error">${esc(i.error)}</div>` : ""}
@@ -76,8 +76,8 @@ function inboxHtml(w) {
     <div class="prog-top">
       <span class="dot" data-course="${courseKey(w.course)}"></span><div class="prog-what"><div class="prog-title">${esc(w.title)}</div>
         <div class="prog-sub">${esc(courseName(w.course))} · ${t("inbox_label")}</div></div>
-      <div class="prog-state"><div>${t("inbox_waiting")}</div><div class="muted">${esc(w.why)}</div></div>
       <div class="prog-actions"><a class="btn btn-small" href="#/add">${t("inbox_add")}</a></div>
     </div>
+    <div class="prog-state"><span>${t("inbox_waiting")}</span><span class="muted">${esc(w.why)}</span></div>
   </div>`;
 }
