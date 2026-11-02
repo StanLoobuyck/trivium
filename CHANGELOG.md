@@ -4,13 +4,15 @@
 1. **Klaar:** fase 0 t/m 5; Velox 4.4.1 uit, oude repo's en mappen weg. Geverifieerd: `.xpi` en updatefeed van 4.4.1 online gelezen, 128 unit, 134 schermtests, 89 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
 2. **Niet getest:** tabbalk op een echte iPhone (alleen gesimuleerde safe area), update naar 4.4.1 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
-4. **Volgende stap:** slides-stroom bouwen in `apps/swiftskip`: keuzelijst bij de download naar de Verbatim-map, met de best passende slides al aangevinkt op lesnummer. Eerst de bouw van een echte Toledo-vakpagina bekijken. Daarna de LaTeX-skill in Verbatim, dan fase 6.
-5. **Wacht op eigenaar:** een echte Toledo-vakpagina met slides (blijft buiten de repo); de twee vrienden de link naar 4.4.1 sturen; tabbalk op de iPhone beoordelen.
+4. **Volgende stap:** slides-stroom bouwen in `apps/swiftskip`: keuzelijst bij de download naar de Verbatim-map, met lesnummer in de titel die ene aangevinkt, anders alle slides. Eerst de API-test op Toledo uitlezen. Daarna de LaTeX-skill in Verbatim, dan fase 6.
+5. **Wacht op eigenaar:** `toledo-test.json` uit de API-test (blijft buiten de repo); de twee vrienden de link naar 4.4.1 sturen; tabbalk op de iPhone beoordelen.
 6. **Open:** beschikbaarheid van de namen, notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
 ## 2026-11-02 — slides-stroom gekozen
 - Keuze eigenaar: keuzelijst bij de download, best passende slides al aangevinkt, één tik om te bevestigen. Niet volledig automatisch: een verkeerde keuze zou pas in Verbatim opvallen.
-- Nog onbekend: de bouw van de Toledo-pagina's met slides. Velox heeft daar nog geen code voor.
+- Echte vakpagina bekeken: Toledo is Blackboard Ultra, bestanden hebben een `bbcswebdav`-link, maar die staan alleen in de pagina als de map openstaat.
+- Dat vak heeft slides per hoofdstuk, niet per les, dus aanvinken op lesnummer lukt daar niet. Beslissing: titels met een lesnummer → die ene; anders → alle slides van het vak, want Verbatim neemt dan alle decks en de uitlijning kiest wat getoond werd. Slides eerst downloaden, dan de opname, zodat de inbox niet zonder begint.
+- Nog onbekend: of de REST-API van Blackboard werkt met de Toledo-sessie. Test: `fixtures/private/toledo-test.js`.
 
 ## 2026-11-02 — Velox 4.4.1, oude repo's weg
 - Keuze eigenaar: niemand gebruikt nog oude Velox-versies, dus de repo's mochten weg. Volgorde: eerst 4.4.1, anders hadden de knoppen in 4.4.0 naar een dode pagina gewezen.
