@@ -1,6 +1,8 @@
-# SwiftSkip — handleiding
+# Velox — handleiding
 
-SwiftSkip maakt lesopnames in Toledo (Kaltura) aangenamer om te bekijken:
+_Velox heette vroeger SwiftSkip; bestanden en instellingen gebruiken die naam nog._
+
+Velox maakt lesopnames in Toledo (Kaltura) aangenamer om te bekijken:
 
 - **Sneltoetsen** om te springen, pauzeren, sneller/trager af te spelen, het volume te regelen … — ook zonder eerst in de speler te klikken
 - **Verdergaan waar je gebleven was** bij het heropenen van een les
@@ -15,7 +17,7 @@ Werkt in **Zen, Firefox, LibreWolf** en **Chrome, Edge, Brave, Opera, Vivaldi, A
 
 ### Zen, Firefox of LibreWolf (aanbevolen: updatet vanzelf)
 
-1. Download **[swiftskip-firefox.xpi](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.1/swiftskip-firefox.xpi)**.
+1. Download **swiftskip-firefox.xpi** via de knop *Firefox / Zen* op de [Trivium-pagina](https://stanloobuyck.github.io/trivium/).
 2. Open in je browser `about:addons`, klik op het **tandwiel** (⚙) → **Add-on installeren via bestand…** en kies het gedownloade bestand. (Het bestand in het venster slepen werkt ook.)
 3. Klik op **Toevoegen**.
 
@@ -23,16 +25,16 @@ Nieuwe versies worden daarna **automatisch** geïnstalleerd.
 
 ### Chrome, Edge, Brave, Opera, Vivaldi of Arc
 
-1. Download **[swiftskip-chrome.zip](https://github.com/StanLoobuyck/trivium/releases/download/swiftskip-v4.4.1/swiftskip-chrome.zip)** en pak het uit naar een map die je **laat staan** (bv. `Documenten/SwiftSkip`). Als je de map verwijdert, verdwijnt de extensie.
+1. Download **swiftskip-chrome.zip** via de knop *Chrome* op de [Trivium-pagina](https://stanloobuyck.github.io/trivium/) en pak het uit naar een map die je **laat staan** (bv. `Documenten/Velox`). Als je de map verwijdert, verdwijnt de extensie.
 2. Open `chrome://extensions` (Edge: `edge://extensions`).
 3. Zet **Ontwikkelaarsmodus** aan (rechtsboven; in Edge links).
 4. Klik op **Uitgepakte extensie laden** en kies de uitgepakte map.
 
-**Updaten:** Chrome updatet dit niet vanzelf. Download bij een nieuwe versie de zip opnieuw, pak hem uit **over dezelfde map** en klik bij SwiftSkip in `chrome://extensions` op het **herlaad-icoon** (↻).
+**Updaten:** Chrome updatet dit niet vanzelf. Download bij een nieuwe versie de zip opnieuw, pak hem uit **over dezelfde map** en klik bij Velox in `chrome://extensions` op het **herlaad-icoon** (↻).
 
 ### Het icoon vastzetten
 
-Klik op het **puzzelstukje** naast de adresbalk en zet SwiftSkip vast. Via dat icoon download je de les, verander je de snelheid en open je de instellingen.
+Klik op het **puzzelstukje** naast de adresbalk en zet Velox vast. Via dat icoon download je de les, verander je de snelheid en open je de instellingen.
 
 ---
 
@@ -62,14 +64,14 @@ Klik op het icoon → **Instellingen**:
 - **Spronginterval** en **snelheidsstappen** (0,25× of 0,1×, van 0,25× tot 4×)
 - **Afspeelsnelheid onthouden** en **Verdergaan waar je gebleven was**
 - **Sneltoetsen** — klik op een toets om ze te wijzigen (tot twee toetsen per actie, ook met Shift/Ctrl/Alt)
-- **Sites** — SwiftSkip werkt altijd op Toledo en in Kaltura-spelers; op een andere site zet je het aan via **Aanzetten op …** in het menu van het icoon
+- **Sites** — Velox werkt altijd op Toledo en in Kaltura-spelers; op een andere site zet je het aan via **Aanzetten op …** in het menu van het icoon
 
 ---
 
 ## Problemen oplossen
 
 **Sneltoetsen doen niets**
-- Staat SwiftSkip aan? (schakelaar in het menu van het icoon)
+- Staat Velox aan? (schakelaar in het menu van het icoon)
 - Typ je in een tekstveld? Daar werken de sneltoetsen bewust niet.
 - Herlaad de pagina één keer.
 
@@ -77,10 +79,10 @@ Klik op het icoon → **Instellingen**:
 - Speel de opname een paar seconden af; de knop verschijnt zodra de video geladen is.
 
 **Het icoon is niet zichtbaar (Zen)**
-- Zen verbergt de extensieknop soms. Zet in `about:config` `zen.theme.hide-unified-extensions-button` op `false`, en zet SwiftSkip daarna vast.
+- Zen verbergt de extensieknop soms. Zet in `about:config` `zen.theme.hide-unified-extensions-button` op `false`, en zet Velox daarna vast.
 
-**Iets anders?** Meld het via [GitHub](https://github.com/StanLoobuyck/trivium/issues) of het menu van SwiftSkip → Instellingen → *Probleem melden*.
+**Iets anders?** Meld het via [GitHub](https://github.com/StanLoobuyck/trivium/issues) of het menu van Velox → Instellingen → *Probleem melden*.
 
 ---
 
-SwiftSkip is een onafhankelijk, open-source studentenproject ([MIT-licentie](LICENSE)). Het is niet verbonden aan, goedgekeurd door of ondersteund door KU Leuven, en verzamelt geen gegevens ([privacy](PRIVACY.md)). Gedownloade opnames zijn enkel voor je eigen studie: deel ze niet.
+Velox is een onafhankelijk, open-source studentenproject ([MIT-licentie](LICENSE)). Het is niet verbonden aan, goedgekeurd door of ondersteund door KU Leuven, en verzamelt geen gegevens ([privacy](PRIVACY.md)). Gedownloade opnames zijn enkel voor je eigen studie: deel ze niet.

@@ -1,13 +1,20 @@
-# Verbatim (Lecture Transcriber)
+# Verbatim
+
+_Nederlands: [README_NL.md](README_NL.md)_
+
+> **Experimental.** Verbatim works for its developer every day, but installing it takes some Linux experience and
+> it changes often. Expect rough edges.
 
 Turns lecture recordings (MP4, often hundreds of MB) plus optional slides (PDF/PPTX) into a slide-aligned
-transcript, subtitles and study notes. Transcription runs **locally on the NVIDIA GPU** (faster-whisper
-large-v3), with Groq's free Whisper API as fallback. Notes will be written by Claude (`claude -p` on a Claude
-Pro subscription) with Gemini as fallback.
+transcript, subtitles and study notes. Transcription runs **locally on an NVIDIA GPU** (faster-whisper large-v3),
+with Groq's free Whisper API or your own model server as fallback. Notes are written by Claude (`claude -p` on your
+own Claude subscription) with Gemini as fallback; LaTeX lecture notes by Claude through Claude Code.
 
-Status: **Phase 2 started** (local Whisper works; transcripts + subtitles; notes not yet). The build plan
-is in [PLAN.md](PLAN.md) — section 10 says what's next; progress and measurements in
-[CHANGELOG.md](CHANGELOG.md).
+- **Runs on:** Linux (developed on Arch), best with an NVIDIA GPU. Without a GPU it needs a Groq key.
+- **Works with:** [Velox](../swiftskip/README.md) saves Toledo recordings and slides in `~/Downloads/Verbatim/<course code>/`, which Verbatim picks up;
+  [Sequo](../inhaal/README_EN.md) shows a badge on a lecture once its notes are ready.
+- **Privacy:** recordings and slides stay on your computer; audio or text only goes to a service you set up yourself.
+  See the [privacy policy](https://stanloobuyck.github.io/trivium/privacy/#verbatim) and [Privacy](#privacy) below.
 
 ## Usage
 
