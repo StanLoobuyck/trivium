@@ -5,7 +5,7 @@
 2. **Niet getest:** nieuwe notitiestijl op meer dan één les; modus "Zonder slides" op een echte les; LaTeX op een PPTX-les en een lange les; Safari, Lighthouse.
 3. **Onafgewerkt:** slidekoppeling in Verbatim mislukt bij lessen in delen (skill omzeilt dat); schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) onbetrouwbaar; fase 2 in `PLAN.md` noemt nog Cloudflare.
 4. **Volgende stap:** geen fase meer open. Kies met de eigenaar uit punt 3 en 6, of nieuwe wensen.
-5. **Wacht op eigenaar:** `~/Downloads/latex-notes.zip` opnieuw maken en uploaden op claude.ai (skill veranderd); de twee vrienden de link sturen (nu de Trivium-pagina).
+5. **Wacht op eigenaar:** `~/Downloads/latex-notes.zip` (nieuwe versie, oude als `latex-notes.oud.zip`) uploaden op claude.ai; de twee vrienden de link sturen (nu de Trivium-pagina).
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
 
 ## 2026-11-02 — fase 6: landingspagina, privacy en READMEs
