@@ -9,7 +9,7 @@ import * as store from "./db/store.js";
 import { lang, setLang, setTheme, t } from "./i18n/index.js";
 import { renderCourse, courseView } from "./screens/course.js";
 import { renderOverview, view } from "./screens/overview.js";
-import { renderSettings, syncStatusText } from "./screens/settings.js";
+import { renderSettings, settingsView, syncStatusText } from "./screens/settings.js";
 import { connect, nudge, startSync } from "./sync/index.js";
 import { startSwiftSkip } from "./sync/swiftskip.js";
 import * as sheets from "./screens/sheets.js";
@@ -172,10 +172,11 @@ document.addEventListener("click", (e) => {
     e.preventDefault();
     return;
   }
-  const target = e.target.closest("[data-action],[data-tick],[data-pick],[data-options],[data-view],[data-filter],[data-edit-course],[data-lang],[data-theme-choice],[data-speed]");
+  const target = e.target.closest("[data-action],[data-tick],[data-pick],[data-options],[data-view],[data-filter],[data-edit-course],[data-settings-tab],[data-lang],[data-theme-choice],[data-speed]");
   if (!target || target.closest("#sheet")) return;
-  const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, lang: choice, themeChoice, speed } = target.dataset;
-  if (action) actions[action]();
+  const { action, tick: tickId, pick, options, view: viewChoice, filter, editCourse, settingsTab, lang: choice, themeChoice, speed } = target.dataset;
+  if (settingsTab) { settingsView.tab = settingsTab; render(); }
+  else if (action) actions[action]();
   else if (tickId) tick(tickId);
   else if (pick) {
     if (courseView.selecting.has(pick)) courseView.selecting.delete(pick); else courseView.selecting.add(pick);

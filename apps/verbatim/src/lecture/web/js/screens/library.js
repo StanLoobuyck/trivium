@@ -5,7 +5,7 @@ import { api, post } from "../core/api.js";
 import { $, $$ } from "../core/dom.js";
 import { esc, fmtDate, fmtHm, fmtLong } from "../core/format.js";
 import { ICON } from "../core/icons.js";
-import { S, courseKey, courseName, isArchived } from "../core/state.js";
+import { S, courseKey, courseName, isArchived, sortedCourses } from "../core/state.js";
 import { drawSidebar } from "../core/sidebar.js";
 import { closeMenus, inlineEdit, paint, toast } from "../core/ui.js";
 import { deleteLecture, renameLecture, setCourseArchived } from "../shared/actions.js";
@@ -50,7 +50,7 @@ function drawHead() {
     <div class="progress" role="img" aria-label="${t("lib_with_notes", { n: ready })}"><span style="--value: ${list.length ? ready / list.length : 0}"></span></div>
   </div>`);
   paint($("#lib-chips"), S.courses.length ? `<a class="chip" href="#/" ${libSel ? "" : 'aria-current="page"'}>${t("nav_library")}</a>
-    ${S.courses.filter((c) => !isArchived(c.id)).map((c) => `<a class="chip" href="#/c/${encodeURIComponent(c.id)}" ${libSel === `c:${c.id}` ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}` : "");
+    ${sortedCourses().filter((c) => !isArchived(c.id)).map((c) => `<a class="chip" href="#/c/${encodeURIComponent(c.id)}" ${libSel === `c:${c.id}` ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}` : "");
   drawTools();
   const action = (id, label, extra = "") => `<li><button class="row ${extra}" id="${id}"><span class="row-main"><span>${label}</span></span></button></li>`;
   if (paint($("#lib-actions"), libSel ? `<ul class="list">

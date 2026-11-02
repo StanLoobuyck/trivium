@@ -1,6 +1,6 @@
 // Alle sheets: toevoegen, sessie-opties, importcontrole, vak bewerken, Notes en bevestigingen.
 import { addDays, startOfDay } from "date-fns";
-import { COLORS, mergeProposal, proposeCourses, proposeMerges } from "../domain/courses.js";
+import { COLORS, mergeProposal, proposeCourses, proposeMerges, byName } from "../domain/courses.js";
 import { parseNotes, planNotesImport } from "../domain/notes.js";
 import { currentCluster, parseRooster, proposeSemester, splitSemesters } from "../domain/rooster.js";
 import { readBackup } from "../domain/backup.js";
@@ -21,7 +21,7 @@ const dateValue = (iso) => { const d = new Date(iso); return `${d.getFullYear()}
 
 // ---- Toevoegen ----
 export function openAdd() {
-  const courses = state.courses.filter((c) => !c.hidden);
+  const courses = state.courses.filter((c) => !c.hidden).sort(byName);
   if (!courses.length) return;
   const today = startOfDay(new Date());
   const days = Array.from({ length: 21 }, (_, i) => addDays(today, -i));
@@ -256,7 +256,7 @@ export function openLinkRecording() {
 // ---- Vak bewerken ----
 export function openCourse(id) {
   const course = store.courseById(id);
-  const others = state.courses.filter((c) => c.id !== id);
+  const others = state.courses.filter((c) => c.id !== id).sort(byName);
   const sheet = openSheet(`<h2 class="title">${esc(course.name)}</h2>
     <p class="group-label"><label for="course-name">${esc(t("courseName"))}</label></p>
     <input class="field" id="course-name" value="${esc(course.name)}">

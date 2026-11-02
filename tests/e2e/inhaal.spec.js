@@ -161,7 +161,7 @@ test("inhaalplan rekent met de afspeelsnelheid en de grafiek toont de weken", as
 test("sneltoetsen: vak kiezen, bewegen, afvinken, ongedaan maken", async ({ page }, info) => {
   test.skip(info.project.name === "iphone-chromium", "alleen op de laptop");
   await start(page);
-  await page.keyboard.press("3");
+  await page.keyboard.press("2");
   await expect(page.locator("h1")).toContainText("Digitale signaalverwerking");
   await page.getByRole("checkbox").first().waitFor();
   await page.keyboard.press("j");
@@ -192,6 +192,7 @@ test("naar beneden vegen sluit de sheet", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "aangemaakte touch-events werken alleen in Chromium");
   await start(page);
   await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Gegevens", exact: true }).click();
   await page.getByRole("button", { name: "Notes-lijst plakken" }).click();
   const sheet = page.getByRole("dialog");
   await expect(sheet).toBeVisible();
@@ -270,6 +271,7 @@ test("meerdere tegelijk afvinken", async ({ page }) => {
 test("opnieuw uploaden maakt geen dubbels", async ({ page }) => {
   await start(page);
   await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Gegevens", exact: true }).click();
   await upload(page, ROOSTER, page.getByRole("button", { name: "Rooster uploaden" }));
   await expect(page.locator("#toast")).toContainText("0 nieuw, 0 gewijzigd");
   await page.goto("/inhaal/#/");
@@ -294,6 +296,7 @@ test("een verdwenen les wordt een voorstel, geen stille verwijdering", async ({ 
   const file = info.outputPath("rooster.ics");
   writeFileSync(file, blocks.join("BEGIN:VEVENT\n"));
   await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Gegevens", exact: true }).click();
   await upload(page, file, page.getByRole("button", { name: "Rooster uploaden" }));
   await expect(page.getByRole("dialog")).toContainText("Verdwenen uit je rooster");
   await page.getByRole("button", { name: "Markeer als geschrapt" }).click();
@@ -304,6 +307,7 @@ test("een verdwenen les wordt een voorstel, geen stille verwijdering", async ({ 
 test("Notes plakken zonder dubbels", async ({ page }) => {
   await start(page);
   await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Gegevens", exact: true }).click();
   await page.getByRole("button", { name: "Notes-lijst plakken" }).click();
   await page.getByRole("dialog").getByRole("textbox").fill("Hoorcolleges\nDigitale signaalverwerking:\n- [x] 14/10\n- [ ] 21/10\n- [ ] 30/09\n");
   await page.getByRole("button", { name: "Controleer" }).click();
@@ -317,6 +321,7 @@ test("back-up exporteren en herstellen", async ({ page }, info) => {
   await start(page);
   await page.getByRole("button", { name: "Bekeken", exact: true }).click();
   await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Gegevens", exact: true }).click();
   const saved = page.waitForEvent("download");
   await page.getByRole("button", { name: "Exporteer back-up" }).click();
   const file = info.outputPath("backup.json");
@@ -328,6 +333,7 @@ test("back-up exporteren en herstellen", async ({ page }, info) => {
   await expect(page.getByText("Nog geen rooster")).toBeVisible();
 
   await page.goto("/inhaal/#/instellingen");
+  await page.getByRole("button", { name: "Gegevens", exact: true }).click();
   const chooser = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Herstel back-up" }).click();
   await (await chooser).setFiles(file);

@@ -16,7 +16,7 @@ export async function route() {
   drawChrome();
   setBarTitle();
   document.getElementById("bar-actions").innerHTML = "";
-  if (page === "lecture" && arg) return renderLecture(decodeURIComponent(arg), tab);
+  if (page === "lecture" && arg) { ensureSideData(); return renderLecture(decodeURIComponent(arg), tab); }
   if (page === "setup") { ensureSideData(); return renderSetup(); }
   if (page === "add") { ensureSideData(); return renderAdd(); }
   if (page === "archive") { ensureSideData(); return renderArchive(); }

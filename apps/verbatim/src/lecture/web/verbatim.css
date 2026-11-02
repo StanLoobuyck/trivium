@@ -169,11 +169,7 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 /* ---- Lesscherm: geen zijbalk, wel de balk bovenaan met terugknop en acties ---- */
 .lecture-bar { display: none; min-height: 56px; padding-block: var(--space-1); }
 body[data-page="lecture"] .lecture-bar { display: flex; }
-body[data-page="lecture"] .sidebar, body[data-page="lecture"] .tabbar { display: none; }
-body[data-page="lecture"] .split { display: block; }
-body[data-page="lecture"] .page { max-width: 1680px; }
-.lecture-back { flex: none; font-size: var(--text-sub); }
-.lecture-back .icon { width: 16px; height: 16px; }
+.lecture-back { flex: none; }
 .lecture-bar-title { flex: 1; min-width: 0; }
 .lecture-bar-title h1 { overflow: hidden; font-size: var(--text-body); text-overflow: ellipsis; white-space: nowrap; }
 .lecture-bar-title .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -307,12 +303,11 @@ mark { padding-inline: 2px; border-radius: 3px; background: var(--course-yellow-
   .add-options { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-6); }
   .stage { position: sticky; top: 72px; max-height: calc(100dvh - 88px); }
 }
-@media (min-width: 1100px) {
+@media (min-width: 1300px) {
   .lecture-layout { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-5); }
 }
 @media (max-width: 899px) {
-  .bar-actions .btn-plain, .lecture-back { font-size: 0; gap: 0; }
-  .lecture-back .icon { width: 20px; height: 20px; }
+  .bar-actions .btn-plain { font-size: 0; gap: 0; }
   .bar-actions { flex-wrap: nowrap; }
   #open-folder { display: none; }
 }

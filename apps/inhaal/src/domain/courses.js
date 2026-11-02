@@ -12,6 +12,9 @@ export function shortName(name) {
   return words.map((w) => w[0]).join("").toUpperCase().slice(0, 4);
 }
 
+// Vakken staan overal op alfabet; zo vind je er een op dezelfde plek terug.
+export const byName = (a, b) => a.name.localeCompare(b.name, "nl", { sensitivity: "base", numeric: true });
+
 const median = (values) => {
   if (!values.length) return 0;
   const sorted = [...values].sort((a, b) => a - b);

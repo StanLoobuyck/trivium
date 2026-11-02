@@ -4,7 +4,7 @@ import { icon } from "/static/design/icons.js";
 import { api, post } from "./api.js";
 import { $, $$ } from "./dom.js";
 import { esc, fmtSem } from "./format.js";
-import { S, courseKey, isArchived } from "./state.js";
+import { S, courseKey, isArchived, sortedCourses } from "./state.js";
 import { inlineEdit, paint, toast } from "./ui.js";
 
 let loaded = false;
@@ -29,7 +29,8 @@ export function drawChrome() {
   const setup = page === "setup";
   $("#side-add").innerHTML = `${icon("plus")}${esc(t("nav_add"))}`;
   $("#side-settings").innerHTML = rowLink("#/setup", t("nav_settings"), null, setup, icon("settings"));
-  $("#lecture-back").innerHTML = `<span class="flip-icon">${icon("chevron")}</span>${esc(t("back_library"))}`;
+  $("#lecture-back").innerHTML = `<span class="flip-icon">${icon("chevron")}</span>`;
+  $("#lecture-back").setAttribute("aria-label", t("back_library"));
   const bar = $("#tabbar");
   bar.dataset.active = setup ? "1" : "0";
   bar.innerHTML = [["#/", "book", "nav_library", !setup], ["#/setup", "settings", "nav_settings", setup]].map(([href, name, key, on]) =>
@@ -46,9 +47,9 @@ export function drawSidebar() {
   const sel = page === "c" || page === "f" ? `${page}:${decodeURIComponent(arg || "")}` : "";
   const done = S.lectures.filter((l) => l.id);
   const busy = S.queue.items.filter((i) => i.status !== "done").length;
-  const home = !page;
+  const home = !page || page === "lecture";
   const counts = (pred) => done.filter(pred).length;
-  const current = S.courses.filter((c) => !isArchived(c.id));
+  const current = sortedCourses().filter((c) => !isArchived(c.id));
   const pastSems = S.sem ? S.sem.semesters.filter((x) => x.archived).length : 0;
   const courseTitle = S.sem && current.every((c) => S.sem.courses[c.id]?.semester === S.sem.current) ? fmtSem(S.sem.current) : t("nav_courses");
   const nav = `

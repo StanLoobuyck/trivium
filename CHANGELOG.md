@@ -2,12 +2,19 @@
 
 ## ▶ Start here (volgende sessie)
 1. Oriëntatie: `CLAUDE.md`. Daarna `npm test`; SwiftSkip en Verbatim testen in hun eigen map (`npm test`, `uv run pytest -q`).
-2. **Klaar:** fase 0 t/m 5 gebouwd. Verbatim en SwiftSkip laden `packages/design`; zelfde blauwe logofamilie; SwiftSkip-instellingen per sectie met thema-keuze.
-3. **Wacht op de eigenaar:** herstart van de hub (nodig voor vakkleuren), test van Velox 4.4.0 in Zen.
-   Keuzes: notitiemodel in Verbatim (nu Gemini), definitief adres voor fase 6.
-4. **Niet getest:** ronde hoeken van het echte Zen-venster, look op de echte Kaltura-speler, badges in de Inhaal-app zelf, Safari.
-5. **Volgende:** de slides-stroom (nog uit te werken), de LaTeX-skill als functie in Verbatim (wens van de eigenaar) en daarna fase 6.
-6. **Open:** menu's verder herwerken (eigenaar komt erop terug); Lighthouse niet gemeten; `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft.
+2. **Klaar:** fase 0 t/m 5, Trivium (Sequo, Verbatim, Velox 4.4.0), vakkleuren, zelfde opbouw en instellingen-tabs in Sequo en Verbatim. Eigenaar testte kleuren, overlay en Velox in Zen.
+3. **Niet te fixen:** de hoeken van de Velox-popup in Zen komen van de browser zelf (eigenaar akkoord).
+4. **Niet getest:** look op de echte Kaltura-speler in alle gevallen, badges in Sequo zelf, Safari.
+5. **Volgende:** de slides-stroom (voorstel: Velox haalt de slides mee en zet ze bij de download; nog te bevestigen), de LaTeX-skill als functie in Verbatim, daarna fase 6.
+6. **Open:** menu's verder herwerken als de eigenaar dat wil; beschikbaarheid van de namen; Lighthouse niet gemeten; notitiemodel in Verbatim (nu Gemini);
+   `~/Documents/lecture-transcriber` opruimen als Verbatim stabiel blijft; repo `studie-ecosysteem` bewaart het update-adres van Velox t/m 4.3.0, verwijderen kan zodra niemand die nog gebruikt.
+
+## 2026-11-02 — menu altijd zichtbaar, instellingen in tabs, map Trivium
+- Verbatim: het menu blijft ook op het lesscherm staan. De twee kolommen van het lesscherm beginnen nu vanaf 1300 px.
+- Sequo en Verbatim: instellingen in vier tabs met één onderwerp tegelijk, in één kolom van 720 px; uitlegteksten bij secties weg in Verbatim.
+- Vakken staan overal op alfabet, ook vakken zonder open lessen (Sequo: sneltoets 1-9 volgt die volgorde).
+- Map hernoemd naar `~/Documents/trivium`; `lecture` opnieuw geïnstalleerd omdat de editable install naar het oude pad wees.
+- Tests: 128 unit, 134 schermtests, 233 Verbatim.
 
 ## 2026-11-02 — Velox 4.4.0 en repo Trivium
 - Velox 4.4.0 gereleased, met update-adres op `/trivium/`. Repo hernoemd naar `trivium`. De kleine repo `studie-ecosysteem` bewaart het oude update-adres voor versies t/m 4.3.0.

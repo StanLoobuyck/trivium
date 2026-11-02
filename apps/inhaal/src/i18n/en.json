@@ -1,6 +1,7 @@
 {
   "appTitle": "Overview",
   "overview": "Overview",
+  "general": "General",
   "settings": "Settings",
   "courses": "Courses",
   "sessionsHours": "sessions · ± {hours} hours",

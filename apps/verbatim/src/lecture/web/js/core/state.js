@@ -15,6 +15,7 @@ export const isArchived = (courseId) => !!S.sem?.courses[courseId]?.archived;
 const PALETTE = ["blue", "orange", "green", "purple", "pink", "indigo", "yellow", "red"];
 // Inhaal's colour when the hub gave one; remembered, so the colours are right before the hub answers.
 export const courseKey = (id) => S.colors[id] || PALETTE[Math.max(0, S.courses.findIndex((c) => c.id === id)) % PALETTE.length];
+export const sortedCourses = () => [...S.courses].sort((a, b) => a.name.localeCompare(b.name, "nl", { sensitivity: "base", numeric: true }));
 export const reason = (code) => t("r_" + code, { plan: S.setup?.claude_plan || "" }).replace("  ", " ");
 export const courseName = (id) => (S.courses.find((c) => c.id === id) || {}).name || id;
 export const courseLang = (id) => (S.courses.find((c) => c.id === id) || {}).language || "nl";

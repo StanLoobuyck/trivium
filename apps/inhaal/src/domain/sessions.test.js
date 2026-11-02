@@ -53,10 +53,11 @@ describe("samenvatting", () => {
     expect(summarize([{ ...course, hidden: true }], [session("a", "12")], now).open).toBe(0);
   });
 
-  it("zet vakken zonder open lessen onderaan", () => {
-    const other = { ...course, id: "o", order: 1 };
-    const result = summarize([course, other], [session("x", "12", { courseId: "o" })], now);
-    expect(result.perCourse.map((p) => p.course.id)).toEqual(["o", "c"]);
+  it("zet vakken op alfabet, ook zonder open lessen", () => {
+    const first = { ...course, id: "a", name: "algebra", order: 2 };
+    const last = { ...course, id: "z", name: "Zonnepanelen", order: 0 };
+    const result = summarize([last, first], [session("x", "12", { courseId: "z" })], now);
+    expect(result.perCourse.map((p) => p.course.id)).toEqual(["a", "z"]);
   });
 });
 

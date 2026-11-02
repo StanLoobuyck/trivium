@@ -37,7 +37,7 @@ export function sttSectionHtml(s) {
 
 export function notesSectionHtml(s) {
   return `<section class="setup-section">
-    <h2>${t("s_notes")}</h2><p class="muted small">${t("s_notes_sub")}</p>
+    <h2>${t("s_notes")}</h2>
     <ol class="list rank">${s.notes.choices.map((c) => `
       <li class="rank-row ${c.value === s.notes.choice ? "on" : ""}">
         <button type="button" class="rank-what rank-pick" data-model="${esc(c.value)}">

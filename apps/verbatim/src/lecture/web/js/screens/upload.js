@@ -3,7 +3,7 @@ import { api, post } from "../core/api.js";
 import { $, $$ } from "../core/dom.js";
 import { esc, fmtDate, fmtSize } from "../core/format.js";
 import { ICON } from "../core/icons.js";
-import { S, courseLang } from "../core/state.js";
+import { S, courseLang, sortedCourses } from "../core/state.js";
 import { inlineEdit, toast } from "../core/ui.js";
 
 let picked = [], pickedSlides = [], suggestions = null, notesPolicy = "never";
@@ -83,7 +83,7 @@ function drawPending() {
   if (!box) return;
   box.hidden = !picked.length;
   if (!picked.length) { box.innerHTML = ""; return; }
-  const courseOpts = (sel) => (S.courses.length ? S.courses : [{ id: "", name: t("no_course_yet") }])
+  const courseOpts = (sel) => (S.courses.length ? sortedCourses() : [{ id: "", name: t("no_course_yet") }])
     .map((c) => `<option value="${esc(c.id)}" ${c.id === sel ? "selected" : ""}>${esc(c.name)}</option>`).join("") +
     `<option value="__new">+ ${t("new_course")}</option>`;
   box.innerHTML = `

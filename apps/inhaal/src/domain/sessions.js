@@ -1,4 +1,6 @@
 // Status, nummering en afgeleide waarden. Niets hiervan wordt opgeslagen.
+import { byName } from "./courses.js";
+
 export const COUNTED_TYPES = ["lecture", "exercise", "lab"];
 export const OPEN = new Set(["missed", "inProgress"]);
 export const DONE = new Set(["watched", "processed", "attended", "skipped"]);
@@ -57,7 +59,7 @@ export function summarize(courses, sessions, now) {
       lab: counts("lab"),
       done: done.filter((s) => s.courseId === course.id).length,
     };
-  }).sort((a, b) => (a.open === 0) - (b.open === 0) || a.course.order - b.course.order);
+  }).sort((a, b) => byName(a.course, b.course));
 
   const total = open.length + done.length;
   return { open: open.length, minutes, next: open[0] ?? null, openSessions: open, done: done.length, progress: total ? done.length / total : 0, perCourse };

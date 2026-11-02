@@ -1,6 +1,7 @@
 {
   "appTitle": "Overzicht",
   "overview": "Overzicht",
+  "general": "Algemeen",
   "settings": "Instellingen",
   "courses": "Vakken",
   "sessionsHours": "sessies · ± {hours} uur",
