@@ -1,12 +1,20 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 met slides-knop; Verbatim met Bezig, slides-regels en LaTeX-notities (Opus 5.5). Geverifieerd: echte run op Les 11 deel 3 (3 pagina's, `check.py` 0 problemen), `.xpi` 4.5.0 online gelezen, 132 unit, 94 + 31 SwiftSkip, 263 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
-2. **Niet getest:** badges in Sequo op de toestellen (nieuwe versie staat op de Mac, herstel alleen gesimuleerd), update naar 4.5.0 in Zen, LaTeX op een PPTX-les en een lange les, Safari, Lighthouse. Opus als standaard rust op één vergeleken les.
+1. **Klaar:** fase 0 t/m 5; Velox 4.5.0 met slides-knop; Verbatim met Bezig, slides-regels en LaTeX-notities (Opus 5.5), nu als aanvulling naast de slides en per vak instelbaar. Geverifieerd: 132 unit, 94 + 31 SwiftSkip, 265 Verbatim, 133 schermtests. Eerst `CLAUDE.md`, dan `npm test`.
+2. **Niet getest:** de nieuwe notitiestijl op een echte les (Les 11 deel 3 nog in de oude stijl), modus "Zonder slides" op een echte les, update naar 4.5.0 in Zen, LaTeX op een PPTX-les en een lange les, Safari, Lighthouse.
 3. **Onafgewerkt:** slidekoppeling in Verbatim mislukt bij lessen in delen (skill omzeilt dat); schermtests "knop Bekeken ... overleeft herladen" en `design light` (Firefox) onbetrouwbaar; fase 2 in `PLAN.md` noemt nog Cloudflare.
-4. **Volgende stap:** Les 11 beoordelen in `~/Documents/Lesnotities/Digitale elektronica en processoren/main.pdf`, daarna fase 6 in `PLAN.md`.
-5. **Wacht op eigenaar:** oordeel over Les 11; Sequo-badges nakijken (RZL les 1 op 23 september, les 5); `~/Downloads/latex-notes.zip` uploaden op claude.ai; de twee vrienden de link naar 4.5.0 sturen.
+4. **Volgende stap:** Les 11 deel 3 opnieuw maken in de nieuwe stijl en laten beoordelen; daarna fase 6 in `PLAN.md`.
+5. **Wacht op eigenaar:** worker herstarten (`systemctl --user restart lecture-worker.service`) vóór een vak op "Zonder slides" gezet wordt; `~/Downloads/latex-notes.zip` uploaden op claude.ai (de skill is weer veranderd: eerst opnieuw maken); de twee vrienden de link naar 4.5.0 sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — LaTeX-notities naast de slides
+- Eigenaarsoordeel Les 11: oké, niet wauw; te woordig, meer structuur. Studeert met de slides ernaast. Sequo-badges werken.
+- Oorzaken in Les 11: 4 volledige codeblokken en elke FSM twee keer (TikZ en uitsnede van dezelfde slide), bullets als kleine alinea's, elk onderwerp een andere vorm.
+- Keuze eigenaar: alleen aanvullen. Geen code of figuren van de slide meer, wel verwijzing en wat de lector toevoegt; hoogstens 4 regels code waar de uitleg over gaat. Elk onderwerp: `\kernpunt`, korte bullets, `\valkuil`. Slides die de lector niet besprak: één regel "Niet besproken". Budget 3 pagina's per uur, minimum 2.
+- `check.py` meldt gekopieerde code, slidefiguren en onderwerpen zonder kernregel: 11 problemen op de oude Les 11.
+- Keuze eigenaar: per vak instelbaar ("LaTeX-notities: Naast slides / Zonder slides" in Instellingen → Vakken), voor vakken zoals religie. Zonder slides = zelfstandig leesbaar, code en figuren mogen, 5 pagina's per uur.
+- Getest: 265 Verbatim-tests, sjabloon compileert met de nieuwe macro's, vakformulier op 375 en 1440 px licht en donker (0 px overloop, geen JS-fouten). Niet getest: een echte run in de nieuwe stijl.
 
 ## 2026-11-02 — LaTeX-skill getest op een echte les, Opus als standaard
 - Eerste echte run (Sonnet, Les 11 deel 3): tijdstempels overgenomen uit een foute slidekoppeling; de koppeling zelf in Verbatim is niet aangepast, 4 pagina's tegen budget 1,5, lege regels door `\slide`.
