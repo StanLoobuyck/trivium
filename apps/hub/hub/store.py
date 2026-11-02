@@ -71,7 +71,13 @@ class Store:
             rows = self.db.execute("SELECT data FROM records WHERE tbl = ?", (table,)).fetchall()
             return [r for r in (json.loads(data) for (data,) in rows) if not r.get("deletedAt")]
 
-        active = {s["id"] for s in records("semesters") if s.get("isActive")}
+        # Zelfde regel als domain/semesters.js in Sequo: de nieuwste actieve upload wint.
+        candidates = sorted(
+            (s for s in records("semesters") if s.get("isActive")),
+            key=lambda s: (s.get("createdAt") or "", s["id"]),
+            reverse=True,
+        )
+        active = {candidates[0]["id"]} if candidates else set()
         return [
             {"name": c.get("name"), "codes": c.get("codes", []), "language": c.get("language"), "colorKey": c.get("colorKey")}
             for c in records("courses")

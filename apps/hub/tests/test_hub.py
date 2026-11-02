@@ -151,3 +151,17 @@ def test_courses_of_the_active_semester_only(client):
     client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
     assert client.get("/api/courses").status_code == 401
     assert client.get("/api/courses", headers=AUTH).json()["courses"] == [{"name": "SP", "codes": ["H06F2a"], "language": "en", "colorKey": "indigo"}]
+
+
+def test_two_active_semesters_newest_upload_wins(client):
+    # Twee toestellen uploadden elk een rooster voor ze gesynct waren: beide semesters staan actief.
+    time = "2026-11-02T17:00:00.000Z"
+    rows = [
+        ("semesters", {"id": "a", "createdAt": "2026-11-02T16:44:40.654Z", "updatedAt": time, "isActive": True}),
+        ("semesters", {"id": "b", "createdAt": "2026-11-02T16:47:39.430Z", "updatedAt": time, "isActive": True}),
+        ("courses", {"id": "c1", "updatedAt": time, "semesterId": "a", "name": "EEA", "codes": ["H01L8a"]}),
+        ("courses", {"id": "c2", "updatedAt": time, "semesterId": "b", "name": "EEA", "codes": ["H01L8a"]}),
+    ]
+    client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
+    courses = client.get("/api/courses", headers=AUTH).json()["courses"]
+    assert [c["name"] for c in courses] == ["EEA"]

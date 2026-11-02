@@ -2,6 +2,7 @@
 import { findCourseByCode, proposeCourses } from "../domain/courses.js";
 import { mergeRooster } from "../domain/merge.js";
 import { planRecordings, reconcileNotes } from "../domain/recordings.js";
+import { pickActiveSemester } from "../domain/semesters.js";
 import { computeNumbers } from "../domain/sessions.js";
 import { db, getMeta, requestPersistence, setMeta, stamp } from "./index.js";
 
@@ -10,7 +11,14 @@ const nowIso = () => new Date().toISOString();
 
 export async function load() {
   state.semesters = await db.semesters.toArray();
-  state.semester = state.semesters.find((s) => s.isActive && !s.deletedAt) ?? null;
+  const { active, stale } = pickActiveSemester(state.semesters);
+  // Verouderde actieve semesters (van een ander toestel) uitzetten; de sync brengt dat naar de andere toestellen.
+  if (stale.length) {
+    const now = nowIso();
+    await db.semesters.bulkPut(stale.map((s) => ({ ...s, isActive: false, updatedAt: now })));
+    state.semesters = await db.semesters.toArray();
+  }
+  state.semester = state.semesters.find((s) => s.id === active?.id) ?? null;
   const id = state.semester?.id;
   state.courses = id ? (await db.courses.where({ semesterId: id }).toArray()).filter((c) => !c.deletedAt).sort((a, b) => a.order - b.order) : [];
   const ids = state.courses.map((c) => c.id);
