@@ -6,7 +6,8 @@
 
 import { buildLectureTitle, sanitizeFilename } from "../shared/filename.js";
 import { normalizeInhaalUrl, verbatimFolder } from "../shared/inhaal.js";
-import { loadSettings } from "../shared/storage.js";
+import { isSlideUrl, slideFilename } from "../shared/slides.js";
+import { loadSettings, markSlideSaved } from "../shared/storage.js";
 import { forgetDelivered, reportToInhaal } from "./inhaal.js";
 import { ext } from "../shared/ext.js";
 import { describeError } from "../shared/errors.js";
@@ -141,6 +142,47 @@ export function saveFile(url, title, extension) {
   return downloadFile({ url, filename: folder ? `${folder}/${name}` : name, saveAs: false });
 }
 
+// Resolves with the finished download, or null when it stopped halfway.
+function downloadFinished(id) {
+  return new Promise((resolve) => {
+    const check = async () => {
+      const [item] = await ext.downloads.search({ id });
+      if (item?.state === "in_progress") return;
+      ext.downloads.onChanged.removeListener(onChanged);
+      resolve(item?.state === "complete" ? item : null);
+    };
+    const onChanged = (delta) => {
+      if (delta.id === id && delta.state) check();
+    };
+    ext.downloads.onChanged.addListener(onChanged);
+    check();
+  });
+}
+
+// A slide file from Toledo into the course folder. Overwrites: a newer version
+// of the same deck replaces the old one instead of becoming "name (1).pdf".
+async function saveSlide({ url, id, title, type, code }, sender) {
+  const folder = verbatimFolder(code);
+  if (!folder || !isSlideUrl(url, sender.url)) return { ok: false };
+  const downloadId = await ext.downloads.download({
+    url,
+    filename: `${folder}/${slideFilename(title, type)}`,
+    saveAs: false,
+    conflictAction: "overwrite",
+  });
+  const item = await downloadFinished(downloadId);
+  if (!item) return { ok: false };
+  // Logged out: Toledo answers with its login page, which must not land in the
+  // course folder as a "PDF" that Verbatim would then read.
+  if (item.mime?.startsWith("text/html")) {
+    await ext.downloads.removeFile(downloadId).catch(() => {});
+    await ext.downloads.erase({ id: downloadId }).catch(() => {});
+    return { ok: false };
+  }
+  await markSlideSaved(code, id);
+  return { ok: true };
+}
+
 function createJobId() {
   return `swiftskip-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -251,6 +293,7 @@ export function startBackground({ runDownload, cancelDownload, extraHandlers = {
   const tabOf = (msg, sender) => msg.tabId ?? (sender.tab && sender.tab.id);
 
   const handlers = {
+    saveSlide,
     registerLectureDownloadUrl(msg, sender) {
       const tabId = tabOf(msg, sender);
       const state = getState(tabId);

@@ -135,7 +135,7 @@
   "inhaalUnlink": "Ontkoppel",
   "inhaalDenied": "Niet gekoppeld: de browser kreeg geen toestemming.",
   "downloadsToVerbatim": "Downloads naar Verbatim",
-  "downloadsToVerbatimDesc": "Bewaart opnames in Downloads/Verbatim/<vakcode>/, waar Verbatim ze vanzelf oppikt. Zonder vakcode blijft een download in Downloads.",
+  "downloadsToVerbatimDesc": "Bewaart opnames in Downloads/Verbatim/<vakcode>/, waar Verbatim ze vanzelf oppikt. Zonder vakcode blijft een download in Downloads. PDF- en PPTX-bestanden op Toledo krijgen een knop die ze in dezelfde map bewaart.",
   "popupLinkedInhaal": "Gekoppeld met Sequo",
   "popupToVerbatim": "downloads gaan naar Verbatim",
   "theme": "Weergave",
@@ -143,5 +143,9 @@
   "themeSystem": "Systeem",
   "themeLight": "Licht",
   "themeDark": "Donker",
-  "linksTitle": "Koppelingen"
+  "linksTitle": "Koppelingen",
+  "slideSave": "Bewaar in vakmap {code}",
+  "slideSaving": "Bezig met bewaren…",
+  "slideSaved": "Staat in vakmap {code}. Tik om opnieuw te bewaren",
+  "slideFailed": "Bewaren lukte niet. Ben je nog ingelogd? Tik om opnieuw te proberen"
 }

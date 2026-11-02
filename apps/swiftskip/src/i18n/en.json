@@ -135,7 +135,7 @@
   "inhaalUnlink": "Unlink",
   "inhaalDenied": "Not linked: the browser didn't get permission.",
   "downloadsToVerbatim": "Downloads to Verbatim",
-  "downloadsToVerbatimDesc": "Saves recordings in Downloads/Verbatim/<course code>/, where Verbatim picks them up. Without a course code, a download stays in Downloads.",
+  "downloadsToVerbatimDesc": "Saves recordings in Downloads/Verbatim/<course code>/, where Verbatim picks them up. Without a course code, a download stays in Downloads. PDF and PPTX files on Toledo get a button that saves them to the same folder.",
   "popupLinkedInhaal": "Linked with Sequo",
   "popupToVerbatim": "downloads go to Verbatim",
   "theme": "Appearance",
@@ -143,5 +143,9 @@
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "linksTitle": "Links"
+  "linksTitle": "Links",
+  "slideSave": "Save to course folder {code}",
+  "slideSaving": "Saving…",
+  "slideSaved": "In course folder {code}. Tap to save again",
+  "slideFailed": "Couldn't save. Are you still logged in? Tap to try again"
 }

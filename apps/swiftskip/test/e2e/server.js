@@ -15,6 +15,7 @@ const TYPES = {
   ".mp4": "video/mp4",
   ".m3u8": "application/vnd.apple.mpegurl",
   ".ts": "video/mp2t",
+  ".pdf": "application/pdf",
 };
 
 createServer(async (req, res) => {

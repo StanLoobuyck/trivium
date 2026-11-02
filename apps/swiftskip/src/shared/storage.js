@@ -27,6 +27,24 @@ export function watchSettings(callback) {
   });
 }
 
+// ─── Slides saved to a course folder ──────────────────────────────────────────
+
+const SLIDE_PREFIX = "slide:";
+
+export async function getSavedSlides(code) {
+  const prefix = `${SLIDE_PREFIX}${code}:`;
+  const all = await ext.storage.local.get(null);
+  return new Set(
+    Object.keys(all)
+      .filter((key) => key.startsWith(prefix))
+      .map((key) => key.slice(prefix.length)),
+  );
+}
+
+export function markSlideSaved(code, id) {
+  return ext.storage.local.set({ [`${SLIDE_PREFIX}${code}:${id}`]: Date.now() });
+}
+
 // ─── Resume positions ─────────────────────────────────────────────────────────
 
 const RESUME_PREFIX = "resume:";

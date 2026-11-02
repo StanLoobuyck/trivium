@@ -60,7 +60,7 @@ const ICONS = {
   ],
 };
 
-function icon(name) {
+export function icon(name) {
   const node = svg(ICONS[name]);
   node.setAttribute("aria-hidden", "true");
   node.classList.add("ss-icon");

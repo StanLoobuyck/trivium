@@ -44,6 +44,7 @@ import {
   showToast,
 } from "./overlays.js";
 import { createDownloadControl } from "./download-control.js";
+import { createSlideButtons } from "./slide-buttons.js";
 
 (function () {
   // Where this runs is decided by the browser (manifest matches + sites the
@@ -57,7 +58,7 @@ import { createDownloadControl } from "./download-control.js";
   if (window.__swiftSkip && window.__swiftSkip.alive()) return;
   window.__swiftSkip?.retire();
   for (const stale of document.querySelectorAll(
-    "#swiftskip-download, #swiftskip-download-wrap, #swiftskip-osd, .swiftskip-sheet, .swiftskip-toast",
+    "#swiftskip-download, #swiftskip-download-wrap, #swiftskip-osd, .swiftskip-sheet, .swiftskip-toast, .swiftskip-slide",
   )) {
     stale.remove();
   }
@@ -73,6 +74,7 @@ import { createDownloadControl } from "./download-control.js";
     if (retired) return;
     retired = true;
     stopWatchingPage();
+    slideButtons?.update(false);
     for (const el of [downloadWrapEl, osdEl]) el?.remove();
     closeShortcutSheet();
   }
@@ -93,7 +95,17 @@ import { createDownloadControl } from "./download-control.js";
     downloadControl?.relabel();
     shortcutMap = buildShortcutMap(settings.shortcuts);
     if (!settings.enabled) closeShortcutSheet();
+    updateSlideButtons();
   }
+  // Toledo's file lists: only on the page itself, only with Verbatim downloads on.
+  const slideButtons =
+    SUPPORTS_DOWNLOAD && window === window.top && window.location.pathname.includes("/ultra/courses/")
+      ? createSlideButtons()
+      : null;
+  function updateSlideButtons() {
+    slideButtons?.update(settings.enabled && settings.downloadsToVerbatim);
+  }
+  updateSlideButtons();
   loadSettings().then(applySettings, () => {});
   watchSettings(applySettings);
 

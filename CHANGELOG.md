@@ -4,9 +4,16 @@
 1. **Klaar:** fase 0 t/m 5; Velox 4.4.1 uit, oude repo's en mappen weg. Geverifieerd: `.xpi` en updatefeed van 4.4.1 online gelezen, 128 unit, 134 schermtests, 89 SwiftSkip, 233 Verbatim. Eerst `CLAUDE.md`, dan `npm test`.
 2. **Niet getest:** tabbalk op een echte iPhone (alleen gesimuleerde safe area), update naar 4.4.1 in Zen, Safari, look op alle Kaltura-spelers, badges in Sequo zelf, Lighthouse.
 3. **Onafgewerkt:** de schermtest "knop Bekeken ... overleeft herladen" is onbetrouwbaar; fase 2 in `PLAN.md` is niet nagekeken en noemt nog Cloudflare.
-4. **Volgende stap:** slides-stroom bouwen in `apps/swiftskip`: keuzelijst bij de download naar de Verbatim-map, met lesnummer in de titel die ene aangevinkt, anders alle slides. Eerst de API-test op Toledo uitlezen. Daarna de LaTeX-skill in Verbatim, dan fase 6.
-5. **Wacht op eigenaar:** `toledo-test.json` uit de API-test (blijft buiten de repo); de twee vrienden de link naar 4.4.1 sturen; tabbalk op de iPhone beoordelen.
+4. **Volgende stap:** de slides-knop op echt Toledo testen (`apps/swiftskip/dist/firefox` als tijdelijke add-on), dan Velox 4.5.0 uitbrengen. Daarna de LaTeX-skill in Verbatim, dan fase 6.
+5. **Wacht op eigenaar:** test van de slides-knop in Zen, één vak met PPTX om dat label te zien; de twee vrienden de link naar 4.4.1 sturen; tabbalk op de iPhone beoordelen.
 6. **Open:** beschikbaarheid van de namen, notitiemodel in Verbatim (nu Gemini), menu's verder herwerken als de eigenaar dat wil. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-02 — slides-knop in Velox
+- Keuze eigenaar, na de tests: een knop op de Toledo-rij in plaats van de keuzelijst. Elk vak heeft een andere indeling, dus Velox kan niet betrouwbaar raden wat slides zijn. De eerdere keuzelijst en de aanvinkregel hieronder vervallen.
+- Knop alleen bij PDF en PPTX, in een open map, met "Downloads naar Verbatim" aan. Overschrijft dezelfde naam. Een loginpagina i.p.v. een bestand wordt weer gewist.
+- API-tests op Toledo gaven geen lijst: relatieve adressen kwamen op de CDN uit; waarom is niet bewezen. Niet verder onderzocht, de knop heeft de API niet nodig.
+- Tests: 94 unit en 31 e2e SwiftSkip, 128 unit, lint 0 fouten. Niet getest: echt Toledo, Zen, PPTX-label, schermformaten van de knop op Toledo.
+- Lek: het testscript bewaarde een toegangscode van de Toledo-sessie in `fixtures/private/` (niet in de repo); gewist uit de test-JSON, staat nog in de opgeslagen pagina.
 
 ## 2026-11-02 — slides-stroom gekozen
 - Keuze eigenaar: keuzelijst bij de download, best passende slides al aangevinkt, één tik om te bevestigen. Niet volledig automatisch: een verkeerde keuze zou pas in Verbatim opvallen.

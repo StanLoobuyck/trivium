@@ -638,3 +638,43 @@
     animation-duration: 2s;
   }
 }
+
+/* The save button on Toledo's file rows: on Toledo's page, not on video, so it takes the page's colour. */
+.swiftskip-slide {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0 0 0 8px;
+  padding: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.swiftskip-slide svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.swiftskip-slide:hover {
+  background: rgba(120, 120, 128, 0.16);
+}
+.swiftskip-slide:focus-visible {
+  outline: 2px solid #0071e3;
+  outline-offset: 1px;
+}
+.swiftskip-slide[data-state="busy"] {
+  opacity: 0.45;
+  cursor: default;
+}
+.swiftskip-slide[data-state="saved"] {
+  color: #1a7f37;
+}
+.swiftskip-slide[data-state="failed"] {
+  color: #c4320a;
+}
