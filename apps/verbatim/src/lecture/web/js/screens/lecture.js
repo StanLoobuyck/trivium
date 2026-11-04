@@ -30,7 +30,8 @@ export async function renderLecture(id, tab) {
   view.innerHTML = `
     <div class="lecture-layout fade-in">
       <aside class="stage">
-        ${lec.media_available ? `<div class="player"><video id="player" controls preload="auto" src="/api/lectures/${encodeURIComponent(lec.id)}/media"></video></div>`
+        ${lec.media_available ? `<div class="player"><video id="player" controls preload="auto" src="/api/lectures/${encodeURIComponent(lec.id)}/media">${
+          lec.subtitles ? `<track kind="subtitles" label="${t("subtitles")}" srclang="${esc(lec.language || "nl")}" src="${subsUrl()}">` : ""}</video></div>`
           : lec.media_on_mac ? `<div class="card flat on-mac"><p>${t("lec_on_mac")}</p><button class="btn" id="restore-media">${t("lec_restore")}</button></div>`
           : `<div class="card flat" style="padding:16px"><p class="muted small">${t("no_video")}</p></div>`}
         <div class="chapters card flat" id="chapters"></div>
@@ -74,6 +75,7 @@ export async function renderLecture(id, tab) {
   drawTabs();
   lines = null;
   $("#player")?.addEventListener("timeupdate", (e) => syncToTime(e.target.currentTime));
+  bindSubtitles();
   if (["queued", "transcribing", "notes", "transcribed", "notes_pending"].includes(lec.status)) {
     poll(async () => {
       const fresh = await api(`/api/lectures/${encodeURIComponent(id)}`).catch(() => null);
@@ -81,6 +83,37 @@ export async function renderLecture(id, tab) {
     }, 5000);
   }
 }
+
+// Subtitles from the transcript (outputs/subtitles.vtt): "c" or the player's CC menu, remembered across lectures.
+let subsOn = (() => { try { return localStorage.getItem("lt-subs") === "1"; } catch { return false; } })();
+const subsUrl = () => `/api/lectures/${encodeURIComponent(lec.id)}/subtitles.vtt?v=${Date.now()}`;
+const subsTrack = () => $("#player")?.textTracks[0];
+function bindSubtitles() {
+  const tracks = $("#player")?.textTracks;
+  if (!tracks?.length) return;
+  tracks[0].mode = subsOn ? "showing" : "hidden";
+  tracks.addEventListener("change", () => {  // also when switched in the player's own menu
+    subsOn = tracks[0].mode === "showing";
+    try { localStorage.setItem("lt-subs", subsOn ? "1" : "0"); } catch { /* just not remembered */ }
+  });
+}
+function reloadSubtitles() {  // after a word fix the .vtt is rewritten: swap in a fresh track
+  const old = $("#player track");
+  if (!old) return;
+  const track = Object.assign(document.createElement("track"), { kind: "subtitles", label: old.label, srclang: old.srclang, src: subsUrl() });
+  old.replaceWith(track);
+  bindSubtitles();
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "c" && e.key !== "C") return;
+  if (e.ctrlKey || e.altKey || e.metaKey || e.defaultPrevented) return;
+  if (e.target.closest?.("input, textarea, select, [contenteditable]")) return;
+  const track = subsTrack();
+  if (!track) return;
+  e.preventDefault();
+  track.mode = track.mode === "showing" ? "hidden" : "showing";
+  toast(t(track.mode === "showing" ? "subtitles_on" : "subtitles_off"));
+});
 
 function partTitle(s) {
   return lec.notes?.sections.find((n) => n.index === s.index)?.title || s.title || `${t("chapters")} ${s.index}`;
@@ -325,6 +358,7 @@ async function saveCorrections(corrections) {
     lec = await api(`/api/lectures/${encodeURIComponent(lec.id)}`);
     drawChapters();
     drawTabs();
+    reloadSubtitles();
     scroller().scrollTop = y;
   } catch (e) { toast(e.message, true); }
 }
@@ -411,6 +445,7 @@ function drawSuggest(body) {
       if (b.dataset.to === "course") S.courses = await api("/api/courses");
       drawChapters();
       drawTabs();
+      reloadSubtitles();
       scroller().scrollTop = y;
     } catch (e) { toast(e.message, true); drawTabs(); }
   }));

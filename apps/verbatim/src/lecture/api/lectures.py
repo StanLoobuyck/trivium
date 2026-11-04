@@ -75,7 +75,9 @@ def lecture(name: str):
             "latex_pdf": bool(_latex_pdf(d)), "can_latex": (d / "sections.json").exists(),
             "media_available": bool(media and Path(media).is_file()),
             "media_on_mac": archive_status(d)["on_mac"],
-            "media_name": Path(media).name if media else None}
+            "media_name": Path(media).name if media else None,
+            "subtitles": (outputs / "subtitles.vtt").is_file(),
+            "language": read_json(d / "manifest.json").get("language")}
 
 
 def _latex_pdf(d: Path) -> Path | None:
@@ -118,6 +120,15 @@ def media(name: str):
     # lectures from before the player stage get their copy on first view (a few seconds)
     player = ensure_player(d, Path(path))
     return FileResponse(player or path)  # supports Range requests: the player can seek
+
+
+@router.get("/api/lectures/{name}/subtitles.vtt")
+def subtitles(name: str):
+    # its own route for the <track>: Firefox only shows WebVTT served as text/vtt, and "files/" sends attachments
+    path = job_dir(name) / "outputs" / "subtitles.vtt"
+    if not path.is_file():
+        raise HTTPException(404)
+    return FileResponse(path, media_type="text/vtt; charset=utf-8", headers={"Cache-Control": "no-cache"})
 
 
 @router.get("/api/lectures/{name}/files/{file}")

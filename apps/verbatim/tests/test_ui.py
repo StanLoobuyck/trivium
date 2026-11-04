@@ -112,6 +112,17 @@ def test_files_only_from_outputs_and_media_seeks(env):
     assert r.status_code == 206 and r.content == b"0123456789"
 
 
+def test_subtitles_served_as_webvtt_for_the_player(env):
+    client, queue, video, job = env
+    assert client.get(f"/api/lectures/{job.name}").json()["subtitles"] is False
+    assert client.get(f"/api/lectures/{job.name}/subtitles.vtt").status_code == 404
+    (job / "outputs" / "subtitles.vtt").write_text("WEBVTT\n\n00:00:01.000 --> 00:00:03.000\nHallo\n")
+    assert client.get(f"/api/lectures/{job.name}").json()["subtitles"] is True
+    r = client.get(f"/api/lectures/{job.name}/subtitles.vtt")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/vtt") and r.text.startswith("WEBVTT")
+    assert "attachment" not in r.headers.get("content-disposition", "")
+
+
 def test_make_notes_queues_once(env):
     client, queue, video, job = env
     for _ in range(2):
