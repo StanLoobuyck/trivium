@@ -6,7 +6,7 @@
 3. **Onafgewerkt:** Velox-downloads hebben "duur onbekend" in de mp4-kop (andere spelers dan mpv tonen 13 u); slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig.
 4. **Volgende stap:** eigenaar bevestigt het overlay op volledig scherm in Zen (Velox 5.2.2); daarna kiezen uit punt 3 of nieuwe wensen.
 5. **Wacht op eigenaar:** Velox 5.2.2 installeren en testen; `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
-6. **Nieuw (2026-11-04):** ondertitels in Verbatim met `c`; vraagt een herstart van `lecture ui`.
+6. **Nieuw (2026-11-04):** ondertitels in Verbatim met `c`; `lecture ui` en worker herstart, wacht op test van de eigenaar in Zen.
 7. **Open:** notitiemodel in Verbatim (nu Gemini). Niet te fixen: hoeken van de Velox-popup in Zen.
 ## 2026-11-04 — ondertitels in de speler van Verbatim
 - Lessen met een transcript (`outputs/subtitles.vtt`) krijgen ondertitels in de speler: toets `c` of de CC-knop van de speler. Keuze blijft onthouden (`lt-subs`), standaard uit; melding "Ondertitels aan/uit (c)". Typen in een veld schakelt niet. Na een woordcorrectie of een aanvaarde suggestie laadt de speler de nieuwe ondertitels.
