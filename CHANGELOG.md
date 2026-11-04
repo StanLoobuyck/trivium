@@ -1,18 +1,18 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar (2026-11-02):** alles heet Sequo/Velox; hub = `trivium-hub` (Mac, `be.trivium.hub`). Velox 5.2.2: slides+webcam (met Verbatim-downloads beide, Verbatim voegt samen op de Mac), draait op Verbatim (poort 7861), overlay ook bij minder beweging en op een video op volledig scherm. Verbatim: Stop-knop in Bezig, kopbalk doorzichtig in rust. Sequo: delen van een les in het lesvenster. Geverifieerd: 145 unit, 137 schermtests, 101 + 33 Velox, 276 Verbatim; samenvoegen op de Mac echt gezien (Les 11 deel 1, 30 min, ~5 min).
-2. **Niet getest:** overlay op volledig scherm in echte Zen (headless Zen weigert fullscreen); Stop op een echt lopende les; Verbatim-knop per deel in Sequo met echte hubdata; nieuwe notitiestijl op meer dan één les, PPTX-les, Safari, Lighthouse.
-3. **Onafgewerkt:** Velox-downloads hebben "duur onbekend" in de mp4-kop (andere spelers dan mpv tonen 13 u); slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig.
-4. **Volgende stap:** eigenaar bevestigt het overlay op volledig scherm in Zen (Velox 5.2.2); daarna kiezen uit punt 3 of nieuwe wensen.
-5. **Wacht op eigenaar:** Velox 5.2.2 installeren en testen; `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
-6. **Nieuw (2026-11-04):** ondertitels in Verbatim met `c`; door de eigenaar bevestigd in Zen.
-7. **Open:** notitiemodel in Verbatim (nu Gemini). Niet te fixen: hoeken van de Velox-popup in Zen.
+1. **Klaar (2026-11-04):** Verbatim-ondertitels in de speler (`c` of CC-knop, onthouden), door de eigenaar bevestigd in Zen; `lecture ui` en worker herstart. Eerder (2026-11-02): alles heet Sequo/Velox, Velox 5.2.2 (slides+webcam, overlay op volledig scherm), Stop in Verbatim, delen in Sequo. Geverifieerd vandaag: 277 Verbatim, 145 unit, ondertitels in Chromium + Firefox (375/1440, licht/donker).
+2. **Niet getest:** ondertitels en Velox-overlay op volledig scherm in echte Zen; Stop op een echt lopende les; Verbatim-knop per deel in Sequo met echte hubdata; notitiestijl op meer lessen, PPTX-les, Safari, Lighthouse.
+3. **Onafgewerkt:** slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig; Velox-mp4's zonder duur in de kop (eigenaar: laat maar).
+4. **Volgende stap:** eigenaar kiest; aanbeveling = slides koppelen aan elk deel van een les in delen (begin bij hoe `apps/verbatim/src/lecture/inbox.py` slides aan een opname hangt).
+5. **Wacht op eigenaar:** `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
+6. **Open:** notitiemodel in Verbatim (nu Gemini); eventueel grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
+
 ## 2026-11-04 — ondertitels in de speler van Verbatim
 - Lessen met een transcript (`outputs/subtitles.vtt`) krijgen ondertitels in de speler: toets `c` of de CC-knop van de speler. Keuze blijft onthouden (`lt-subs`), standaard uit; melding "Ondertitels aan/uit (c)". Typen in een veld schakelt niet. Na een woordcorrectie of een aanvaarde suggestie laadt de speler de nieuwe ondertitels.
 - Eigen route `/api/lectures/{id}/subtitles.vtt` (als `text/vtt`, geen bijlage). `c` is vrij in Velox.
 - Nagekeken op een echte les (482 cues) in Chromium en Firefox, 1440 px licht en 375 px donker: `c` aan/uit, tekst op de video, niet tijdens typen in de zoekbalk. Niet getest: in Zen zelf, op volledig scherm.
-- Getest: 277 Verbatim (nieuw: ondertitels als WebVTT).
+- Getest: 277 Verbatim (nieuw: ondertitels als WebVTT). Na herstart van `lecture ui` (7861) en de worker bevestigd door de eigenaar in Zen. Geen `install.sh` nodig: Verbatim is editable geïnstalleerd.
 
 ## 2026-11-02 — Velox-overlay op een video op volledig scherm
 - Eigenaar: overlay werkt in de kleine speler van Verbatim, niet op volledig scherm. Oorzaak: daar is de `<video>` zelf het fullscreen-element; het overlay kan er niet in en hing in `<html>`, onder de bovenste laag.

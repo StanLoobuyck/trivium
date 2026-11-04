@@ -109,8 +109,8 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - Proefrun van een Velox-release: `npm run release -- <versie> --dry-run`. Zonder `--` slikt npm de vlag en publiceert
   het echt.
 - De hub herstart niet met `scripts/deploy-hub.sh`: nieuwe hubcode vraagt een herstart (proces stoppen volstaat, KeepAlive start het opnieuw).
-- Verbatim draait op de laptop als geïnstalleerde tool: Python-wijzigingen vragen `apps/verbatim/scripts/install.sh` en een herstart van de
-  worker (vraag eerst). Statische webbestanden gelden na herladen. Persoonlijke instellingen staan in `~/.config/lecture-transcriber/`.
+- Verbatim draait op de laptop als editable geïnstalleerde tool: Python-wijzigingen vragen een herstart van de worker (vraag eerst) en,
+  bij API-wijzigingen, van `lecture ui` (PID op poort 7861); `apps/verbatim/scripts/install.sh` alleen bij nieuwe afhankelijkheden. Statische webbestanden gelden na herladen. Persoonlijke instellingen staan in `~/.config/lecture-transcriber/`.
 - Vóór code in deze publieke repo komt: scannen op Mac-naam, IP, thuispaden, plaatsen, privémail en Claude-vermeldingen.
 - Eén look: `packages/design` is de enige bron. Na een wijziging daar: `node scripts/sync-design.mjs` (kopie voor Verbatim; een test faalt anders).
   Velox kopieert bij het bouwen. De speler-overlay heeft de donkere waarden letterlijk in `style.css`; ook die bewaakt een test. Geen eigen tokens of knoppen in een app.
