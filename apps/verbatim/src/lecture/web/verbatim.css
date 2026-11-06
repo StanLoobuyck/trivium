@@ -66,6 +66,19 @@ input[type="checkbox"]:not(.switch) { accent-color: var(--accent); }
 .lecture .row { padding-right: var(--space-2); }
 .lecture .row-trail { margin-block: calc(var(--space-2) * -1); }
 .lecture .row-trail .icon { width: 20px; height: 20px; }
+/* library: a block per course; lessons in parts as one row that opens */
+.lib-block + .lib-block { margin-top: var(--space-6); }
+.lectures .row-title { overflow-wrap: anywhere; white-space: normal; }
+.lib-course { display: flex; align-items: center; gap: var(--space-2); }
+.lecture-group { cursor: pointer; }
+.lecture-group.dragging { opacity: 0.5; }
+.lecture-group .row { padding-right: var(--space-3); }
+.group-toggle { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.group-chevron { display: inline-flex; color: var(--text-2); transition: transform var(--dur-fast) var(--ease-out); }
+.group-chevron .icon { width: 16px; height: 16px; }
+.lecture-group.is-open .group-chevron { transform: rotate(90deg); }
+.lecture.lecture-part .row { padding-left: calc(var(--space-4) + var(--space-5)); }
+.lecture.lecture-part .dot { display: none; }
 .row-title { color: var(--text); }
 .empty-line { padding: var(--space-5); text-align: center; color: var(--text-2); }
 

@@ -1,9 +1,10 @@
 // The lecture list on the home page: header (Library / a course / a folder + totals, search, sort), rows with
 // date, length and notes status; row menu (rename, move to folder, delete); rows drag onto sidebar folders.
+// Per course a block, lessons by number, parts of one lesson under one row that opens (order from library.py).
 import { icon } from "/static/design/icons.js";
 import { api, post } from "../core/api.js";
 import { $, $$ } from "../core/dom.js";
-import { esc, fmtDate, fmtDuration } from "../core/format.js";
+import { esc, fmtDayShort, fmtDuration } from "../core/format.js";
 import { ICON } from "../core/icons.js";
 import { S, courseKey, courseName, isArchived, sortedCourses } from "../core/state.js";
 import { drawSidebar } from "../core/sidebar.js";
@@ -100,6 +101,82 @@ function notesText(l) {
   return t("notes_none");
 }
 
+// Lessons in parts: one row that opens; which ones are open is remembered in this browser.
+const OPEN_KEY = "lt-open-groups";
+const openGroups = new Set((() => { try { return JSON.parse(localStorage.getItem(OPEN_KEY)) || []; } catch { return []; } })());
+const saveOpen = () => { try { localStorage.setItem(OPEN_KEY, JSON.stringify([...openGroups])); } catch { /* private window */ } };
+const PART_RX = /\s*\b(?:deel|part)\s*\d+.*$/i;
+
+// The order: per course a block (on "All" and in a folder), in it the lessons by number (the server's rank);
+// newest = highest lesson first. Title = alphabetical. Blocks: the course with the newest lecture first.
+function arrangeRows(list) {
+  const cmp = libSort === "title" ? (a, b) => a.title.localeCompare(b.title, undefined, { numeric: true })
+    : libSort === "old" ? (a, b) => a.rank - b.rank : (a, b) => b.rank - a.rank;
+  const blocks = new Map();
+  for (const l of list) (blocks.get(l.course) || blocks.set(l.course, []).get(l.course)).push(l);
+  const newest = (ls) => ls.reduce((m, l) => ((l.date || "") > m ? l.date || "" : m), "");
+  const oldest = (ls) => ls.reduce((m, l) => ((l.date || "~") < m ? l.date || "~" : m), "~");
+  return [...blocks.entries()].map(([course, ls]) => ({ course, name: ls[0].course_name, items: groupParts(ls.sort(cmp)) }))
+    .sort(libSort === "title" ? (a, b) => (a.name || "").localeCompare(b.name || "")
+      : libSort === "old" ? (a, b) => oldest(a.items.flatMap(itemLectures)).localeCompare(oldest(b.items.flatMap(itemLectures)))
+        : (a, b) => newest(b.items.flatMap(itemLectures)).localeCompare(newest(a.items.flatMap(itemLectures))));
+}
+const itemLectures = (it) => (it.parts || [it]);
+// Two or more parts of the same lesson become one item at the place of the first; parts always 1, 2, 3 …
+function groupParts(sorted) {
+  const count = new Map();
+  for (const l of sorted) if (l.group) count.set(l.group, (count.get(l.group) || 0) + 1);
+  const out = [], seen = new Map();
+  for (const l of sorted) {
+    if (!l.group || count.get(l.group) < 2) { out.push(l); continue; }
+    if (!seen.has(l.group)) { const g = { key: l.group, title: l.title.replace(PART_RX, ""), parts: [] }; seen.set(l.group, g); out.push(g); }
+    seen.get(l.group).parts.push(l);
+  }
+  for (const g of seen.values()) g.parts.sort((a, b) => (a.part || 0) - (b.part || 0));
+  return out;
+}
+
+function groupNotes(parts) {
+  const busy = parts.find((l) => !l.has_notes && l.queue && l.status !== "done");
+  if (busy) return notesText(busy);
+  const ready = parts.filter((l) => l.has_notes).length;
+  return ready === parts.length ? t("notes_ready") : ready ? t("group_notes", { n: ready, total: parts.length }) : t("notes_none");
+}
+
+function subLine(l, showCourse) {
+  const folder = S.folders.folders.find((f) => f.id === S.folders.assign[l.id]);
+  return [showCourse ? l.course_name : "", folder && !libSel.startsWith("f:") ? folder.name : "",
+    isArchived(l.course) ? t("archived") : ""].filter(Boolean).join(" · ");
+}
+
+function lectureRow(l, { part = false, showCourse } = {}) {
+  const sub = part ? "" : subLine(l, showCourse);
+  const title = part ? (l.title.match(PART_RX)?.[0].trim() || l.title).replace(/^./, (c) => c.toUpperCase()) : l.title;
+  return `<li class="lecture${part ? " lecture-part" : ""}" draggable="true" data-id="${esc(l.id)}"><div class="row" data-course="${courseKey(l.course)}">
+      <span class="dot"></span>
+      <span class="row-main"><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(title)}</a>
+        ${sub ? `<span class="sub">${esc(sub)}</span>` : ""}<span class="sub">${esc(notesText(l))}</span></span>
+      <span class="row-trail">${esc(fmtDayShort(l.date))} · ${esc(fmtDuration(l.duration_s))}
+        <button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${icon("more")}</button></span>
+    </div></li>`;
+}
+
+function groupRow(g, showCourse) {
+  const open = openGroups.has(g.key);
+  const first = g.parts[0];
+  const total = g.parts.reduce((a, l) => a + (l.duration_s || 0), 0);
+  const sub = [t("group_parts", { n: g.parts.length }), subLine(first, showCourse)].filter(Boolean).join(" · ");
+  const head = `<li class="lecture-group${open ? " is-open" : ""}" draggable="true" data-group="${esc(g.key)}"
+      data-ids="${esc(g.parts.map((l) => l.id).join("\n"))}"><div class="row" data-course="${courseKey(first.course)}">
+      <span class="dot"></span>
+      <span class="row-main"><button class="row-title group-toggle" aria-expanded="${open}">${esc(g.title)}</button>
+        <span class="sub">${esc(sub)}</span><span class="sub">${esc(groupNotes(g.parts))}</span></span>
+      <span class="row-trail">${esc(fmtDayShort(first.date))} · ${esc(fmtDuration(total))}
+        <span class="group-chevron">${icon("chevron")}</span></span>
+    </div></li>`;
+  return head + (open ? g.parts.map((l) => lectureRow(l, { part: true })).join("") : "");
+}
+
 function drawRows() {
   const wrap = $("#lib-wrap");
   const done = S.lectures.filter((l) => l.id);
@@ -109,30 +186,32 @@ function drawRows() {
     return;
   }
   const q = libQ.trim().toLowerCase();
-  let shown = done.filter((l) => inSel(l) && (!q || `${l.title} ${l.course_name}`.toLowerCase().includes(q)));
-  shown = shown.sort(libSort === "title" ? (a, b) => a.title.localeCompare(b.title, undefined, { numeric: true })
-    : libSort === "old" ? (a, b) => (a.date || "").localeCompare(b.date || "") : (a, b) => (b.date || "").localeCompare(a.date || ""));
+  const shown = done.filter((l) => inSel(l) && (!q || `${l.title} ${l.course_name}`.toLowerCase().includes(q)));
   if (!shown.length) {
     paint(wrap, `<div class="empty-line">${libSel.startsWith("f:") ? t("folder_empty") : t("nothing_here")}</div>`);
     return;
   }
-  const rows = shown.map((l) => {
-    const data = `data-course="${courseKey(l.course)}"`;
-    const folder = S.folders.folders.find((f) => f.id === S.folders.assign[l.id]);
-    const sub = [libSel.startsWith("c:") ? "" : l.course_name, folder && !libSel.startsWith("f:") ? folder.name : "",
-      isArchived(l.course) ? t("archived") : ""].filter(Boolean).join(" · ");
-    return `<li class="lecture" draggable="true" data-id="${esc(l.id)}"><div class="row" ${data}>
-      <span class="dot"></span>
-      <span class="row-main"><a class="row-title" href="#/lecture/${encodeURIComponent(l.id)}">${esc(l.title)}</a>
-        ${sub ? `<span class="sub">${esc(sub)}</span>` : ""}<span class="sub">${esc(notesText(l))}</span></span>
-      <span class="row-trail">${esc(fmtDate(l.date))} · ${esc(fmtDuration(l.duration_s))}
-        <button class="icon-btn" data-menu="${esc(l.id)}" aria-label="${t("rename")}, ${t("move_to")}, ${t("delete")}">${icon("more")}</button></span>
-    </div></li>`;
-  }).join("");
-  if (!paint(wrap, `<ul class="list lectures">${rows}</ul>`)) return;
+  const blocks = arrangeRows(shown);
+  const heads = !libSel.startsWith("c:");  // one course: no heading needed
+  const html = blocks.map((b) => `<section class="lib-block">
+      ${heads ? `<h2 class="group-title lib-course" data-course="${courseKey(b.course)}"><span class="dot"></span>${esc(b.name || b.course)}</h2>` : ""}
+      <ul class="list lectures">${b.items.map((it) => (it.parts ? groupRow(it, false) : lectureRow(it, { showCourse: !heads }))).join("")}</ul>
+    </section>`).join("");
+  if (!paint(wrap, html)) return;
   $$(".lecture", wrap).forEach((r) => {
     r.addEventListener("click", (e) => { if (!e.target.closest("button, a, input")) location.hash = `#/lecture/${encodeURIComponent(r.dataset.id)}`; });
-    r.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/lecture", r.dataset.id); r.classList.add("dragging"); });
+    r.addEventListener("dragstart", (e) => { e.stopPropagation(); e.dataTransfer.setData("text/lecture", r.dataset.id); r.classList.add("dragging"); });
+    r.addEventListener("dragend", () => r.classList.remove("dragging"));
+  });
+  $$(".lecture-group", wrap).forEach((r) => {
+    const toggle = () => {
+      if (openGroups.has(r.dataset.group)) openGroups.delete(r.dataset.group); else openGroups.add(r.dataset.group);
+      saveOpen();
+      drawRows();
+      $(`.lecture-group[data-group="${CSS.escape(r.dataset.group)}"] .group-toggle`, wrap)?.focus();
+    };
+    r.addEventListener("click", (e) => { if (!e.target.closest("a, input") && !e.target.closest("[data-menu]")) toggle(); });
+    r.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/lecture", r.dataset.ids); r.classList.add("dragging"); });
     r.addEventListener("dragend", () => r.classList.remove("dragging"));
   });
   $$("[data-menu]", wrap).forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); openRowMenu(b); }));

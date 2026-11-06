@@ -18,6 +18,14 @@ export const fmtDate = (d) => {
   const dt = new Date(d + "T12:00:00");
   return isNaN(dt) ? d : dt.toLocaleDateString(locale(), { day: "numeric", month: "short", year: "numeric" });
 };
+// Library rows: no year in the current year (keeps the title readable at 375 px).
+export const fmtDayShort = (d) => {
+  if (!d) return "";
+  const dt = new Date(d + "T12:00:00");
+  if (isNaN(dt)) return d;
+  const year = dt.getFullYear() === new Date().getFullYear() ? {} : { year: "numeric" };
+  return dt.toLocaleDateString(locale(), { day: "numeric", month: "short", ...year });
+};
 export const when = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);

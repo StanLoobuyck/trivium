@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from .. import config as cfgmod
+from .. import library
 from ..naming import guess_title
 from ..util import read_json, write_json
 from . import common
@@ -29,7 +30,8 @@ class Rename(BaseModel):
 def lectures():
     queued = queue_by_job()
     courses = {c.id: c for c in cfgmod.load_courses()}
-    out = [lecture_summary(mf.parent, queued, courses) for mf in jobs_dir().glob("*/manifest.json")]
+    lessons = common.library_lessons()
+    out = [lecture_summary(mf.parent, queued, courses, lessons=lessons) for mf in jobs_dir().glob("*/manifest.json")]
     # lectures still waiting in the queue have no job folder yet
     jobs = {o["id"] for o in out}
     for i in common.Queue().snapshot()["items"]:
@@ -40,6 +42,7 @@ def lectures():
                         "course_name": course.name if course else i["course"], "status": i["status"],
                         "duration_s": None, "sections": None, "has_notes": False, "has_slides": bool(i["slides"]),
                         "queue": i})
+    library.arrange([o for o in out if o["id"]])
     return sorted(out, key=lambda o: (o["date"] or "", o["title"]), reverse=True)
 
 

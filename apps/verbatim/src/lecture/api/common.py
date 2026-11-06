@@ -108,7 +108,19 @@ def archive_status(d: Path) -> dict[str, Any]:
     return status(d)
 
 
-def lecture_summary(d: Path, queued: dict[str, dict], courses: dict, conf=None) -> dict[str, Any]:
+def library_lessons() -> dict[str, list[dict]]:
+    """Lesson numbers per course from the hub (cached, refreshed in the background); {} without a hub."""
+    from .. import hub, library
+
+    def refresh():
+        courses = cfgmod.load_courses()
+        return library.lessons_from_hub(hub.fetch_courses(cfgmod.load_config()), courses)
+    return library.cached_lessons(jobs_dir() / "hub_lessons.json", refresh)
+
+
+def lecture_summary(d: Path, queued: dict[str, dict], courses: dict, conf=None, lessons=None) -> dict[str, Any]:
+    from ..library import display_title
+
     m = read_json(d / "manifest.json")
     st = m.get("stages", {})
     item = queued.get(str(d))
@@ -123,7 +135,11 @@ def lecture_summary(d: Path, queued: dict[str, dict], courses: dict, conf=None) 
         status = m.get("status", "queued")
     course = courses.get(m.get("course"))
     sections = st.get("sections", {}).get("sections")
-    return {"id": d.name, "title": m.get("title") or d.name, "date": m.get("date"), "course": m.get("course"),
+    media = (m.get("input") or {}).get("media")
+    lessons = library_lessons() if lessons is None else lessons
+    title = display_title(m.get("title") or d.name, Path(media).stem if media else None, m.get("date"),
+                          lessons.get(m.get("course"), []), course.language if course else "nl")
+    return {"id": d.name, "title": title, "date": m.get("date"), "course": m.get("course"),
             "course_name": course.name if course else m.get("course"), "status": status,
             "duration_s": st.get("audio", {}).get("duration_s"), "sections": sections, "has_notes": has_notes,
             "has_slides": bool(m.get("slides")), "queue": item,

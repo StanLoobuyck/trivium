@@ -84,9 +84,11 @@ function bindNav() {
     f.addEventListener("drop", async (e) => {
       e.preventDefault();
       f.classList.remove("drop-target");
-      const id = e.dataTransfer.getData("text/lecture");
-      if (!id) return;
-      try { S.folders = await post("/api/folders", { ...S.folders, assign: { ...S.folders.assign, [id]: f.dataset.drop } }); }
+      const ids = e.dataTransfer.getData("text/lecture").split("\n").filter(Boolean);  // a group = all its parts
+      if (!ids.length) return;
+      const assign = { ...S.folders.assign };
+      for (const id of ids) assign[id] = f.dataset.drop;
+      try { S.folders = await post("/api/folders", { ...S.folders, assign }); }
       catch (err) { toast(err.message, true); }
       $("#side-nav")._html = null;
       drawSidebar();
