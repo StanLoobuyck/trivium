@@ -8,6 +8,11 @@
 5. **Wacht op eigenaar:** `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
 6. **Open:** notitiemodel in Verbatim (nu Gemini); grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
 
+## 2026-11-07 — deellink uit de adresbalk werkte niet
+- Eigenaar stuurde het adres uit zijn eigen adresbalk (`…/share/#/`); de vriend kreeg "Open the link you were sent". Oorzaak: de pagina haalde de code na het inloggen uit het adres; bij de eigenaar werkte het nog dankzij de cookie.
+- Nu blijft de code vooraan in elk adres (`#<code>`, `#<code>/vak/…`, `#<code>/les/…`); `/share/api/me` geeft de eigen code terug, zodat een oud `#/`-adres met cookie de code terugkrijgt. Nagekeken met een lokale hub: gekopieerd lesadres opent bij iemand zonder cookie meteen de les; `#/` zonder cookie en een foute code geven de juiste melding. Hub herstart, publiek nagekeken.
+- De vriend had nooit een cookie: die heeft een nieuwe link nodig (Kopieer link in Instellingen → Delen).
+
 ## 2026-11-07 — examendatum, deelformulier, volgorde van versturen
 - Eigenaar: examendatum in Sequo "reset" na herladen. Oorzaak: een datumveld vuurt `change` per afgewerkt deel (dag, maand, jaar); Sequo hertekende dan de pagina, het veld verloor de focus en de volgende cijfers werden sneltoetsen ("1" = overzicht). Op de hub stond zo een half getypte 10/12/2026. Nu: opslaan zonder hertekenen. Schermtest met pijltjestoetsen (vuurt `change` per druk): faalt zonder fix, slaagt met (Chromium, Firefox). Valkuil: de schermtests draaien op `_site/` → `npm run build` in de root, niet alleen `apps/sequo`.
 - Eigenaar: naam en vakken van een nieuwe deellink verdwijnen. Oorzaak: tijdens een sync herlaadt het tabblad elke 3 s en hertekende het de hele sectie. Nu alleen de lijst met links (als die veranderde) en de statusregel; formulier na "Maak link" wel leeg. Nagekeken: "Lies" en een vinkje blijven staan tijdens een sync.
