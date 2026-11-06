@@ -1,13 +1,22 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar (2026-11-06):** Verbatim-bibliotheek geordend: blok per vak, lessen op nummer, lessen in delen als één uitklapbare rij, titels als "EBS - Aula …" krijgen het nummer uit Sequo via de hub (13/10 → Les 6). Hub en `lecture ui` herstart; live nagekeken. Wacht op het oordeel van de eigenaar.
-2. **Wensen van de eigenaar (2026-11-06), in deze volgorde:** (a) ordenen ✔; (b) **Verbatim delen** met iemand zonder Sequo of Velox te delen: (verbeterde) opnames, transcripts en notities; (c) **Velox in Safari**, uitbrengen via het dev-account van zijn vader (Xcode op de Mac; `npm run build:safari` bestaat, nooit getest, downloads staan uit in Safari).
-3. **Niet getest:** groepen in echte Zen (enkel Chromium); slepen van een groep naar een map; ondertitels en Velox-overlay op volledig scherm in Zen; Stop op een echt lopende les; Verbatim-knop per deel in Sequo met echte hubdata; Safari, Lighthouse.
-4. **Onafgewerkt:** slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig; Velox-mp4's zonder duur in de kop (eigenaar: laat maar).
-5. **Volgende stap:** Verbatim delen; eerst de keuzes van de eigenaar vragen (wie, hoe bereikbaar: link via de Mac, export of map; wat precies; live of eenmalig).
-6. **Wacht op eigenaar:** `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
-7. **Open:** notitiemodel in Verbatim (nu Gemini); eventueel grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
+1. **Klaar (2026-11-06):** Verbatim delen: Instellingen → Delen maakt per persoon een link (naam + vakken) naar `<hub>/share/`; video, transcript, ondertitels, notities, downloads; geen toegang tot Sequo. Live op de Mac (hub, `lecture ui` en worker herstart), publiek nagekeken met een tijdelijke code. Eerder vandaag: bibliotheek geordend (groepen, lesnummers uit Sequo).
+2. **Wacht op eigenaar:** eerste echte link maken en zelf openen op iPhone (Safari) en laptop; oordeel over ordenen en delen. Daarna: `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
+3. **Volgende stap:** Velox in Safari, over enkele dagen (eigenaar): uitbrengen via het dev-account van zijn vader (Xcode op de Mac; `npm run build:safari` bestaat, nooit getest, downloads staan uit in Safari).
+4. **Niet getest:** share-pagina in echte Safari/iPhone en Zen (enkel Chromium); de eerste echte upload naar de Mac (alleen lokaal: 16 lessen, 4,1 GB in 6 s); groepen slepen naar een map; ondertitels en Velox-overlay op volledig scherm in Zen; Stop op een echt lopende les; Lighthouse.
+5. **Onafgewerkt:** slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig; Velox-mp4's zonder duur in de kop (eigenaar: laat maar). Delen: geen PDF van de LaTeX-notities en geen slides (niet gekozen).
+6. **Open:** notitiemodel in Verbatim (nu Gemini); eventueel grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-06 — Verbatim delen
+- Keuzes eigenaar: link via de Mac (Funnel draait al), per code een keuze van vakken (nieuwe lessen komen er vanzelf bij), per les video + transcript, notities en downloads.
+- Hub `share.py`: deelcodes (naam, vakken, kleur) en lessen in SQLite, video en `.vtt` in `share/<les>/` naast de database. Beheer onder `/api/share…` met de koppelcode; bekijken onder `/share/api/…` met de deelcode als HttpOnly-cookie (`Path=/share`, SameSite strict, Secure achter Funnel). Een deelcode opent niets onder `/api/` (getest voor sync, courses, events, rooster), en de koppelcode is geen deelcode. Video met Range (spoelen) en als download; transcript als `.txt`.
+- Verbatim `share.py`: houdt de hub gelijk met de jobs (nieuw of gewijzigd erop, vak niet meer gedeeld of les weg eraf). Stuurt geen paden, modellen, wachtrij of correctielijst mee. Worker: hoogstens om de 5 min en 1 video per ronde (meteen opnieuw als er nog video's wachten); "Nu bijwerken" stuurt alles. Bestandsslot tegen dubbel uploaden.
+- Instellingen → Delen: link maken (kopieert meteen), vakken wijzigen, intrekken met 5 s ongedaan maken, status "x lessen gedeeld · nog y video's". Vijf tabbladen passen niet op 375 px: de balk scrolt opzij.
+- Share-pagina (`web/share.html`, `js/share/viewer.js`, stijl en teksten van Verbatim; `deploy-hub.sh` zet ze in `~/trivium-hub/share-web/`): code na `#` wordt cookie en verdwijnt uit de adresbalk; bibliotheek per vak met groepen; les met video, ondertitels (`c`), hoofdstukken, notities, transcript met zoeken, drie downloadknoppen.
+- Valkuil gevonden: de rsync van `apps/hub/` met `--delete` had `share/` (alle video's) bij elke deploy gewist; nu `--exclude /share --exclude /share-web`.
+- Gemeten lokaal: 16 echte lessen (4,1 GB) naar een testhub in 6,3 s, tweede ronde 1,3 s en niets verstuurd. Publiek: `/share/` 200, `/share/api/me` zonder code 401, inloggen met tijdelijke code → `Secure`-cookie, na intrekken 401.
+- Getest: 28 hub (10 nieuw), 296 Verbatim (11 nieuw), 145 unit. Chromium op 375 en 1440 px, licht en donker, voor de share-pagina en Instellingen → Delen: 0 px overloop, geen consolefouten; video speelt, tik op tijd spoelt. Niet in Safari, iPhone of Zen.
 
 ## 2026-11-06 — Verbatim-bibliotheek ordenen
 - Keuzes eigenaar: lessen in delen als uitklapbare groep (bestanden blijven per deel); volgorde op lesnummer; lelijke titels opkuisen met het nummer uit Sequo; bibliotheek per vak.
