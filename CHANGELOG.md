@@ -1,12 +1,21 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar (2026-11-04):** Verbatim-ondertitels in de speler (`c` of CC-knop, onthouden), door de eigenaar bevestigd in Zen; `lecture ui` en worker herstart. Eerder (2026-11-02): alles heet Sequo/Velox, Velox 5.2.2 (slides+webcam, overlay op volledig scherm), Stop in Verbatim, delen in Sequo. Geverifieerd vandaag: 277 Verbatim, 145 unit, ondertitels in Chromium + Firefox (375/1440, licht/donker).
-2. **Niet getest:** ondertitels en Velox-overlay op volledig scherm in echte Zen; Stop op een echt lopende les; Verbatim-knop per deel in Sequo met echte hubdata; notitiestijl op meer lessen, PPTX-les, Safari, Lighthouse.
-3. **Onafgewerkt:** slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig; Velox-mp4's zonder duur in de kop (eigenaar: laat maar).
-4. **Volgende stap:** eigenaar kiest; aanbeveling = slides koppelen aan elk deel van een les in delen (begin bij hoe `apps/verbatim/src/lecture/inbox.py` slides aan een opname hangt).
-5. **Wacht op eigenaar:** `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
-6. **Open:** notitiemodel in Verbatim (nu Gemini); eventueel grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
+1. **Klaar (2026-11-06):** Verbatim-bibliotheek geordend: blok per vak, lessen op nummer, lessen in delen als één uitklapbare rij, titels als "EBS - Aula …" krijgen het nummer uit Sequo via de hub (13/10 → Les 6). Hub en `lecture ui` herstart; live nagekeken. Wacht op het oordeel van de eigenaar.
+2. **Wensen van de eigenaar (2026-11-06), in deze volgorde:** (a) ordenen ✔; (b) **Verbatim delen** met iemand zonder Sequo of Velox te delen: (verbeterde) opnames, transcripts en notities; (c) **Velox in Safari**, uitbrengen via het dev-account van zijn vader (Xcode op de Mac; `npm run build:safari` bestaat, nooit getest, downloads staan uit in Safari).
+3. **Niet getest:** groepen in echte Zen (enkel Chromium); slepen van een groep naar een map; ondertitels en Velox-overlay op volledig scherm in Zen; Stop op een echt lopende les; Verbatim-knop per deel in Sequo met echte hubdata; Safari, Lighthouse.
+4. **Onafgewerkt:** slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig; Velox-mp4's zonder duur in de kop (eigenaar: laat maar).
+5. **Volgende stap:** Verbatim delen; eerst de keuzes van de eigenaar vragen (wie, hoe bereikbaar: link via de Mac, export of map; wat precies; live of eenmalig).
+6. **Wacht op eigenaar:** `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
+7. **Open:** notitiemodel in Verbatim (nu Gemini); eventueel grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-06 — Verbatim-bibliotheek ordenen
+- Keuzes eigenaar: lessen in delen als uitklapbare groep (bestanden blijven per deel); volgorde op lesnummer; lelijke titels opkuisen met het nummer uit Sequo; bibliotheek per vak.
+- `library.py` (afgeleid, niets in een manifest): les en deel uit de titel, rang binnen het vak (semester, lesnummer, deel; een les zonder nummer na de genummerde op of vóór haar datum), groepssleutel vak + semester + les. Titel gelijk aan de gok uit de bestandsnaam en zonder nummer → "Les n" als het rooster die dag één hoorcollege heeft, anders "Les van 13 okt". Zelf hernoemd blijft staan; dubbele spaties weg.
+- Hub: `/api/courses` geeft per vak `lectures: [{date, number}]`, zelfde telling als `computeNumbers` in Sequo (per vak en type, geschrapt telt niet, datum in Brussel). Verbatim bewaart dat in `~/Lectures/jobs/hub_lessons.json` en vraagt het na 10 min opnieuw op de achtergrond; zonder hub de datum.
+- Lijst: blok per vak (vak met de nieuwste les eerst), groep "Les 11 · 4 delen" met totale duur en notitiestatus, open/dicht onthouden in de browser, met Enter/spatie te bedienen, een groep naar een map slepen verplaatst alle delen. Datum zonder jaartal in het huidige jaar; titels lopen door op 375 px. Valkuil: `.part` bestond al op de lespagina (24 px marge) → `.lecture-part`.
+- Gemeten op echte data: Les 11 en Les 13 elk 4 delen in één rij; RZL 1–6 op volgorde (was 3 boven 1); EBS 13/10 → Les 6, 9/10 → Les 5, 29/9 → Les 2 (klopt met rooster + aanvulling).
+- Getest: 285 Verbatim (8 nieuw), 18 hub (1 nieuw), 145 unit. Chromium op 375 en 1440 px, licht en donker: 0 px overloop, geen consolefouten. Niet in Zen en niet in Firefox bekeken.
 
 ## 2026-11-04 — ondertitels in de speler van Verbatim
 - Lessen met een transcript (`outputs/subtitles.vtt`) krijgen ondertitels in de speler: toets `c` of de CC-knop van de speler. Keuze blijft onthouden (`lt-subs`), standaard uit; melding "Ondertitels aan/uit (c)". Typen in een veld schakelt niet. Na een woordcorrectie of een aanvaarde suggestie laadt de speler de nieuwe ondertitels.
