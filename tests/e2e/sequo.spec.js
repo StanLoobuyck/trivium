@@ -509,3 +509,26 @@ test.describe("Velox-koppeling", () => {
     await expect(page.getByText("Gekoppeld.")).toBeVisible();
   });
 });
+
+test("examendatum met het toetsenbord: focus blijft, datum blijft na herladen", async ({ page }, info) => {
+  test.skip(info.project.name === "iphone-chromium", "op de iPhone kies je met het wiel");
+  await start(page);
+  await page.goto("/sequo/#/instellingen");
+  await page.getByRole("button", { name: "Semester", exact: true }).click();
+  const exam = page.locator('input[data-semester="examStart"]');
+  const before = await exam.inputValue();
+  await exam.focus();
+  // elke pijl vuurt "change", net als elk afgewerkt deel bij typen; vroeger hertekende dat de pagina
+  for (let i = 0; i < 3; i++) { await page.keyboard.press("ArrowUp"); await page.waitForTimeout(100); }
+  await expect(exam).toBeFocused();
+  const after = await exam.inputValue();
+  expect(after).not.toBe(before);
+  await page.keyboard.press("1");  // in het veld, geen sneltoets naar het overzicht
+  await expect(page.getByRole("button", { name: "Semester", exact: true })).toBeVisible();
+  await page.keyboard.press("Tab");
+  const saved = await exam.inputValue();
+  await page.waitForTimeout(300);
+  await page.reload();
+  await page.getByRole("button", { name: "Semester", exact: true }).click();
+  await expect(page.locator('input[data-semester="examStart"]')).toHaveValue(saved);
+});

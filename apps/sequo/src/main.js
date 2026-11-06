@@ -195,7 +195,9 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("change", async (e) => {
   const { semester, duration } = e.target.dataset;
-  if (semester && e.target.value) { await store.updateSemester({ [semester]: e.target.value }); render(); }
+  // No redraw: a date field fires "change" per finished part (day, month, year); redrawing took the focus away,
+  // so the next digits became shortcuts ("1" = overview) and the date ended up half typed.
+  if (semester && e.target.value) await store.updateSemester({ [semester]: e.target.value });
   if (duration && +e.target.value > 0) { await store.setAllDurations({ [duration]: +e.target.value }); render(); }
 });
 
