@@ -23,9 +23,9 @@ WRITE_HEADER = "x-lecture-ui"
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Verbatim", docs_url=None, redoc_url=None, openapi_url=None)
-    from .api import add, archive, lectures, models, queue, setup
+    from .api import add, archive, lectures, models, queue, setup, share
 
-    for module in (add, queue, lectures, setup, models, archive):
+    for module in (add, queue, lectures, setup, models, archive, share):
         app.include_router(module.router)
 
     @app.middleware("http")

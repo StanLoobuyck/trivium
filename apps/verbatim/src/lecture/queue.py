@@ -27,7 +27,7 @@ from typing import Any
 
 from . import config as cfgmod
 from .config import Config
-from . import hub
+from . import hub, share
 from .notify import notify
 from .providers.claude_cli import schedule_allows
 from .util import read_json, write_json
@@ -453,6 +453,7 @@ def watch_inbox(queue: Queue, conf: Config) -> bool:
     from . import inbox
 
     hub.report_quietly()
+    share.sync_quietly()
     try:
         added = inbox.tick(queue, conf, lambda msg: print(msg, flush=True))
     except Exception as exc:  # noqa: BLE001 — a bad file in the inbox must not stop the worker

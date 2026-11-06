@@ -8,6 +8,7 @@ import { scroller, setTheme, themeChoice, toast } from "../core/ui.js";
 import { route } from "../core/router.js";
 import { startWorker } from "../shared/actions.js";
 import { bindModels, notesSectionHtml, sttSectionHtml } from "./setup-models.js";
+import { bindShare, shareSectionHtml } from "./setup-share.js";
 
 let editingCourse = null, tab = "models";
 
@@ -85,6 +86,7 @@ export async function renderSetup(refresh = false) {
           </div>`).join("")}</div>
       </section>
 `,
+    share: shareSectionHtml,
     general: () => `      <section class="setup-section">
         <h2>${t("s_outputs")}</h2><div class="list">${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
           <label class="row toggle-row"><span class="row-text"><b>${t("o_" + k)}</b><span class="sub">${t("o_" + k + "_d")}</span></span>
@@ -126,6 +128,7 @@ export async function renderSetup(refresh = false) {
     rerender();
   };
   bindModels(s, rerender);
+  if (tab === "share") bindShare();
   $$("[data-setup-tab]").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.setupTab; rerender(); }));
   $$("[data-theme-choice]").forEach((b) => b.addEventListener("click", () => { setTheme(b.dataset.themeChoice); rerender(); }));
   $$("[data-lang]").forEach((b) => b.addEventListener("click", () => { setLang(b.dataset.lang); route(); }));

@@ -320,3 +320,18 @@ def test_stop_buttons_reach_the_worker_and_the_inbox(env, tmp_path):
     assert client.post("/api/inbox/stop", json={"media": str(folder / "les 9.mp4")}, headers=W).json() == {"ok": True}
     from lecture.config import load_config
     assert str((folder / "les 9.mp4").resolve()) in inbox.ignored(load_config())
+
+
+def test_share_reads_a_real_job(env):
+    from lecture import share
+    _, _, video, job = env
+    [x] = share._local({"digitale-elektronica"})
+    assert x["id"] == job.name and x["_data"]["segments"][0]["text"] == "Hallo"
+    assert x["_data"]["summary"]["title"] == "Les 4" and str(video.parent) not in repr(x["_data"])
+    assert share._local({"ander-vak"}) == []
+
+
+def test_share_settings_without_a_hub(env):
+    client = env[0]
+    assert client.get("/api/share").json()["hub"] is False
+    assert client.post("/api/share/codes", headers=W, json={"name": "Jan", "courses": ["nope"]}).status_code == 400

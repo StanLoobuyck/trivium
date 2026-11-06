@@ -349,3 +349,34 @@ mark { padding-inline: 2px; border-radius: 3px; background: var(--course-yellow-
   .flip-inner { transition: none; }
   .prog-bar > span.indet { width: 100%; animation: fade-pulse 2s ease-in-out infinite; }
 }
+
+/* Settings → Share */
+.share-intro { margin: calc(var(--space-2) * -1) 0 var(--space-3); }
+.share-row { flex-wrap: wrap; gap: var(--space-2); }
+.share-actions { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-left: auto; }
+.share-edit { padding: var(--space-2) var(--space-3) var(--space-3); }
+.share-form-actions { display: flex; justify-content: flex-end; margin-top: var(--space-3); }
+.share-status { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-4); }
+
+/* the page for a share link (served by the hub at /share/) */
+body.share-app { min-height: 100dvh; background: var(--bg); }
+.share-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: calc(env(safe-area-inset-top) + var(--space-2)) max(var(--space-4), env(safe-area-inset-right)) var(--space-2) max(var(--space-4), env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--bg) 80%, transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.share-brand { display: flex; align-items: center; gap: var(--space-2); color: var(--text); font-weight: var(--weight-semibold); text-decoration: none; }
+.share-who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.share-page { max-width: 1280px; margin-inline: auto; padding-bottom: calc(env(safe-area-inset-bottom) + var(--space-8, 48px)); }
+.share-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.share-back { margin-left: calc(var(--space-3) * -1); }
+.share-head { margin-top: var(--space-1); }
+.share-head + .lecture-layout { margin-top: var(--space-4); }
+.share-downloads { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block: var(--space-3); }
+.share-empty { margin-top: 20vh; }
+.lecture > a.row { color: inherit; text-decoration: none; }
+/* five settings tabs don't fit at 375 px: the bar scrolls sideways, not the page */
+.settings-tabs { overflow-x: auto; scrollbar-width: none; }
+.settings-tabs::-webkit-scrollbar { display: none; }
+.settings-tabs > button { flex: 1 0 auto; }
+#share-body .group-title { margin-top: var(--space-5); }
+#share-body > .group-title:first-child { margin-top: 0; }
+.share-row .row-main { flex: 1 1 12rem; min-width: 0; }
