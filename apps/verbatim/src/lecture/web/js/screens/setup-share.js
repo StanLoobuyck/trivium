@@ -36,20 +36,43 @@ function statusLine() {
     .filter(Boolean).join(" · ");
 }
 
+// The poll (every 3 s while lectures are being sent) redraws only the links and the status line: redrawing the
+// whole section emptied the name and courses someone was filling in.
+let linksKey = "";
 function draw() {
   const body = $("#share-body");
-  if (!data.hub) {
-    body.innerHTML = `<div class="card"><p>${t("share_no_hub")}</p></div>`;
+  if (!data.hub || data.error) {
+    linksKey = "";
+    body.innerHTML = !data.hub ? `<div class="card"><p>${t("share_no_hub")}</p></div>`
+      : `<div class="card"><p>${t("share_hub_error")}</p><p class="muted small">${esc(data.error)}</p></div>`;
     return;
   }
-  if (data.error) {
-    body.innerHTML = `<div class="card"><p>${t("share_hub_error")}</p><p class="muted small">${esc(data.error)}</p></div>`;
-    return;
+  if (!$("#share-new", body)) {
+    linksKey = "";
+    body.innerHTML = `<div id="share-links"></div>
+    <h3 class="group-title" id="share-new">${t("share_new")}</h3>
+    <div class="list">
+      <div class="key-row"><label for="share-name"><b>${t("share_name")}</b></label>
+        <input type="text" id="share-name" maxlength="80" placeholder="${t("share_name_ph")}" autocomplete="off"><span></span></div>
+      ${courseChecks([], "new-course")}
+    </div>
+    <div class="share-form-actions"><button class="btn btn-primary" id="share-make">${t("share_make")}</button></div>
+    <div class="share-status"><span class="muted small" id="share-status-line" aria-live="polite"></span>
+      <button class="btn btn-small btn-plain" id="share-sync">${t("share_sync")}</button></div>`;
+    bindForm();
   }
+  drawLinks();
+  $("#share-status-line").textContent = statusLine();
+  $("#share-sync").disabled = !!data.syncing;
+}
+
+function drawLinks() {
   const codes = data.codes.filter((c) => !hidden.has(c.id));
+  const key = JSON.stringify([codes, editing]);
+  if (key === linksKey) return;  // unchanged: keep what is open (and ticked) in an edit panel
+  linksKey = key;
   const names = (c) => c.courses.map((x) => S.courses.find((k) => k.id === x.id)?.name || x.name).join(", ") || t("share_no_courses");
-  body.innerHTML = `
-    ${codes.length ? `<h3 class="group-title">${t("share_links")}</h3><ul class="list">${codes.map((c) => `
+  $("#share-links").innerHTML = codes.length ? `<h3 class="group-title">${t("share_links")}</h3><ul class="list">${codes.map((c) => `
       <li><div class="row share-row">
         <span class="row-main"><span class="row-title">${esc(c.name)}</span><span class="sub">${esc(names(c))}</span></span>
         <span class="share-actions">
@@ -58,17 +81,8 @@ function draw() {
           <button class="btn btn-small btn-plain btn-danger" data-revoke="${esc(c.id)}">${t("share_revoke")}</button>
         </span></div></li>
       ${editing === c.id ? `<li class="share-edit"><div class="list">${courseChecks(c.courses.map((x) => x.id), "edit-course")}</div>
-        <div class="share-form-actions"><button class="btn btn-small btn-primary" data-save="${esc(c.id)}">${t("c_save")}</button></div></li>` : ""}`).join("")}</ul>` : ""}
-    <h3 class="group-title">${t("share_new")}</h3>
-    <div class="list">
-      <div class="key-row"><label for="share-name"><b>${t("share_name")}</b></label>
-        <input type="text" id="share-name" maxlength="80" placeholder="${t("share_name_ph")}" autocomplete="off"><span></span></div>
-      ${courseChecks([], "new-course")}
-    </div>
-    <div class="share-form-actions"><button class="btn btn-primary" id="share-make">${t("share_make")}</button></div>
-    <div class="share-status"><span class="muted small" aria-live="polite">${esc(statusLine())}</span>
-      <button class="btn btn-small btn-plain" id="share-sync" ${data.syncing ? "disabled" : ""}>${t("share_sync")}</button></div>`;
-  bind();
+        <div class="share-form-actions"><button class="btn btn-small btn-primary" data-save="${esc(c.id)}">${t("c_save")}</button></div></li>` : ""}`).join("")}</ul>` : "";
+  bindLinks();
 }
 
 async function copy(link) {
@@ -76,10 +90,10 @@ async function copy(link) {
   catch { window.prompt(t("share_copy"), link); }
 }
 
-function bind() {
+function bindLinks() {
   const find = (id) => data.codes.find((c) => c.id === id);
   $$("[data-copy]").forEach((b) => b.addEventListener("click", () => copy(find(b.dataset.copy).link)));
-  $$("[data-edit]").forEach((b) => b.addEventListener("click", () => { editing = editing === b.dataset.edit ? null : b.dataset.edit; draw(); }));
+  $$("[data-edit]").forEach((b) => b.addEventListener("click", () => { editing = editing === b.dataset.edit ? null : b.dataset.edit; drawLinks(); }));
   $$("[data-save]").forEach((b) => b.addEventListener("click", async () => {
     const courses = $$('input[name="edit-course"]:checked').map((i) => i.value);
     try { await api(`/api/share/codes/${b.dataset.save}`, { method: "PATCH", json: { courses, colors: colorsOf(courses) } }); toast(t("saved")); editing = null; }
@@ -100,6 +114,9 @@ function bind() {
       },
     });
   }));
+}
+
+function bindForm() {
   $("#share-make")?.addEventListener("click", async () => {
     const name = $("#share-name").value.trim();
     const courses = $$('input[name="new-course"]:checked').map((i) => i.value);
@@ -108,6 +125,8 @@ function bind() {
     try {
       const code = await post("/api/share/codes", { name, courses, colors: colorsOf(courses) });
       await copy(code.link);
+      $("#share-name").value = "";
+      $$('input[name="new-course"]').forEach((i) => { i.checked = false; });
     } catch (e) { toast(e.message, true); }
     bindShare();
   });

@@ -121,3 +121,10 @@ def test_worker_checks_every_five_minutes_unless_videos_wait(monkeypatch):
     share.sync_quietly(now=2000)
     share.sync_quietly(now=2030)
     assert len(runs) == 4
+
+
+def test_all_texts_go_up_before_any_video(setup):
+    hub, _ = setup
+    share.sync(log=lambda m: None)
+    kinds = ["video" if p.endswith("/video") else "text" for _, p in hub.calls if not p.endswith("/subtitles")]
+    assert kinds == ["text", "text", "video", "video"]  # the page lists both lectures right away

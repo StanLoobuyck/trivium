@@ -251,4 +251,24 @@ document.addEventListener("keydown", (e) => {
   toast(t(subsOn ? "subs_on" : "subs_off"));
 });
 
+// Lectures you add show up without reloading: the list is fetched again every minute (and when the tab comes
+// back into view); a lecture whose video is still on its way checks every 30 s.
+async function refreshList() {
+  if (!me || lec || document.hidden) return;
+  try {
+    const [who, fresh] = await Promise.all([get("me"), get("lectures")]);  // courses on the link may change too
+    if (JSON.stringify([who, fresh]) !== JSON.stringify([me, lectures])) { me = who; lectures = fresh; renderLibrary(); }
+  } catch { /* offline for a moment: try again next round */ }
+}
+async function refreshLecture() {
+  if (!lec || lec.has_video || document.hidden) return;
+  try {
+    const fresh = await get(`lectures/${encodeURIComponent(lec.summary.id)}`);
+    if (fresh.has_video) renderLecture(lec.summary.id);
+  } catch { /* try again */ }
+}
+setInterval(refreshList, 60000);
+setInterval(refreshLecture, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { refreshList(); refreshLecture(); } });
+
 start();

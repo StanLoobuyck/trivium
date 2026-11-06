@@ -115,6 +115,15 @@ def _local(courses: set[str]) -> list[dict]:
     return out
 
 
+def _status(local: list[dict], shared: set[str]) -> dict:
+    return {"shared": sum(1 for x in local if x["course"] in shared)}
+
+
+def _waiting(send: list[dict], by_id: dict, remote: dict) -> int:
+    return sum(1 for item in send if by_id[item["id"]]["_video"]
+               and remote.get(item["id"], {}).get("video_size") != by_id[item["id"]]["video_size"])
+
+
 def sync(max_videos: int | None = None, log=print) -> dict:
     """Bring the hub up to date. Returns counts; status is written to jobs/share_status.json for the UI."""
     conf = cfgmod.load_config()
@@ -133,25 +142,29 @@ def sync(max_videos: int | None = None, log=print) -> dict:
         videos = 0
         for lecture_id in remove:
             hub_call("DELETE", f"/api/share/lectures/{lecture_id}")
+        # First every lecture's text and subtitles (seconds: the whole list is on the page at once), then the
+        # videos (~15 s each); a lecture without its video yet says so on the page.
         for item in send:
             x, old = by_id[item["id"]], remote.get(item["id"], {})
-            if old.get("hash") != x["hash"] or not old:
+            if old.get("hash") != x["hash"] or old.get("course") != x["course"]:
                 hub_call("PUT", f"/api/share/lectures/{x['id']}", json={"course": x["course"], "hash": x["hash"],
                                                                          "data": x["_data"]})
-            if x["_video"] and old.get("video_size") != x["video_size"]:
-                if max_videos is not None and videos >= max_videos:
-                    continue
-                log(f"share: uploading {x['id']} ({x['video_size'] // 1_000_000} MB)")
-                with x["_video"].open("rb") as f:
-                    hub_call("PUT", f"/api/share/lectures/{x['id']}/video", content=f)
-                videos += 1
             if x["_subs"] and old.get("subtitles_hash") != x["subtitles_hash"]:
                 hub_call("PUT", f"/api/share/lectures/{x['id']}/subtitles", params={"hash": x["subtitles_hash"]},
                          content=x["_subs"].read_bytes())
-        waiting = sum(1 for item in send if by_id[item["id"]]["_video"]
-                      and remote.get(item["id"], {}).get("video_size") != by_id[item["id"]]["video_size"]) - videos
-        result = {"shared": sum(1 for x in local if x["course"] in shared), "sent": len(send), "removed": len(remove),
-                  "videos": videos, "videos_waiting": max(0, waiting)}
+        for item in send:
+            x, old = by_id[item["id"]], remote.get(item["id"], {})
+            if not x["_video"] or old.get("video_size") == x["video_size"]:
+                continue
+            if max_videos is not None and videos >= max_videos:
+                break
+            log(f"share: uploading {x['id']} ({x['video_size'] // 1_000_000} MB)")
+            with x["_video"].open("rb") as f:
+                hub_call("PUT", f"/api/share/lectures/{x['id']}/video", content=f)
+            videos += 1
+            write_json(status_path, {**_status(local, shared), "videos_waiting": _waiting(send, by_id, remote) - videos})
+        result = {**_status(local, shared), "sent": len(send), "removed": len(remove), "videos": videos,
+                  "videos_waiting": max(0, _waiting(send, by_id, remote) - videos)}
         write_json(status_path, result)
         return result
 
