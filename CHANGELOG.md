@@ -1,12 +1,19 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar (2026-11-06):** Verbatim delen: Instellingen → Delen maakt per persoon een link (naam + vakken) naar `<hub>/share/`; video, transcript, ondertitels, notities, downloads; geen toegang tot Sequo. Live op de Mac (hub, `lecture ui` en worker herstart), publiek nagekeken met een tijdelijke code. Eerder vandaag: bibliotheek geordend (groepen, lesnummers uit Sequo).
+1. **Klaar (2026-11-07):** examendatum in Sequo blijft staan, deelformulier blijft staan tijdens een sync, teksten vóór video's, share-pagina werkt zichzelf bij. **(2026-11-06):** Verbatim delen: Instellingen → Delen maakt per persoon een link (naam + vakken) naar `<hub>/share/`; video, transcript, ondertitels, notities, downloads; geen toegang tot Sequo. Live op de Mac (hub, `lecture ui` en worker herstart), publiek nagekeken met een tijdelijke code. Eerder vandaag: bibliotheek geordend (groepen, lesnummers uit Sequo).
 2. **Wacht op eigenaar:** eerste echte link maken en zelf openen op iPhone (Safari) en laptop; oordeel over ordenen en delen. Daarna: `~/inhaal-hub` op de Mac en `Downloads/Verbatim/H01L1A/.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden op claude.ai; de vrienden de Trivium-link sturen.
 3. **Volgende stap:** Velox in Safari, over enkele dagen (eigenaar): uitbrengen via het dev-account van zijn vader (Xcode op de Mac; `npm run build:safari` bestaat, nooit getest, downloads staan uit in Safari).
 4. **Niet getest:** share-pagina in echte Safari/iPhone en Zen (enkel Chromium); de eerste echte upload naar de Mac (alleen lokaal: 16 lessen, 4,1 GB in 6 s); groepen slepen naar een map; ondertitels en Velox-overlay op volledig scherm in Zen; Stop op een echt lopende les; Lighthouse.
 5. **Onafgewerkt:** slidekoppeling in Verbatim bij lessen in delen; schermtest `design light` (Firefox) wisselvallig; Velox-mp4's zonder duur in de kop (eigenaar: laat maar). Delen: geen PDF van de LaTeX-notities en geen slides (niet gekozen).
 6. **Open:** notitiemodel in Verbatim (nu Gemini); eventueel grootte/positie van de ondertitels. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-07 — examendatum, deelformulier, volgorde van versturen
+- Eigenaar: examendatum in Sequo "reset" na herladen. Oorzaak: een datumveld vuurt `change` per afgewerkt deel (dag, maand, jaar); Sequo hertekende dan de pagina, het veld verloor de focus en de volgende cijfers werden sneltoetsen ("1" = overzicht). Op de hub stond zo een half getypte 10/12/2026. Nu: opslaan zonder hertekenen. Schermtest met pijltjestoetsen (vuurt `change` per druk): faalt zonder fix, slaagt met (Chromium, Firefox). Valkuil: de schermtests draaien op `_site/` → `npm run build` in de root, niet alleen `apps/sequo`.
+- Eigenaar: naam en vakken van een nieuwe deellink verdwijnen. Oorzaak: tijdens een sync herlaadt het tabblad elke 3 s en hertekende het de hele sectie. Nu alleen de lijst met links (als die veranderde) en de statusregel; formulier na "Maak link" wel leeg. Nagekeken: "Lies" en een vinkje blijven staan tijdens een sync.
+- Eigenaar: eerst maar één les gedeeld. Oorzaak: per les tekst + video (~15 s per video), dus lessen verschenen één voor één. Nu eerst alle teksten en ondertitels, dan de video's; status telt af per video.
+- Share-pagina werkt zichzelf bij: lijst en vakken van de link elke minuut en bij terugkeren naar het tabblad, een les zonder video elke 30 s. Nagekeken: vak toegevoegd aan een link → 6 → 16 lessen zonder herladen.
+- Getest: 297 Verbatim, 145 unit, 28 hub, 92 schermtests. `lecture ui` en worker herstart; share-pagina en Sequo op de hub bijgewerkt (statisch, geen hubherstart).
 
 ## 2026-11-06 — Verbatim delen
 - Keuzes eigenaar: link via de Mac (Funnel draait al), per code een keuze van vakken (nieuwe lessen komen er vanzelf bij), per les video + transcript, notities en downloads.
