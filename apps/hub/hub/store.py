@@ -1,7 +1,28 @@
 """SQLite-opslag: per record de nieuwste versie; seq bepaalt wat een toestel nog moet ophalen."""
 import json
 import sqlite3
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+BRUSSELS = ZoneInfo("Europe/Brussels")
+COUNTED_TYPES = {"lecture", "exercise", "lab"}
+
+
+def lecture_numbers(sessions: list[dict]) -> dict[str, list[dict]]:
+    """Per vak de hoorcolleges als {date, number}: zelfde telling als computeNumbers in Sequo (per vak en type,
+    chronologisch, geschrapt telt niet mee). Datum in Brussel, zodat Verbatim op de opnamedatum kan zoeken."""
+    counters: dict[tuple[str, str], int] = {}
+    out: dict[str, list[dict]] = {}
+    for s in sorted((s for s in sessions if s.get("start")), key=lambda s: s["start"]):
+        if s.get("status") == "cancelled" or s.get("type") not in COUNTED_TYPES:
+            continue
+        key = (s.get("courseId"), s["type"])
+        counters[key] = counters.get(key, 0) + 1
+        if s["type"] == "lecture":
+            day = datetime.fromisoformat(s["start"].replace("Z", "+00:00")).astimezone(BRUSSELS).date().isoformat()
+            out.setdefault(s.get("courseId"), []).append({"date": day, "number": counters[key]})
+    return out
 
 TABLES = {"semesters", "courses", "sessions"}
 
@@ -78,8 +99,10 @@ class Store:
             reverse=True,
         )
         active = {candidates[0]["id"]} if candidates else set()
+        lectures = lecture_numbers(records("sessions"))
         return [
-            {"name": c.get("name"), "codes": c.get("codes", []), "language": c.get("language"), "colorKey": c.get("colorKey")}
+            {"name": c.get("name"), "codes": c.get("codes", []), "language": c.get("language"), "colorKey": c.get("colorKey"),
+             "lectures": lectures.get(c["id"], [])}
             for c in records("courses")
             if c.get("semesterId") in active and not c.get("hidden")
         ]

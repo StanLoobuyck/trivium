@@ -150,7 +150,7 @@ def test_courses_of_the_active_semester_only(client):
     ]
     client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
     assert client.get("/api/courses").status_code == 401
-    assert client.get("/api/courses", headers=AUTH).json()["courses"] == [{"name": "SP", "codes": ["H06F2a"], "language": "en", "colorKey": "indigo"}]
+    assert client.get("/api/courses", headers=AUTH).json()["courses"] == [{"name": "SP", "codes": ["H06F2a"], "language": "en", "colorKey": "indigo", "lectures": []}]
 
 
 def test_two_active_semesters_newest_upload_wins(client):
@@ -165,3 +165,24 @@ def test_two_active_semesters_newest_upload_wins(client):
     client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
     courses = client.get("/api/courses", headers=AUTH).json()["courses"]
     assert [c["name"] for c in courses] == ["EEA"]
+
+
+def test_courses_carry_lecture_numbers_like_sequo(client):
+    # Zelfde telling als computeNumbers: per vak en type, chronologisch; geschrapt en verwijderd tellen niet.
+    time = "2026-11-01T10:00:00.000Z"
+    def session(i, start, kind="lecture", **extra):
+        return ("sessions", {"id": f"x{i}", "updatedAt": time, "courseId": "c1", "type": kind, "start": start, "status": "upcoming", **extra})
+    rows = [
+        ("semesters", {"id": "s1", "updatedAt": time, "isActive": True}),
+        ("courses", {"id": "c1", "updatedAt": time, "semesterId": "s1", "name": "Vak", "codes": ["H00X1a"]}),
+        session(3, "2026-10-02T10:00:00.000Z"),
+        session(1, "2026-09-22T06:35:00.000Z"),
+        session(2, "2026-09-29T06:35:00.000Z", status="cancelled"),
+        session(4, "2026-10-05T06:35:00.000Z", kind="exercise"),
+        session(5, "2026-10-06T06:35:00.000Z", deletedAt=time),
+        session(6, "2026-10-12T22:30:00.000Z"),  # 00:30 in Brussel: telt als 13/10
+    ]
+    client.post("/api/sync", json={"changes": [{"table": t, "record": r} for t, r in rows]}, headers=AUTH)
+    [course] = client.get("/api/courses", headers=AUTH).json()["courses"]
+    assert course["lectures"] == [{"date": "2026-09-22", "number": 1}, {"date": "2026-10-02", "number": 2},
+                                  {"date": "2026-10-13", "number": 3}]
