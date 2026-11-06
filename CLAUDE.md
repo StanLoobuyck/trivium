@@ -139,3 +139,7 @@ Componenten gebruiken **nooit losse waarden**, alleen tokens uit `packages/desig
 - LaTeX-notities staan standaard **naast de slides** (geen code of figuren van de slide; `\kernpunt`, `\valkuil`); per vak `notes_without_slides` voor zelfstandige notities. `check.py` bewaakt dat.
 - Landingspagina: `%%VELOX_*%%` vult `scripts/build-site.mjs` in uit `updates.json`. Downloadlinks in READMEs wijzen naar de Trivium-pagina, nooit naar een versie.
 - Snel na elkaar pushen laat de Pages-deploy soms falen ("in progress deployment"): onschuldig als de site niet veranderde, anders de run opnieuw starten.
+- Schermtests (Playwright) draaien op `_site/`: na een wijziging in Sequo eerst `npm run build` in de root, niet alleen in `apps/sequo`.
+- Datumvelden vuren `change` per afgewerkt deel (dag/maand/jaar): nooit de pagina hertekenen in die handler, anders verliest het veld de focus en worden cijfers sneltoetsen.
+- Verbatim delen: deelcodes openen alleen `/share/api/…`, nooit `/api/…`; beheer met de koppelcode. Video's staan in `share/` naast de hubdatabase: `deploy-hub.sh` sluit `/share` en `/share-web` uit van de `--delete`; laat dat zo. De share-pagina is `apps/verbatim/src/lecture/web/share.html` (statisch, geen hubherstart nodig).
+- Een scherm dat pollt mag geen formulier hertekenen waarin iemand typt: alleen de delen die veranderen.
