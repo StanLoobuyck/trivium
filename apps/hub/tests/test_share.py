@@ -117,6 +117,7 @@ def test_pagina_en_sequo_naast_elkaar(hub):
 def test_kleur_per_vak_gaat_mee(hub):
     r = hub.post("/api/share/codes", headers=AUTH, json={"name": "Jan", "courses": [{"id": "vak-a", "name": "A", "color": "purple"}]})
     login(hub, r.json()["code"])
-    assert hub.get("/share/api/me").json()["courses"] == [{"id": "vak-a", "name": "A", "color": "purple"}]
+    me = hub.get("/share/api/me").json()
+    assert me["courses"] == [{"id": "vak-a", "name": "A", "color": "purple"}] and me["code"] == r.json()["code"]
     bad = hub.post("/api/share/codes", headers=AUTH, json={"name": "Jan", "courses": [{"id": "vak-a", "name": "A", "color": "<b>"}]})
     assert bad.status_code == 422

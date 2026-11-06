@@ -1,6 +1,7 @@
 // The page someone with a share link sees (served by the hub at /share/): the shared lectures per course, and per
 // lecture the video with subtitles, notes and transcript, plus downloads. Read only; no access to Sequo.
-// The link is …/share/#<code>: the code is traded for a cookie once and removed from the address bar.
+// Addresses are …/share/#<code>, …/#<code>/vak/<id> and …/#<code>/les/<id>: the code stays in front, so whatever
+// someone copies from the address bar is a working link. The code also becomes a cookie (for the video and track).
 import { esc, fmtDate, fmtDayShort, fmtDuration, fmtTs, parseTs } from "../core/format.js";
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -8,7 +9,15 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const view = $("#view");
 const API = "api";  // relative to /share/
 const PART_RX = /\s*\b(?:deel|part)\s*\d+.*$/i;
-let me = null, lectures = [], sel = "", lec = null, tab = "notes";
+let me = null, lectures = [], sel = "", lec = null, tab = "notes", loggedIn = "";
+
+// "#abc/les/x" → { code: "abc", path: "/les/x" }; "#/les/x" (older links) → no code, the cookie decides
+function parseHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  const i = h.indexOf("/");
+  return { code: i < 0 ? h : h.slice(0, i), path: i < 0 ? "" : h.slice(i) };
+}
+const href = (path = "") => `#${encodeURIComponent(me?.code || loggedIn)}${path}`;
 
 let toastTimer;
 function toast(msg) {
@@ -28,25 +37,28 @@ async function get(path) {
 
 async function start() {
   document.documentElement.lang = LANG;
-  const hash = location.hash.slice(1);
-  if (hash && !hash.startsWith("/")) {  // a fresh link: trade the code for a cookie, then drop it from the address
+  const { code, path } = parseHash();
+  if (code && code !== loggedIn) {  // a (new) link: trade the code for a cookie
     const r = await fetch(`${API}/login`, { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ code: hash }), credentials: "same-origin" });
-    history.replaceState(null, "", location.pathname + location.search);
+      body: JSON.stringify({ code }), credentials: "same-origin" });
     if (!r.ok) return noAccess(true);
+    loggedIn = code;
   }
   try {
     [me, lectures] = await Promise.all([get("me"), get("lectures")]);
   } catch (e) {
     return e.status === 401 ? noAccess(false) : failed(e);
   }
+  loggedIn = me.code || loggedIn;
+  // an address without the code (older link, or "#/…"): put it back, so copying the address bar shares a working link
   $("#who").textContent = t("sh_for", { name: me.name });
+  $(".share-brand").setAttribute("href", href());
   route();
 }
 
-// "#/…" is a page in here; anything else after "#" is a (new) code, e.g. a link pasted into this tab
 window.addEventListener("hashchange", () => {
-  if (location.hash.length > 1 && !location.hash.startsWith("#/")) start();
+  const { code } = parseHash();
+  if (code && code !== loggedIn) start();
   else if (me) route();
 });
 
@@ -58,10 +70,13 @@ function failed(e) {
 }
 
 function route() {
-  const m = location.hash.match(/^#\/les\/(.+)$/);
-  if (m) return renderLecture(decodeURIComponent(m[1]));
-  const c = location.hash.match(/^#\/vak\/(.+)$/);
-  sel = c ? decodeURIComponent(c[1]) : "";
+  const { code, path } = parseHash();
+  // an address without the code (older link, "#/…"): put it back, so copying the address bar shares a working link
+  if (me?.code && code !== me.code) history.replaceState(null, "", location.pathname + location.search + href(path));
+  const m = path.match(/^\/les\/(.+)$/);
+  if (m) return renderLecture(m[1]);
+  const c = path.match(/^\/vak\/(.+)$/);
+  sel = c ? c[1] : "";
   renderLibrary();
 }
 
@@ -84,7 +99,7 @@ function groupParts(sorted) {
 const courseIndex = (id) => me.courses.findIndex((c) => c.id === id);
 function lectureRow(l, part = false) {
   const title = part ? (l.title.match(PART_RX)?.[0].trim() || l.title).replace(/^./, (c) => c.toUpperCase()) : l.title;
-  return `<li class="lecture${part ? " lecture-part" : ""}"><a class="row" href="#/les/${encodeURIComponent(l.id)}" data-course="${courseTone(l.course)}">
+  return `<li class="lecture${part ? " lecture-part" : ""}"><a class="row" href="${href(`/les/${encodeURIComponent(l.id)}`)}" data-course="${courseTone(l.course)}">
       <span class="dot"></span>
       <span class="row-main"><span class="row-title">${esc(title)}</span>
         <span class="sub">${esc(l.has_notes ? t("sh_with_notes") : t("sh_transcript"))}</span></span>
@@ -116,8 +131,8 @@ function renderLibrary() {
   const total = shown.reduce((a, l) => a + (l.duration_s || 0), 0);
   view.innerHTML = `
     <h1 class="large-title">${esc(sel ? me.courses.find((c) => c.id === sel)?.name || "" : t("nav_library"))}</h1>
-    ${me.courses.length > 1 ? `<div class="chips share-chips"><a class="chip" href="#/" ${sel ? "" : 'aria-current="page"'}>${t("sh_all")}</a>
-      ${me.courses.map((c) => `<a class="chip" href="#/vak/${encodeURIComponent(c.id)}" ${sel === c.id ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}</div>` : ""}
+    ${me.courses.length > 1 ? `<div class="chips share-chips"><a class="chip" href="${href()}" ${sel ? "" : 'aria-current="page"'}>${t("sh_all")}</a>
+      ${me.courses.map((c) => `<a class="chip" href="${href(`/vak/${encodeURIComponent(c.id)}`)}" ${sel === c.id ? 'aria-current="page"' : ""}>${esc(c.name)}</a>`).join("")}</div>` : ""}
     <div class="hero"><span class="hero-number">${shown.length}</span>
       <span class="sub">${t(shown.length === 1 ? "lib_hero_1" : "lib_hero", { dur: fmtDuration(total) })}</span></div>
     ${blocks.length ? blocks.map((b) => `<section class="lib-block">
@@ -143,7 +158,7 @@ async function renderLecture(id) {
   tab = lec.notes ? "notes" : "transcript";
   const meta = [s.course_name, fmtDate(s.date), fmtDuration(s.duration_s)].filter(Boolean).join(" · ");
   view.innerHTML = `
-    <a class="btn btn-plain share-back" href="#/vak/${encodeURIComponent(s.course)}">‹ ${esc(s.course_name)}</a>
+    <a class="btn btn-plain share-back" href="${href(`/vak/${encodeURIComponent(s.course)}`)}">‹ ${esc(s.course_name)}</a>
     <div class="share-head"><h1 class="title">${esc(s.title)}</h1><p class="muted small">${esc(meta)}</p></div>
     <div class="lecture-layout">
       <aside class="stage">

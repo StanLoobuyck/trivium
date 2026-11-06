@@ -192,7 +192,8 @@ def router(store, check_code, data_dir: Path) -> APIRouter:
 
     @r.get("/share/api/me")
     def me(code: dict = Depends(viewer)) -> dict:
-        return {"name": code["name"], "courses": code["courses"]}
+        # the viewer's own code (it has it already, as a cookie): the page keeps it in the address bar
+        return {"name": code["name"], "courses": code["courses"], "code": code["code"]}
 
     @r.get("/share/api/lectures")
     def lectures(code: dict = Depends(viewer)) -> list[dict]:
