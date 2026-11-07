@@ -201,6 +201,13 @@ document.addEventListener("change", async (e) => {
   if (duration && +e.target.value > 0) { await store.setAllDurations({ [duration]: +e.target.value }); render(); }
 });
 
+// Safari (WebKit) edits a date field with the keyboard without firing "change": save on "input" too, also
+// without redrawing. A finished date only (the value stays empty while a part is missing).
+document.addEventListener("input", async (e) => {
+  const { semester } = e.target.dataset;
+  if (semester && e.target.value) await store.updateSemester({ [semester]: e.target.value });
+});
+
 window.addEventListener("hashchange", () => {
   courseView.selecting = null;
   courseView.filter = "all";
