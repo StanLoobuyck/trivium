@@ -3,6 +3,11 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.3.0
+
+**New**
+- Works on lectures someone shared with you from their Verbatim (a link ending in `.ts.net/share/`): speed, skipping, the on-screen display and all other shortcuts. Your browser asks for this new permission once.
+
 ## 5.2.2
 
 **Fixed**
