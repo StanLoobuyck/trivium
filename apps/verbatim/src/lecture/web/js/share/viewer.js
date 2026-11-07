@@ -263,7 +263,7 @@ document.addEventListener("keydown", (e) => {
   subsOn = track.mode !== "showing";
   track.mode = subsOn ? "showing" : "hidden";
   try { localStorage.setItem("lt-subs", subsOn ? "1" : "0"); } catch { /* private window */ }
-  toast(t(subsOn ? "subs_on" : "subs_off"));
+  toast(t(subsOn ? "subtitles_on" : "subtitles_off"));
 });
 
 // Lectures you add show up without reloading: the list is fetched again every minute (and when the tab comes
