@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   isBuiltInSite,
   isLocalPage,
+  isSharePage,
   isVerbatim,
   originPattern,
   patternHost,
@@ -54,4 +55,14 @@ test("Verbatim on this laptop is a built-in site; other local pages are not", ()
   assert.ok(isLocalPage("http://localhost:5173/") && !isLocalPage("https://toledo.kuleuven.be/"));
   assert.ok(isBuiltInSite("http://127.0.0.1:7861/"));
   assert.ok(!isBuiltInSite("http://127.0.0.1:8080/"));
+});
+
+test("shared Verbatim lectures on any Tailscale Funnel hub, only under /share/", () => {
+  assert.ok(isSharePage("https://hub-of-someone.tail1234.ts.net/share/#abc/les/x"));
+  assert.ok(isBuiltInSite("https://a.b.ts.net/share/"));
+  assert.ok(!isSharePage("https://a.b.ts.net/")); // Sequo on the same hub: not a lecture page
+  assert.ok(!isSharePage("https://a.b.ts.net/api/share"));
+  assert.ok(!isSharePage("http://a.b.ts.net/share/"));
+  assert.ok(!isSharePage("https://ts.net.evil.com/share/"));
+  assert.ok(!isSharePage("https://evil.com/share/?x=.ts.net"));
 });

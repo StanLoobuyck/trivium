@@ -19,6 +19,19 @@ function local(url) {
   }
 }
 
+// Lectures someone shared with you from their Verbatim, at <their hub>/share/ (Tailscale Funnel: always *.ts.net).
+// The hub's name differs per person, so the pattern covers every *.ts.net host, but only its /share/ pages.
+export const SHARE_HOSTS = ["https://*.ts.net/share/*"];
+
+export function isSharePage(url) {
+  try {
+    const { protocol, hostname, pathname } = new URL(url);
+    return protocol === "https:" && hostname.endsWith(".ts.net") && pathname.startsWith("/share/");
+  } catch {
+    return false;
+  }
+}
+
 // A page on this laptop (127.0.0.1 / localhost)?
 export const isLocalPage = (url) => local(url) !== null;
 // Verbatim's own pages?
@@ -67,5 +80,7 @@ export function patternMatches(pattern, url) {
 
 // Is this URL one where Velox always runs?
 export function isBuiltInSite(url) {
-  return isVerbatim(url) || REQUIRED_HOSTS.some((pattern) => patternMatches(pattern, url));
+  return (
+    isVerbatim(url) || isSharePage(url) || REQUIRED_HOSTS.some((pattern) => patternMatches(pattern, url))
+  );
 }

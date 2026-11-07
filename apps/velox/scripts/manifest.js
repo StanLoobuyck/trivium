@@ -1,6 +1,6 @@
 // Generates manifest.json for each browser from one shared base.
 
-import { OPTIONAL_HOSTS, REQUIRED_HOSTS, VERBATIM_HOSTS } from "../src/shared/sites.js";
+import { OPTIONAL_HOSTS, REQUIRED_HOSTS, SHARE_HOSTS, VERBATIM_HOSTS } from "../src/shared/sites.js";
 
 const ICONS = {
   16: "icons/icon16.png",
@@ -19,9 +19,11 @@ const ACTION = {
 export const UPDATE_URL = "https://stanloobuyck.github.io/trivium/velox/updates.json";
 
 // Local pages: Verbatim's in release builds (content.js leaves other ports alone), every local test page in dev
-// builds (npm run dev:*).
+// builds (npm run dev:*). Shared Verbatim lectures: <hub>.ts.net/share/.
 export function buildManifest(target, { version, dev }) {
-  const hosts = [...REQUIRED_HOSTS, ...VERBATIM_HOSTS];
+  const hosts = [...REQUIRED_HOSTS, ...VERBATIM_HOSTS, ...SHARE_HOSTS];
+  // web_accessible_resources only takes origins ("…/*"): Chrome refuses the whole extension for "…/share/*"
+  const origins = [...new Set(hosts.map((h) => h.replace(/^([^:]+:\/\/[^/]+)\/.*$/, "$1/*")))];
   const base = {
     name: dev ? "Velox (dev)" : "Velox",
     version,
@@ -82,7 +84,7 @@ export function buildManifest(target, { version, dev }) {
         host_permissions: hosts,
         optional_host_permissions: OPTIONAL_HOSTS,
         background: { service_worker: "background.js" },
-        web_accessible_resources: [{ resources: ["fonts/Inter.woff2"], matches: hosts }],
+        web_accessible_resources: [{ resources: ["fonts/Inter.woff2"], matches: origins }],
         action: ACTION,
       };
 
@@ -94,7 +96,7 @@ export function buildManifest(target, { version, dev }) {
         host_permissions: hosts,
         optional_host_permissions: OPTIONAL_HOSTS,
         background: { scripts: ["background.js"], persistent: false },
-        web_accessible_resources: [{ resources: ["fonts/Inter.woff2"], matches: hosts }],
+        web_accessible_resources: [{ resources: ["fonts/Inter.woff2"], matches: origins }],
         action: ACTION,
       };
 

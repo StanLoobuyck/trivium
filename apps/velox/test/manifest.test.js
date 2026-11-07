@@ -42,6 +42,7 @@ test("no build asks for all websites up front; other sites are optional", () => 
       "*://*.kaltura.com/*",
       "http://127.0.0.1/*", // Verbatim (content.js only stays on its port)
       "http://localhost/*",
+      "https://*.ts.net/share/*", // lectures shared from someone's Verbatim hub
     ]);
     assert.deepEqual(m.optional_permissions || m.optional_host_permissions, ["*://*/*"]);
   }
@@ -61,4 +62,15 @@ test("release Firefox builds point to the self-hosted update manifest; dev build
     buildManifest("firefox", { ...opts, dev: true }).browser_specific_settings.gecko.update_url,
     undefined,
   );
+});
+
+test("web_accessible_resources only lists origins (Chrome refuses the extension for a path like /share/*)", () => {
+  for (const target of ["chrome", "safari"]) {
+    const { matches } = buildManifest(target, opts).web_accessible_resources[0];
+    assert.ok(
+      matches.every((m) => /^[^:]+:\/\/[^/]+\/\*$/.test(m)),
+      `${target}: ${matches}`,
+    );
+    assert.ok(matches.includes("https://*.ts.net/*"));
+  }
 });

@@ -14,9 +14,11 @@ const BRIDGE = ["sequo-bridge.js"];
 const JS = ["content.js"];
 const CSS = ["style.css"];
 
-// Patterns the manifest's content script already covers.
+// Patterns the manifest's content script already covers. The browser lists a host permission without its path
+// ("https://*.ts.net/share/*" comes back as "https://*.ts.net/*"), so both forms count as built in.
 function builtInPatterns() {
-  return ext.runtime.getManifest().content_scripts.flatMap((script) => script.matches);
+  const matches = ext.runtime.getManifest().content_scripts.flatMap((script) => script.matches);
+  return [...matches, ...matches.map((m) => m.replace(/^([^:]+:\/\/[^/]+)\/.*$/, "$1/*"))];
 }
 
 export async function enabledSites() {
