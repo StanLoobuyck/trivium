@@ -1,10 +1,16 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { test } from "node:test";
+import { before, test } from "node:test";
+import { fixturesExist, generateFixtures } from "../scripts/fixtures.js";
 import { remuxToMp4 } from "../src/shared/downloader.js";
 import { readBoxes } from "../src/shared/mp4.js";
 
 const HLS = new URL("./fixtures/media/hls/", import.meta.url);
+
+// The media is generated, not committed (CI starts without it; needs ffmpeg).
+before(() => {
+  if (!fixturesExist()) generateFixtures();
+});
 
 // The 12 test segments (2 min, 640×360 + AAC) through Velox's TS → MP4 path.
 async function remuxFixture() {
