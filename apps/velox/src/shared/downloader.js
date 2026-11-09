@@ -9,6 +9,7 @@
 import { Transmuxer } from "mux.js/cjs/mp4/transmuxer.js";
 import { chooseBestVariant, parseMediaPlaylist } from "./hls.js";
 import { CodedError, describeError } from "./errors.js";
+import { createMp4Writer } from "./mp4.js";
 
 const downloadJobs = new Map();
 
@@ -130,16 +131,9 @@ async function downloadSegments(segmentUrls, signal, opts, report) {
 // Remuxes MPEG-TS segments into one fragmented MP4, one segment at a time.
 export async function remuxToMp4(tsBlobs, signal, report = () => {}) {
   const transmuxer = new Transmuxer();
-  const parts = [];
-  let hasInit = false;
-
-  transmuxer.on("data", (segment) => {
-    if (!hasInit) {
-      parts.push(new Blob([segment.initSegment]));
-      hasInit = true;
-    }
-    parts.push(new Blob([segment.data]));
-  });
+  // An ordinary MP4, not mux.js's fragments: QuickTime can't play those (see mp4.js).
+  const writer = createMp4Writer();
+  transmuxer.on("data", (segment) => writer.add(segment.initSegment, segment.data));
 
   for (let i = 0; i < tsBlobs.length; i++) {
     if (signal.aborted) throw abortError();
@@ -148,10 +142,10 @@ export async function remuxToMp4(tsBlobs, signal, report = () => {}) {
     report({ phase: "Converting to MP4", percent: Math.round(((i + 1) / tsBlobs.length) * 100) });
   }
 
-  if (!hasInit) {
+  if (!writer.hasMedia) {
     throw new Error("No audio/video found to convert.");
   }
-  return new Blob(parts, { type: "video/mp4" });
+  return writer.finish();
 }
 
 // onProgress(progress) receives { jobId, tabId, phase, percent, downloaded?, total?, speed?, eta? }.

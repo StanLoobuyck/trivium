@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildLectureTitle, parseCourseTitle, sanitizeFilename } from "../src/shared/filename.js";
+import {
+  buildLectureTitle,
+  downloadFilename,
+  parseCourseTitle,
+  sanitizeFilename,
+} from "../src/shared/filename.js";
 
 test("sanitizeFilename replaces characters that are illegal in filenames", () => {
   assert.equal(sanitizeFilename('EBS / "intro"?'), "EBS _ _intro__");
@@ -91,4 +96,12 @@ test("the full pipeline gives a clean filename", () => {
     sanitizeFilename(title),
     "Digitale signaalverwerking - Les 1 (2026-09-23) - signaaltransformaties en frequentiebeschrijving",
   );
+});
+
+test("downloadFilename keeps the .webcam suffix when a long title is shortened", () => {
+  assert.equal(downloadFilename("Les 1: intro", "mp4"), "Les 1 - intro.mp4");
+  const long = `${"woord ".repeat(30)}einde`;
+  const name = downloadFilename(`${long}.webcam`, "mp4");
+  assert.ok(name.endsWith(".webcam.mp4"), name);
+  assert.equal(name, `${sanitizeFilename(long)}.webcam.mp4`);
 });

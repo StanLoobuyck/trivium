@@ -1,6 +1,7 @@
 // Settings page: general options + the keyboard shortcut editor.
 
 import { ext } from "../shared/ext.js";
+import { SUPPORTS_FOLDERS } from "../shared/features.js";
 import { SKIP_OPTIONS, SPEED_STEP_OPTIONS, THEME_OPTIONS } from "../shared/settings.js";
 import {
   ACTIONS,
@@ -52,6 +53,8 @@ function renderGeneral() {
   $("remember-speed").checked = settings.rememberSpeed;
   $("resume").checked = settings.resumePlayback;
   $("downloads-verbatim").checked = settings.downloadsToVerbatim;
+  // Safari saves straight into Downloads: no course folders for Verbatim.
+  $("downloads-verbatim").closest(".row").hidden = !SUPPORTS_FOLDERS;
   $("remember-speed-desc").textContent =
     settings.preferredSpeed !== 1
       ? t("rememberSpeedDescNow", { speed: formatSpeed(settings.preferredSpeed) })

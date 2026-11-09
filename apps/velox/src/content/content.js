@@ -3,7 +3,7 @@
 // lecture download button. Shortcuts are configurable (see shared/shortcuts.js).
 
 import { DEFAULT_SETTINGS } from "../shared/settings.js";
-import { SUPPORTS_DOWNLOAD } from "../shared/features.js";
+import { SUPPORTS_FOLDERS } from "../shared/features.js";
 import {
   clearResumePosition,
   getResumePosition,
@@ -102,7 +102,7 @@ import { createSlideButtons } from "./slide-buttons.js";
   }
   // Toledo's file lists: only on the page itself, only with Verbatim downloads on.
   const slideButtons =
-    SUPPORTS_DOWNLOAD && window === window.top && window.location.pathname.includes("/ultra/courses/")
+    SUPPORTS_FOLDERS && window === window.top && window.location.pathname.includes("/ultra/courses/")
       ? createSlideButtons()
       : null;
   function updateSlideButtons() {
@@ -129,6 +129,9 @@ import { createSlideButtons } from "./slide-buttons.js";
   let downloadWrapEl = null; // downloadControl.el
   let downloadResetTimer = null;
   let activeDownloadJobId = null;
+  // Safari has no downloads API: the download runs in this frame (see safari-download.js).
+  // Only bundled into the Safari build (dead code elsewhere).
+  const safariDownload = __BROWSER__ === "safari" ? import("./safari-download.js") : null;
   let hlsPerformanceObserver = null;
   let pageObserver = null;
   let pageScanTimer = null;
@@ -368,6 +371,8 @@ import { createSlideButtons } from "./slide-buttons.js";
     chrome.runtime.sendMessage(
       { action: "startLectureDownload", jobId, url: detectedLectureUrl, title: getPageTitle() },
       (response) => {
+        // Safari doesn't deliver the background's progress messages: the final state comes here.
+        if (__BROWSER__ === "safari" && response?.state) setDownloadProgress(response.state);
         if (chrome.runtime.lastError || !response) {
           setDownloadProgress({
             jobId,
@@ -379,11 +384,14 @@ import { createSlideButtons } from "./slide-buttons.js";
         }
       },
     );
+    if (__BROWSER__ === "safari")
+      safariDownload.then((m) => m.runSafariDownloads(jobId, setDownloadProgress));
   }
 
   function cancelActiveDownload() {
     const jobId = activeDownloadJobId;
     if (!jobId) return;
+    if (__BROWSER__ === "safari") safariDownload.then((m) => m.cancelSafariDownload(jobId));
     downloadControl.update({ jobId, phase: "Canceling", percent: 0, active: true });
     chrome.runtime.sendMessage({ action: "cancelLectureDownload", jobId }, () => {
       void chrome.runtime.lastError;
@@ -393,7 +401,7 @@ import { createSlideButtons } from "./slide-buttons.js";
   }
 
   function injectDownloadButton() {
-    if (!SUPPORTS_DOWNLOAD || !detectedLectureUrl) return;
+    if (!detectedLectureUrl) return;
 
     if (!downloadControl) {
       downloadControl = createDownloadControl({

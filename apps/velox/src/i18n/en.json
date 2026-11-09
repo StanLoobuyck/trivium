@@ -41,7 +41,7 @@
   "errNoSegments": "The recording's playlist is empty.",
   "errNoStream": "No lecture has been found on this page yet.",
   "errNoBackground": "Velox isn't responding. Reload the page and try again.",
-  "errSafari": "Downloads aren't supported in Safari yet.",
+  "errUsePlayer": "Use the download button in the player.",
   "errNotStarted": "The browser didn't start the download.",
   "errUnknown": "Download failed.",
   "muted": "Muted",

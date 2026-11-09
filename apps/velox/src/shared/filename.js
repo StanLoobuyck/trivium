@@ -21,6 +21,16 @@ export function sanitizeFilename(title) {
   return safeTitle || fallback;
 }
 
+export const COMPANION_SUFFIX = ".webcam"; // Verbatim pairs "<title>.webcam.mp4" with "<title>.mp4"
+
+// The file name for a downloaded lecture. Shortening a long title must not cut
+// the suffix off: it pairs the webcam with the slides.
+export function downloadFilename(title, extension) {
+  const companion = String(title).endsWith(COMPANION_SUFFIX);
+  const base = sanitizeFilename(companion ? title.slice(0, -COMPANION_SUFFIX.length) : title);
+  return `${base}${companion ? COMPANION_SUFFIX : ""}.${extension}`;
+}
+
 // "Digitale signaalverwerking [H01L6a] • ULTRA-B-KUL-H01L6a-2627"
 //   → { name: "Digitale signaalverwerking", code: "H01L6a" }
 export function parseCourseTitle(text) {

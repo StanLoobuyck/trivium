@@ -3,6 +3,14 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.4.0
+
+**Fixed**
+- Downloaded lectures play everywhere, also in QuickTime on a Mac and in other players that showed a black picture or a length of 13 or 27 hours. Velox now saves an ordinary MP4
+
+**New**
+- Safari on the Mac (still being tested): downloads work, with the button in the player. The file goes straight into Downloads
+
 ## 5.3.0
 
 **New**

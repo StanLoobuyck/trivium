@@ -52,8 +52,9 @@ src/
   background/sites.js       sites the user enabled; injecting into open tabs after install/update
   background/firefox.js     runs the download in the (persistent) background page
   background/chrome.js      runs it in the offscreen document (MV3 worker can't make blobs)
-  background/safari.js      downloads disabled (Safari has no downloads API)
+  background/safari.js      hands downloads to the player frame (Safari has no downloads API)
   offscreen/                Chrome only
+  content/safari-download.js    Safari only: runs the download in the player frame
   content/content.js        shortcuts, overlay, resume/speed memory, player↔page relay
   content/download-control.js   the in-player Download button / ring / card
   content/overlays.js       "?" shortcut sheet and the "Resumed at …" toast
@@ -76,23 +77,32 @@ replaced at build time, for the rare place where the code has to differ.
 | | Firefox | Chrome | Safari |
 |---|---|---|---|
 | Manifest | V2 (persistent background, so long downloads aren't cut off) | V3 | V3 |
-| Downloads | background page | offscreen document | not supported |
+| Downloads | background page | offscreen document | player frame, saved as a page download (no folders) |
 | Also covers | Zen, LibreWolf, Waterfox | Edge, Brave, Opera, Vivaldi, Arc | — |
 
 ## Safari (needs a Mac with Xcode)
 
+From the laptop, with an ssh host for the Mac (Xcode installed and launched once):
+
 ```bash
-npm install
-npm run build:safari
-xcrun safari-web-extension-converter dist/safari \
-  --project-location safari-xcode --app-name Velox \
-  --bundle-identifier be.velox.Velox --macos-only
+scripts/safari-mac.sh [ssh-host]   # default host: mac
 ```
 
-Open the generated Xcode project and press ▶ Run. In Safari: *Settings →
-Advanced → Show features for web developers*, then *Develop → Allow Unsigned
-Extensions*, and enable Velox under *Settings → Extensions*.
-Publishing in the App Store requires an Apple Developer account (€99/year).
+It builds `dist/safari`, copies it to `~/velox-safari` on the Mac, generates the
+Xcode project once (`safari-web-extension-converter`), builds the app unsigned
+and installs it in `~/Applications`. In Safari: *Settings → Developer → Allow
+unsigned extensions* (again after every Safari restart), then enable Velox
+under *Settings → Extensions*. Web Inspector for the background: *Develop →
+Web Extension Background Content → Velox*.
+
+Safari quirks Velox works around:
+- No downloads API: the download runs in the player frame and is saved with a
+  `download` link on a blob URL, straight into Downloads.
+- Messages from the background to a tab or frame don't arrive (`tabs.sendMessage`
+  answered `undefined`), so the player asks and the background answers
+  (`safariNextDownload`, `safariDownloadProgress`, `safariDownloadDone`).
+
+Publishing in the Mac App Store requires an Apple Developer account (€99/year).
 
 ## Using Velox in your own browser
 

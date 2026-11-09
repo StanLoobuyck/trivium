@@ -41,7 +41,7 @@
   "errNoSegments": "De afspeellijst van de opname is leeg.",
   "errNoStream": "Er is nog geen lesopname gevonden op deze pagina.",
   "errNoBackground": "Velox reageert niet. Herlaad de pagina en probeer opnieuw.",
-  "errSafari": "Downloaden kan nog niet in Safari.",
+  "errUsePlayer": "Gebruik de downloadknop in de speler.",
   "errNotStarted": "De browser startte de download niet.",
   "errUnknown": "Download mislukt.",
   "muted": "Gedempt",

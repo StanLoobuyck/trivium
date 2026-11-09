@@ -2,7 +2,6 @@
 // interval, and links to the settings page. Everything else lives there.
 
 import { ext } from "../shared/ext.js";
-import { SUPPORTS_DOWNLOAD } from "../shared/features.js";
 import { formatProgressMeta } from "../shared/format.js";
 import { formatSpeed } from "../shared/playback.js";
 import { SKIP_OPTIONS } from "../shared/settings.js";
@@ -71,13 +70,12 @@ function renderLecture() {
     $("lecture-hint").textContent = t("noLectureHint");
   }
   $("lecture-hint").hidden = available;
-  $("site-off").closest("section").hidden = siteActive && !SUPPORTS_DOWNLOAD;
 
   const phase = state.phase;
   const active = Boolean(state.active);
   const done = !active && phase === "Complete";
   const failed = !active && phase === "Download failed";
-  const canDownload = SUPPORTS_DOWNLOAD && available;
+  const canDownload = available;
 
   $("download-btn").hidden = !canDownload || active || done;
   $("download-label").textContent = failed ? t("tryAgain") : t("downloadLecture");
@@ -98,6 +96,12 @@ function renderLecture() {
 }
 
 $("download-btn").addEventListener("click", async () => {
+  // Safari: the download runs in the player frame, so it starts from the player's own button.
+  if (__BROWSER__ === "safari") {
+    download = { ...download, active: false, phase: "Download failed", errorCode: "errUsePlayer" };
+    renderLecture();
+    return;
+  }
   download = { ...download, active: true, phase: "Preparing", percent: 0, error: null };
   renderLecture();
   const response = await askBackground({ action: "startLectureDownload" });

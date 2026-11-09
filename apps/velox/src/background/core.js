@@ -4,7 +4,13 @@
 // browser, so the entry file (firefox.js / chrome.js / safari.js) passes in
 // `runDownload` and `cancelDownload`.
 
-import { buildLectureTitle, sanitizeFilename } from "../shared/filename.js";
+import {
+  COMPANION_SUFFIX,
+  buildLectureTitle,
+  downloadFilename,
+  sanitizeFilename,
+} from "../shared/filename.js";
+import { SUPPORTS_FOLDERS } from "../shared/features.js";
 import { normalizeSequoUrl, verbatimFolder } from "../shared/sequo.js";
 import { isSlideUrl, slideFilename } from "../shared/slides.js";
 import { loadSettings, markSlideSaved } from "../shared/storage.js";
@@ -105,10 +111,11 @@ function setDownloadState(tabId, patch, { persist = true } = {}) {
   return { ...state };
 }
 
+// Returns the tab's new download state (null when the progress was for another job).
 export function reportProgress(progress) {
-  if (!progress.tabId) return;
+  if (!progress.tabId) return null;
   const state = getState(progress.tabId);
-  if (progress.jobId && state.jobId && progress.jobId !== state.jobId) return;
+  if (progress.jobId && state.jobId && progress.jobId !== state.jobId) return null;
 
   const numberOr = (value, fallback) => (Number.isFinite(value) ? value : fallback);
   let phase = progress.phase || state.phase;
@@ -117,7 +124,7 @@ export function reportProgress(progress) {
   if (state.pairStep && Number.isFinite(percent))
     percent = (state.pairStep === "main" ? 50 : 0) + percent / 2;
   if (state.pairStep === "companion" && phase === "Complete") phase = "Saving";
-  setDownloadState(
+  return setDownloadState(
     progress.tabId,
     {
       phase,
@@ -143,13 +150,8 @@ export async function downloadFile({ url, filename, saveAs = false }) {
 // because in Chrome the file is saved from a separate document.
 const downloadFolders = new Map();
 
-export const COMPANION_SUFFIX = ".webcam"; // Verbatim pairs "<title>.webcam.mp4" with "<title>.mp4"
-
 export function saveFile(url, title, extension) {
-  // Shortening a long title must not cut the suffix off: it pairs the webcam with the slides.
-  const companion = title.endsWith(COMPANION_SUFFIX);
-  const base = sanitizeFilename(companion ? title.slice(0, -COMPANION_SUFFIX.length) : title);
-  const name = `${base}${companion ? COMPANION_SUFFIX : ""}.${extension}`;
+  const name = downloadFilename(title, extension);
   const folder = downloadFolders.get(title);
   return downloadFile({ url, filename: folder ? `${folder}/${name}` : name, saveAs: false });
 }
@@ -243,7 +245,7 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
   });
 
   const { downloadsToVerbatim } = await loadSettings();
-  const folder = downloadsToVerbatim ? verbatimFolder(state.context?.code) : null;
+  const folder = downloadsToVerbatim && SUPPORTS_FOLDERS ? verbatimFolder(state.context?.code) : null;
   // Two pictures: Verbatim puts them side by side, so only then the webcam too. It goes first: Verbatim waits
   // for "<title>.webcam.mp4" once "<title>.mp4" is there. Without Verbatim only the main picture (the slides).
   const companionUrl = folder ? knownCompanion : null;
