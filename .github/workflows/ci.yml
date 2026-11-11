@@ -8,9 +8,14 @@ on:
 permissions:
   contents: read
 
+# ubuntu-latest became 26.04 on 2026-11-01: no ffmpeg preinstalled, apt and Playwright's --with-deps hung there.
+# Pinned to 24.04; apt never asks questions.
+env:
+  DEBIAN_FRONTEND: noninteractive
+
 jobs:
   sequo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,14 +33,14 @@ jobs:
           path: _site
 
   hub:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: uv run --project apps/hub pytest apps/hub/tests -q
 
   velox:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: apps/velox
@@ -56,7 +61,7 @@ jobs:
       - run: npm run test:e2e
 
   verbatim:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: apps/verbatim
@@ -81,7 +86,7 @@ jobs:
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [sequo, hub]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write
