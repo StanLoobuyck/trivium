@@ -2,9 +2,7 @@
 
 _Last updated: 2 November 2026_
 
-Velox was called Velox; its code and settings still use that name.
-
-**In short: Velox collects no personal data and sends nothing to the developer or anyone else.** The only exception is a link with Sequo (Sequo) that you set up yourself. There are no accounts, no analytics and no tracking.
+**In short: Velox collects no personal data and sends nothing to the developer or anyone else.** The only exception is a link with Sequo that you set up yourself. There are no accounts, no analytics and no tracking.
 
 ## What Velox stores
 
@@ -27,7 +25,7 @@ Firefox, Zen and LibreWolf check `stanloobuyck.github.io` for new versions now a
 
 ## Link with Sequo (optional)
 
-Off by default. If you link Velox with an Sequo address, Velox hands that page the course code, title, page address and date of the recordings you watch, your position, and the names of your downloads. That happens inside your browser, in the page you linked. If that Sequo uses your own hub, it syncs from there like the rest of your Sequo data.
+Off by default. If you link Velox with a Sequo address, Velox hands that page the course code, title, page address and date of the recordings you watch, your position, and the names of your downloads. That happens inside your browser, in the page you linked. If that Sequo uses your own hub, it syncs from there like the rest of your Sequo data.
 
 ## Permissions
 

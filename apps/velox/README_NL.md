@@ -1,7 +1,5 @@
 # Velox — handleiding
 
-_Velox heette vroeger Velox; bestanden en instellingen gebruiken die naam nog._
-
 Velox maakt lesopnames in Toledo (Kaltura) aangenamer om te bekijken:
 
 - **Sneltoetsen** om te springen, pauzeren, sneller/trager af te spelen, het volume te regelen … — ook zonder eerst in de speler te klikken

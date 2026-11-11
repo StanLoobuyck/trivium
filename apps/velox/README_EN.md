@@ -1,7 +1,5 @@
 # Velox — guide
 
-_Velox used to be called Velox; files and settings still use that name._
-
 Velox makes Toledo (Kaltura) lecture recordings nicer to watch:
 
 - **Keyboard shortcuts** to skip, pause, speed up/slow down, change the volume … — even without clicking in the player first
