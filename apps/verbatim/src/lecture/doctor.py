@@ -79,7 +79,7 @@ def check_config() -> Iterator[Check]:
         return
     try:
         courses = cfg.load_courses()
-        yield Check("courses.yaml", "ok", f"{len(courses)} courses ({cfg.courses_file()})")
+        yield Check("courses.yaml", "ok", f"{len(courses)} courses ({cfg.courses_file() or 'none yet'})")
     except Exception as exc:  # noqa: BLE001
         yield Check("courses.yaml", "fail", str(exc))
     yield Check("jobs dir", "info", str(conf.paths.jobs_dir))

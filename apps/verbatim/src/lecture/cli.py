@@ -481,6 +481,17 @@ def ui(
     serve(port, browser=not no_browser)
 
 
+@app.command("setup-simple")
+def setup_simple(
+    folder: Path = typer.Argument(..., help="Folder for the lectures (jobs and inbox go inside)."),
+) -> None:
+    """Set up simple mode for a new user (run by the Windows installer)."""
+    from .settings import setup_simple as run
+
+    run(folder)
+    typer.echo(f"Simple mode set up; lectures in {folder}")
+
+
 @app.command("app")
 def app_command(
     port: int = typer.Option(7861, "--port", help="Local port (the UI only listens on 127.0.0.1)."),

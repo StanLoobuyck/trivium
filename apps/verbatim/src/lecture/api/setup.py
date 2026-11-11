@@ -99,6 +99,7 @@ def setup():
     return {
         "app_name": "Lecture Transcriber",
         "simple": conf.app.simple,
+        "welcomed": conf.app.welcomed,
         "termfix": {"enabled": conf.termfix.enabled and not conf.app.simple, "model": conf.termfix.model, "ok": tf_ok, "detail": tf_detail},
         "stt": {"mode": mode, "local_available": local_ok, "gpu_ok": gpu_ok, "gpu": gpu_text,
                 "local_label": stt_label("local", conf), "cloud_label": stt_label("groq", conf),
@@ -157,6 +158,22 @@ def set_outputs(body: Outputs):
 def set_key(body: KeyIn):
     from .. import settings
     return _apply(settings.set_key, body.name, body.value)
+
+
+@router.post("/api/setup/key/test")
+def test_key(body: KeyIn):
+    """Welcome steps: try the key with the service and save it when it works."""
+    from .. import settings
+    try:
+        return settings.test_key(body.name, body.value)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
+
+
+@router.post("/api/setup/welcome-done")
+def welcome_done():
+    from .. import settings
+    return _apply(settings.finish_welcome)
 
 
 @router.post("/api/courses")

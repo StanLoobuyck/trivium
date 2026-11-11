@@ -143,7 +143,7 @@ def save_course(course: dict[str, Any]) -> Course:
                         if k.strip() and v.strip() and k.strip().lower() != v.strip().lower()}
     model = Course.model_validate(c)
     path = _user_courses_path()
-    data = _read(path) if path.exists() else _read(cfgmod.courses_file())
+    data = _read(path) if path.exists() else _read(cfgmod.courses_file() or path)
     courses = [x for x in data.get("courses", []) if x.get("id") != model.id]
     courses.append(model.model_dump(exclude_none=True))
     _write_validated(path, {"courses": courses}, cfgmod.load_courses)
@@ -179,7 +179,7 @@ def import_courses(found: list[dict]) -> dict[str, int]:
 
 def delete_course(course_id: str) -> None:
     path = _user_courses_path()
-    data = _read(path) if path.exists() else _read(cfgmod.courses_file())
+    data = _read(path) if path.exists() else _read(cfgmod.courses_file() or path)
     courses = [x for x in data.get("courses", []) if x.get("id") != course_id]
     if len(courses) == len(data.get("courses", [])):
         raise KeyError(course_id)
@@ -246,3 +246,56 @@ def local_whisper_available() -> bool:
         return importlib.util.find_spec("faster_whisper") is not None and shutil.which("nvidia-smi") is not None
     except Exception:  # noqa: BLE001
         return False
+
+
+# --- welcome steps (simple mode) ---------------------------------------------------------------------------
+
+KEY_TESTS = {
+    "groq": ("https://api.groq.com/openai/v1/models", lambda key: {"Authorization": f"Bearer {key}"}),
+    "gemini": ("https://generativelanguage.googleapis.com/v1beta/models", lambda key: {"x-goog-api-key": key}),
+}
+
+
+def test_key(name: str, value: str, client: Any = None) -> dict[str, Any]:
+    """Does the service accept this key? Lists the models (free, uses no quota). Saves the key when it works.
+
+    reason: ok · format (doesn't look like a key) · rejected · location (Gemini not offered here) · offline · error
+    """
+    import httpx
+
+    if name not in KEY_TESTS:
+        raise ValueError(f"no test for {name!r}")
+    value = value.strip()
+    if not re.fullmatch(r"[A-Za-z0-9_\-.]{10,200}", value):
+        return {"ok": False, "reason": "format"}
+    url, headers = KEY_TESTS[name]
+    try:
+        r = (client or httpx).get(url, headers=headers(value), timeout=20)
+    except httpx.HTTPError:
+        return {"ok": False, "reason": "offline"}
+    if r.status_code == 200:
+        set_key(name, value)
+        return {"ok": True, "reason": "ok"}
+    text = r.text.lower()
+    if "location is not supported" in text or "user location" in text:
+        return {"ok": False, "reason": "location"}
+    if r.status_code in (400, 401, 403):
+        return {"ok": False, "reason": "rejected"}
+    return {"ok": False, "reason": "error", "detail": f"HTTP {r.status_code}"}
+
+
+def finish_welcome() -> None:
+    update_settings({"app": {"welcomed": True}})
+
+
+def setup_simple(folder: Path) -> None:
+    """Simple mode for a new user (the Windows installer runs `lecture setup-simple`): no Mac, hub or LaTeX;
+    Groq first with local Whisper as fallback; lectures in `folder`. Written to settings.yaml, so a second run
+    (an update) only changes these keys and keeps the keys, courses and welcome state."""
+    folder = folder.expanduser().resolve()
+    update_settings({
+        "app": {"simple": True},
+        "paths": {"jobs_dir": str(folder / "jobs"), "inbox_dir": str(folder / "inbox")},
+        "stt": {"providers": ["groq", "local"], "local": {"skip_on_battery": False}},
+        "termfix": {"enabled": False},
+    })

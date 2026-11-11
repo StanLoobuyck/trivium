@@ -380,3 +380,28 @@ body.share-app { min-height: 100dvh; background: var(--bg); }
 #share-body .group-title { margin-top: var(--space-5); }
 #share-body > .group-title:first-child { margin-top: 0; }
 .share-row .row-main { flex: 1 1 12rem; min-width: 0; }
+
+/* Welcome steps (simple mode, first start): no sidebar or tab bar, one centred column. */
+body[data-page="welcome"] .sidebar, body[data-page="welcome"] .tabbar, body[data-page="welcome"] .fab { display: none; }
+body[data-page="welcome"] #shell { display: block; }
+/* Fills the screen below the page padding, so Back/Next sit at the bottom, under the thumb. */
+.welcome { max-width: 520px; margin: 0 auto; padding: var(--space-4) 0 env(safe-area-inset-bottom); box-sizing: border-box;
+  display: flex; flex-direction: column; gap: var(--space-5); min-height: calc(100dvh - var(--space-6) - var(--space-12)); }
+.welcome-body { display: flex; flex-direction: column; gap: var(--space-4); }
+.welcome-lead { color: var(--text-2); margin: 0; }
+.welcome-dots { display: flex; gap: var(--space-2); justify-content: center; }
+.welcome-dots span { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--fill); }
+.welcome-dots span.on { background: var(--accent); }
+.welcome-steps { margin: 0; padding-left: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4); }
+.welcome-steps li > span { display: block; margin-bottom: var(--space-2); }
+.welcome-key { display: flex; gap: var(--space-2); margin-top: var(--space-1); }
+.welcome-key input { flex: 1; min-width: 0; }
+.welcome-status { min-height: 1.4em; margin: var(--space-2) 0 0; }
+.welcome-warn p { margin: 0 0 var(--space-3); }
+.welcome-ways .row { width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.welcome-ways .row .sub { display: block; }
+.welcome-ways .row-main, .welcome-ways .row-main span { white-space: normal; overflow: visible; text-overflow: clip; }
+.welcome-nav { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); margin-top: auto; }
+.welcome-nav-end { display: flex; gap: var(--space-2); }
+/* Laptop: a centred column with the buttons right under the content, no stretching to the bottom. */
+@media (min-width: 900px) { .welcome { min-height: 0; padding-top: 8vh; } .welcome-nav { margin-top: var(--space-4); } }

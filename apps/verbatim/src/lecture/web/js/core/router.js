@@ -6,6 +6,7 @@ import { renderArchive } from "../screens/archive.js";
 import { renderDashboard, renderProgress } from "../screens/dashboard.js";
 import { renderLecture } from "../screens/lecture.js";
 import { renderSetup } from "../screens/setup.js";
+import { renderWelcome } from "../screens/welcome.js";
 
 export async function route() {
   stopPoll();
@@ -17,6 +18,7 @@ export async function route() {
   setBarTitle();
   document.getElementById("bar-actions").innerHTML = "";
   if (page === "lecture" && arg) { ensureSideData(); return renderLecture(decodeURIComponent(arg), tab); }
+  if (page === "welcome") return renderWelcome();
   if (page === "setup") { ensureSideData(); return renderSetup(); }
   if (page === "add") { ensureSideData(); return renderAdd(); }
   if (page === "archive") { ensureSideData(); return renderArchive(); }

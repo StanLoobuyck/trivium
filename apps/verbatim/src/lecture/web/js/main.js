@@ -18,6 +18,11 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenus
 setLang(LANG);
 translateStatic();
 try { S.courses = await api("/api/courses"); } catch { S.courses = []; }
+// First start in simple mode (Windows installer): the welcome steps first.
+try {
+  const setup = await api("/api/setup");
+  if (setup.simple && !setup.welcomed && !location.hash.startsWith("#/welcome")) history.replaceState(null, "", "#/welcome");
+} catch { /* the library shows what's wrong */ }
 route();
 watchBarEdge();
 

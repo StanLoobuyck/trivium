@@ -284,6 +284,7 @@ class HubConfig(_Strict):
 class AppConfig(_Strict):
     # Simple mode (Windows installer, users without the Mac/hub): hides the Mac, hub, sharing and LaTeX parts
     simple: bool = False
+    welcomed: bool = False  # the welcome steps (simple mode) were finished or skipped
 
 
 class Config(_Strict):
@@ -379,13 +380,18 @@ def load_config() -> Config:
     return Config.model_validate(data)
 
 
-def courses_file() -> Path:
+def courses_file() -> Path | None:
+    """The user's courses.yaml, else the repo's example list. Simple mode (a new user) starts empty: None."""
     user = config_dir() / "courses.yaml"
-    return user if user.exists() else REPO_DIR / "courses.yaml"
+    if user.exists():
+        return user
+    return None if load_config().app.simple else REPO_DIR / "courses.yaml"
 
 
 def load_courses() -> list[Course]:
     path = courses_file()
+    if path is None:
+        return []
     courses = [Course.model_validate(c) for c in _read_yaml(path).get("courses", [])]
     ids = [c.id for c in courses]
     dupes = {i for i in ids if ids.count(i) > 1}
