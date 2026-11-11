@@ -2,15 +2,16 @@
 
 _Nederlands: [README_NL.md](README_NL.md)_
 
-> **Experimental.** Verbatim works for its developer every day, but installing it takes some Linux experience and
-> it changes often. Expect rough edges.
+> **Experimental.** Verbatim works for its developer every day and changes often. Expect rough edges.
+> **Windows:** a normal installer, no technical knowledge needed: see the [guide and download](https://stanloobuyck.github.io/trivium/verbatim/).
 
 Turns lecture recordings (MP4, often hundreds of MB) plus optional slides (PDF/PPTX) into a slide-aligned
 transcript, subtitles and study notes. Transcription runs **locally on an NVIDIA GPU** (faster-whisper large-v3),
 with Groq's free Whisper API or your own model server as fallback. Notes are written by Claude (`claude -p` on your
 own Claude subscription) with Gemini as fallback; LaTeX lecture notes by Claude through Claude Code.
 
-- **Runs on:** Linux (developed on Arch), best with an NVIDIA GPU. Without a GPU it needs a Groq key.
+- **Runs on:** Windows 10/11 ([installer](https://stanloobuyck.github.io/trivium/verbatim/): Groq first, the laptop's own CPU or NVIDIA GPU as fallback, a
+  simple mode without the Mac, hub, sharing and LaTeX parts) and Linux (developed on Arch), best with an NVIDIA GPU.
 - **Works with:** [Velox](../velox/README.md) saves Toledo recordings and slides in `~/Downloads/Verbatim/<course code>/`, which Verbatim picks up;
   [Sequo](../sequo/README_EN.md) shows a badge on a lecture once its notes are ready.
 - **Privacy:** recordings and slides stay on your computer; audio or text only goes to a service you set up yourself.
@@ -150,6 +151,21 @@ EEA, Google's Gemini API terms apply the paid-service data terms to free quota t
 to improve Google's products; human review isn't explicitly excluded). Check KU Leuven's rules on
 uploading recordings to third-party services, and keep in mind that questions from the room contain
 other students' voices. Original video and slide files never leave your computer.
+
+## Windows
+
+For users: the [guide and download](https://stanloobuyck.github.io/trivium/verbatim/). The installer (`packaging/windows/`, Inno Setup) is small: it brings
+uv, ffmpeg and Verbatim's source, and `uv sync` fetches Python 3.12 and the libraries once at the end of the install
+(`whisper-cpu` extra, or `local` with an NVIDIA GPU). It asks for a lectures folder and the local Whisper model
+(accurate: large-v3-turbo, or fast: small), then runs `lecture setup-simple`. The shortcuts start
+`pythonw -m lecture.cli app`: UI and worker in one process with a tray icon; without a console, output goes to
+`<cache>/app.log`. New versions: a banner with one click (`updates.py`, GitHub releases `verbatim-v…`).
+
+- Build on Windows: `pwsh packaging/windows/build.ps1` → `dist/Verbatim-Setup-<version>.exe`
+- CI (`verbatim-installer`) installs it on a clean machine and checks settings, ffmpeg, local Whisper, the app,
+  updating over the published version (`test-upgrade.ps1`) and uninstalling.
+- Release: bump `version` in `pyproject.toml`, then `git tag -a verbatim-v<version> -m "notes"` and push the tag;
+  `.github/workflows/verbatim-release.yml` builds, tests and publishes it.
 
 ## Development
 

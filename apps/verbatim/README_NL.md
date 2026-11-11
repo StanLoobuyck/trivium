@@ -2,16 +2,22 @@
 
 _English: [README.md](README.md) (met alle technische details)_
 
-> **Experimenteel.** Verbatim wordt elke dag gebruikt door de maker, maar installeren vraagt wat Linux-ervaring en
-> er verandert nog veel. Verwacht ruwe randjes.
+> **Experimenteel.** Verbatim wordt elke dag gebruikt door de maker en er verandert nog veel. Verwacht ruwe randjes.
+> **Windows:** een gewone installer, geen technische kennis nodig: zie de [handleiding en download](https://stanloobuyck.github.io/trivium/verbatim/).
 
 Verbatim maakt van een lesopname (MP4) en de slides (PDF of PPTX) een transcript per slide, ondertitels en
 studienotities. Uitschrijven gebeurt **lokaal op je NVIDIA-GPU** (faster-whisper large-v3). Notities schrijft Claude
 via je eigen Claude-abonnement, met Gemini als reserve. Op vraag maakt Verbatim ook LaTeX-lesnotities per vak.
 
-- **Werkt op:** Linux (gemaakt op Arch), best met een NVIDIA-GPU. Zonder GPU heb je een gratis Groq-sleutel nodig.
+- **Werkt op:** Windows 10/11 ([installer](https://stanloobuyck.github.io/trivium/verbatim/): eerst Groq, als reserve de processor of NVIDIA-GPU van je
+  laptop) en Linux (gemaakt op Arch), best met een NVIDIA-GPU. Zonder GPU heb je een gratis Groq-sleutel nodig.
 - **Samen met [Velox](../velox/README_NL.md):** Velox bewaart Toledo-opnames en slides meteen in de inbox van
   Verbatim. **Met [Sequo](../sequo/README.md):** een les krijgt daar een badge zodra haar notities klaar zijn.
+
+## Installeren (Windows)
+
+Download de installer via de [handleiding](https://stanloobuyck.github.io/trivium/verbatim/) en volg de stappen daar. Verbatim kijkt zelf of er een nieuwe
+versie is en toont dan een knop **Bijwerken**.
 
 ## Installeren (Arch Linux)
 
