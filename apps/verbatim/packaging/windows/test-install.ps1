@@ -59,7 +59,13 @@ try {
     Start-Sleep 1
     try { $s = Invoke-RestMethod "http://127.0.0.1:7871/api/setup"; $ok = $true } catch {}
   }
-  if (-not $ok) { throw "the app didn't answer" }
+  if (-not $ok) {
+    $log = Join-Path $env:USERPROFILE ".cache\lecture-transcriber\app.log"
+    if (Test-Path $log) { Get-Content $log -Tail 60 } else { Write-Host "no app.log" }
+    throw "the app didn't answer"
+  }
+  $log = Join-Path $env:USERPROFILE ".cache\lecture-transcriber\app.log"
+  if (-not (Test-Path $log)) { throw "no app.log written" }
   if (-not $s.simple -or $s.welcomed -or -not $s.worker) { throw "unexpected state: $($s | ConvertTo-Json -Depth 2 -Compress)" }
   $page = Invoke-WebRequest "http://127.0.0.1:7871/" -UseBasicParsing
   if ($page.Content -notmatch "<title>Verbatim</title>") { throw "no Verbatim page" }

@@ -49,9 +49,33 @@ def _tray(port: int, quit_app):
     return pystray.Icon("verbatim", image, APP_NAME, menu)
 
 
+LOG_MAX_BYTES = 5_000_000
+
+
+def log_to_file_without_console():
+    """Started without a console (pythonw.exe: the Windows shortcut), Python has no stdout/stderr at all and
+    uvicorn's logging fails before the server starts. Then everything goes to <cache>/app.log (the file to ask
+    for when something goes wrong). Returns its path, or None when there is a console."""
+    import sys
+
+    if sys.stdout is not None and sys.stderr is not None:
+        return None
+    from . import config as cfgmod
+
+    path = cfgmod.cache_dir() / "app.log"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = "w" if path.exists() and path.stat().st_size > LOG_MAX_BYTES else "a"
+    log = open(path, mode, encoding="utf-8", errors="replace", buffering=1)  # noqa: SIM115 — lives as long as the app
+    sys.stdout = sys.stdout or log
+    sys.stderr = sys.stderr or log
+    print(f"--- Verbatim app started {time.strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
+    return path
+
+
 def run(port: int = 7861, browser: bool = True) -> None:
     from . import oscompat
 
+    log_to_file_without_console()
     oscompat.prepare_windows_app()
     if ui.already_running(port):
         if browser:

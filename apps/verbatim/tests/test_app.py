@@ -72,3 +72,20 @@ def test_already_running_recognises_the_running_ui(xdg, monkeypatch):
     assert not app.ui.already_running(port)
     app.run(port, browser=False)
     assert seen == [True]
+
+
+def test_without_a_console_output_goes_to_a_log(xdg, monkeypatch):
+    import sys
+
+    monkeypatch.setattr(sys, "stdout", None)
+    monkeypatch.setattr(sys, "stderr", None)
+    path = app.log_to_file_without_console()
+    print("hello from pythonw")
+    sys.stderr.write("an error\n")
+    assert path.name == "app.log"
+    text = path.read_text(encoding="utf-8")
+    assert "Verbatim app started" in text and "hello from pythonw" in text and "an error" in text
+
+
+def test_with_a_console_nothing_changes(monkeypatch):
+    assert app.log_to_file_without_console() is None
