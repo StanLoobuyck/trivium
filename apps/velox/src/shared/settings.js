@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS = {
   preferredSpeed: 1,
   resumePlayback: true,
   downloadsToVerbatim: false,
+  downloadsToVerbatimChosen: false, // the user set it: Velox no longer turns it on by itself
   shortcuts: normalizeShortcuts(null),
 };
 
@@ -39,6 +40,7 @@ export function normalizeSettings(stored = {}) {
     preferredSpeed: speed >= 0.25 && speed <= 4 ? speed : d.preferredSpeed,
     resumePlayback: bool(stored.resumePlayback, d.resumePlayback),
     downloadsToVerbatim: bool(stored.downloadsToVerbatim, d.downloadsToVerbatim),
+    downloadsToVerbatimChosen: bool(stored.downloadsToVerbatimChosen, d.downloadsToVerbatimChosen),
     shortcuts: stored.shortcuts
       ? normalizeShortcuts(stored.shortcuts)
       : migrateLegacyKeybinds(stored.keybinds), // ≤ 3.2 stored "keybinds"

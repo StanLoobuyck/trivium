@@ -100,7 +100,7 @@ $("enabled").addEventListener("change", (e) => saveSettings({ enabled: e.target.
 $("remember-speed").addEventListener("change", (e) => saveSettings({ rememberSpeed: e.target.checked }));
 $("resume").addEventListener("change", (e) => saveSettings({ resumePlayback: e.target.checked }));
 $("downloads-verbatim").addEventListener("change", (e) =>
-  saveSettings({ downloadsToVerbatim: e.target.checked }),
+  saveSettings({ downloadsToVerbatim: e.target.checked, downloadsToVerbatimChosen: true }),
 );
 $("forget-positions").addEventListener("click", async () => {
   await clearResumePositions();

@@ -13,7 +13,8 @@ import {
 import { SUPPORTS_FOLDERS } from "../shared/features.js";
 import { normalizeSequoUrl, verbatimFolder } from "../shared/sequo.js";
 import { isSlideUrl, slideFilename } from "../shared/slides.js";
-import { loadSettings, markSlideSaved } from "../shared/storage.js";
+import { loadSettings, markSlideSaved, saveSettings } from "../shared/storage.js";
+import { autoVerbatim } from "../shared/verbatim.js";
 import { forgetDelivered, reportToSequo } from "./sequo.js";
 import { ext } from "../shared/ext.js";
 import { describeError } from "../shared/errors.js";
@@ -244,8 +245,9 @@ async function startLectureDownload({ tabId, url, title, jobId }, runDownload) {
     phase: "Preparing",
   });
 
-  const { downloadsToVerbatim } = await loadSettings();
-  const folder = downloadsToVerbatim && SUPPORTS_FOLDERS ? verbatimFolder(state.context?.code) : null;
+  const downloadsToVerbatim =
+    SUPPORTS_FOLDERS && (await autoVerbatim(await loadSettings(), saveSettings, undefined, loadSettings));
+  const folder = downloadsToVerbatim ? verbatimFolder(state.context?.code) : null;
   // Two pictures: Verbatim puts them side by side, so only then the webcam too. It goes first: Verbatim waits
   // for "<title>.webcam.mp4" once "<title>.mp4" is there. Without Verbatim only the main picture (the slides).
   const companionUrl = folder ? knownCompanion : null;
@@ -440,6 +442,11 @@ export function startBackground({ runDownload, cancelDownload, extraHandlers = {
   });
 
   startSiteManagement();
+  // Verbatim already running when the browser starts: its slide buttons show from the first lecture on.
+  if (SUPPORTS_FOLDERS)
+    loadSettings()
+      .then((s) => autoVerbatim(s, saveSettings, undefined, loadSettings))
+      .catch(() => {});
   if (__DEV_RELOAD__) devReloadTestPages();
 
   // First install: a short welcome (not for dev builds, which "install" on

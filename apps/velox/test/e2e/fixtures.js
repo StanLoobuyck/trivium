@@ -32,6 +32,11 @@ export const test = base.extend({
 
   serviceWorker: async ({ context }, use) => {
     const sw = context.serviceWorkers()[0] || (await context.waitForEvent("serviceworker"));
+    // Same start everywhere: "downloads to Verbatim" off as if the user chose so, also when a real Verbatim
+    // runs on this computer (Velox would switch it on by itself). verbatim-auto.spec.js undoes this.
+    await sw.evaluate(() =>
+      chrome.storage.sync.set({ downloadsToVerbatim: false, downloadsToVerbatimChosen: true }),
+    );
     await use(sw);
   },
 
