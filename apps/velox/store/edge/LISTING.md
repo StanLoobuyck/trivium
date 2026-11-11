@@ -89,3 +89,37 @@ Permissions:
   and resume positions. scripting, activeTab: running on sites the user enabled.
 
 Velox makes no network requests of its own except fetching the recording the user asks to download.
+
+## Privacy (Partner Center → Privacy)
+
+**Single purpose description**
+
+Velox makes lecture recordings in Kaltura video players (mainly Toledo, KU Leuven's learning platform) easier to watch: keyboard shortcuts, continuing where you stopped, remembering the playback speed, and downloading the recording as an MP4 file.
+
+**activeTab**
+
+When the user opens the Velox popup on a site where Velox isn't enabled yet, Velox reads the current tab's address to offer "Enable on <site>" for that one site. It isn't used to read page content.
+
+**storage**
+
+Stores the user's settings (on/off, skip interval, speed steps, custom shortcuts, last playback speed) and resume positions (a lecture's ID and the time where the user stopped) in the browser's own extension storage. Nothing is sent anywhere.
+
+**scripting**
+
+When the user enables Velox on an extra site from the popup, Velox registers its content script for that one site (scripting.registerContentScripts), so the shortcuts work there. Without it, Velox only runs on the built-in lecture sites.
+
+**downloads**
+
+Saves the recording the user chose to download as an .mp4 file in their Downloads folder, with a clear name (course – lecture – date). Only started by the user's click.
+
+**offscreen**
+
+A recording is streamed as many small HLS segments. An offscreen document joins them into one MP4 file, because the MV3 service worker can't create the blob URL needed to save it. Only used while a download the user started is running.
+
+**Host permissions**
+
+kuleuven.be, kuleuven.cloud, kaltura.com: the Toledo lecture pages and the Kaltura player, where Velox adds its shortcuts and download button. 127.0.0.1 and localhost: Verbatim, the developer's companion app that runs on the user's own computer (port 7861; Velox stays off on every other port). https://*.ts.net/share/*: lecture pages that Verbatim users share from their own computer. Access to other sites is optional and only requested when the user clicks "Enable on <site>" in the popup, for that one site.
+
+**Remote code:** No. All scripts are in the package.
+
+**Data usage:** none of the categories; Velox collects no user data.
