@@ -74,6 +74,15 @@ try {
   Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 }
 
+Write-Host "== install.log, and the NVIDIA build (the installer picks it when nvidia-smi exists)"
+if (-not (Select-String -Path (Join-Path $app "install.log") -Pattern "< exit 0" -Quiet)) { throw "no install.log with the steps" }
+$t = Get-Date
+& (Join-Path $app "uv.exe") sync --frozen --no-dev --python-preference only-managed --project (Join-Path $app "verbatim") --extra local
+if ($LASTEXITCODE -ne 0) { throw "the CUDA build doesn't install on Windows" }
+& $py -c "import ctranslate2, nvidia.cublas, nvidia.cudnn; from lecture.providers.local_whisper import preload_cuda_libraries; print('ok: CUDA build installed,', preload_cuda_libraries())"
+if ($LASTEXITCODE -ne 0) { throw "the CUDA build doesn't import" }
+Write-Host "in $([math]::Round(((Get-Date) - $t).TotalSeconds)) s"
+
 Write-Host "== uninstall keeps the lectures folder"
 New-Item -ItemType Directory -Force $lectures | Out-Null
 $un = Start-Process (Join-Path $app "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES" -Wait -PassThru

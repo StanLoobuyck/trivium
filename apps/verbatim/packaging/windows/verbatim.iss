@@ -50,6 +50,7 @@ nl.Downloading=Python en de onderdelen van Verbatim downloaden (eenmalig, enkele
 nl.Configuring=Verbatim instellen…
 nl.StartWithWindows=Start Verbatim met Windows (in het systeemvak, rechtsonder)
 nl.OpenNow=Verbatim nu openen
+nl.Failed=Verbatim kon niet volledig geïnstalleerd worden. Kijk of je internet hebt en probeer opnieuw. Lukt het niet, stuur dan dit bestand door:%n%n%1
 en.LecturesTitle=Where should your lectures go?
 en.LecturesDesc=Transcripts, subtitles and notes are saved in this folder.
 en.LecturesPrompt=Choose a folder (you can open it in Explorer any time):
@@ -62,6 +63,7 @@ en.Downloading=Downloading Python and Verbatim's parts (once, a few minutes)…
 en.Configuring=Setting up Verbatim…
 en.StartWithWindows=Start Verbatim with Windows (in the notification area, bottom right)
 en.OpenNow=Open Verbatim now
+en.Failed=Verbatim couldn't be installed completely. Check your internet connection and try again. If it still fails, send this file:%n%n%1
 
 [Tasks]
 Name: "autostart"; Description: "{cm:StartWithWindows}"
@@ -82,8 +84,7 @@ Name: "{userprograms}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw
 Name: "{userstartup}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app --no-browser"; WorkingDir: "{app}\verbatim"; IconFilename: "{app}\verbatim.ico"; Tasks: autostart
 
 [Run]
-Filename: "{app}\uv.exe"; Parameters: "sync --frozen --no-dev --python-preference only-managed --project ""{app}\verbatim"" --extra {code:WhisperExtra}"; StatusMsg: "{cm:Downloading}"; Flags: runhidden waituntilterminated
-Filename: "{app}\verbatim\.venv\Scripts\python.exe"; Parameters: "-m lecture.cli setup-simple ""{code:LecturesDir}"" --whisper {code:WhisperChoice}"; WorkingDir: "{app}\verbatim"; StatusMsg: "{cm:Configuring}"; Flags: runhidden waituntilterminated
+; uv sync and setup-simple run in CurStepChanged (below): their output goes to {app}\install.log and a failure stops here.
 Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; Description: "{cm:OpenNow}"; Flags: postinstall nowait skipifsilent
 ; An update from inside Verbatim (/RELAUNCH=1): open it again once the new version is in place
 Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; Flags: nowait; Check: IsRelaunch
@@ -145,3 +146,50 @@ begin
   else
     Result := 'whisper-cpu';
 end;
+
+procedure ExitProcess(uExitCode: Integer); external 'ExitProcess@kernel32.dll stdcall';
+
+{ Runs a program hidden, with its output appended to install.log. True when it exits with 0. }
+function RunLogged(const Exe, Params, Status: String): Boolean;
+var
+  Code: Integer;
+  Log: String;
+begin
+  Log := ExpandConstant('{app}\install.log');
+  WizardForm.StatusLabel.Caption := Status;
+  SaveStringToFile(Log, #13#10 + '> ' + Exe + ' ' + Params + #13#10, True);
+  Result := Exec(ExpandConstant('{cmd}'), '/S /C ""' + Exe + '" ' + Params + ' >> "' + Log + '" 2>&1"', '',
+    SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
+  SaveStringToFile(Log, '< exit ' + IntToStr(Code) + #13#10, True);
+end;
+
+function Sync(const Extra: String): Boolean;
+begin
+  Result := RunLogged(ExpandConstant('{app}\uv.exe'), 'sync --frozen --no-dev --python-preference only-managed --project "'
+    + ExpandConstant('{app}\verbatim') + '" --extra ' + Extra, CustomMessage('Downloading'));
+end;
+
+procedure Fail;
+begin
+  SuppressibleMsgBox(FmtMessage(CustomMessage('Failed'), [ExpandConstant('{app}\install.log')]), mbCriticalError, MB_OK, IDOK);
+  ExitProcess(2);
+end;
+
+{ After the files are copied: the environment (Python + libraries), then the settings. With an NVIDIA GPU the CUDA
+  build first; when that fails (e.g. a download of 1.5 GB breaking off) the light CPU build still works. }
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  Ok: Boolean;
+begin
+  if CurStep <> ssPostInstall then
+    exit;
+  Ok := Sync(WhisperExtra(''));
+  if (not Ok) and (WhisperExtra('') = 'local') then
+    Ok := Sync('whisper-cpu');
+  if not Ok then
+    Fail;
+  if not RunLogged(ExpandConstant('{app}\verbatim\.venv\Scripts\python.exe'), '-m lecture.cli setup-simple "'
+      + LecturesDir('') + '" --whisper ' + WhisperChoice(''), CustomMessage('Configuring')) then
+    Fail;
+end;
+
