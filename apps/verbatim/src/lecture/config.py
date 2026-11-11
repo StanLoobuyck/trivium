@@ -281,7 +281,13 @@ class HubConfig(_Strict):
     url: str = ""  # your own Sequo hub; empty = Verbatim works alone
 
 
+class AppConfig(_Strict):
+    # Simple mode (Windows installer, users without the Mac/hub): hides the Mac, hub, sharing and LaTeX parts
+    simple: bool = False
+
+
 class Config(_Strict):
+    app: AppConfig = Field(default_factory=AppConfig)
     hub: HubConfig = Field(default_factory=HubConfig)
     models: list[ModelEntry] = Field(default_factory=list)
     archive: ArchiveConfig = Field(default_factory=ArchiveConfig)

@@ -12,9 +12,9 @@ let moveMedia = true;
 
 export async function renderArchive() {
   view.innerHTML = `<h1 class="large-title">${t("arch_title")}</h1>
-    <p class="card sub">${t("arch_sub")}</p>
+    <p class="card sub">${t(S.setup?.simple ? "arch_sub_simple" : "arch_sub")}</p>
     <section id="arch-progress"></section><section id="arch-body"></section>
-    <p class="muted small">${t("arch_originals")}</p>`;
+    ${S.setup?.simple ? "" : `<p class="muted small">${t("arch_originals")}</p>`}`;
   await refresh();
   poll(refresh, 3000);
 }
@@ -81,8 +81,8 @@ function drawBody(sem, busy) {
       <div class="arch-sem-head">
         <h2>${esc(fmtSem(s.name))}${s.current ? ` <span class="muted" style="font-weight:400">· ${t("arch_current")}</span>` : ""}</h2>
         <div class="arch-actions">
-          ${active.length ? `<label class="arch-cb"><input type="checkbox" data-media-cb ${moveMedia ? "checked" : ""}> ${t("arch_move_media_cb")}</label>
-            <button class="btn btn-small" data-arch-sem="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_sem")}</button>` : ""}
+          ${active.length && !S.setup?.simple ? `<label class="arch-cb"><input type="checkbox" data-media-cb ${moveMedia ? "checked" : ""}> ${t("arch_move_media_cb")}</label>
+            ` : ""}${active.length ? `<button class="btn btn-small" data-arch-sem="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_sem")}</button>` : ""}
           ${archived.length ? `<button class="btn btn-small btn-plain" data-back="${esc(s.name)}" ${busy ? "disabled" : ""}>${t("arch_back")}</button>` : ""}
         </div>
       </div>
@@ -102,7 +102,7 @@ function drawBody(sem, busy) {
     const s = sem.semesters.find((x) => x.name === b.dataset.archSem);
     const active = s.courses.filter((c) => !c.archived);
     for (const c of active) await setCourseArchived(c.id, true);
-    if (moveMedia) await post("/api/archive/move", { jobs: active.flatMap((c) => c.lectures.map((l) => l.id)) });
+    if (moveMedia && !S.setup?.simple) await post("/api/archive/move", { jobs: active.flatMap((c) => c.lectures.map((l) => l.id)) });
   })));
   $$("[data-back]").forEach((b) => b.addEventListener("click", () => act(async () => {
     const s = sem.semesters.find((x) => x.name === b.dataset.back);

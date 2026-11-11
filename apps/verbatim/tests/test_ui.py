@@ -335,3 +335,15 @@ def test_share_settings_without_a_hub(env):
     client = env[0]
     assert client.get("/api/share").json()["hub"] is False
     assert client.post("/api/share/codes", headers=W, json={"name": "Jan", "courses": ["nope"]}).status_code == 400
+
+
+def test_simple_mode_hides_latex(env):
+    client, _, _, job = env
+    (job / "sections.json").write_text("{}")
+    assert client.get("/api/setup").json()["simple"] is False
+    assert client.get(f"/api/lectures/{job.name}").json()["can_latex"] is True
+    conf = job.parents[1] / "xdg-config"
+    path = next(conf.rglob("config.yaml"))
+    path.write_text(path.read_text() + "app:\n  simple: true\n")
+    assert client.get("/api/setup").json()["simple"] is True
+    assert client.get(f"/api/lectures/{job.name}").json()["can_latex"] is False

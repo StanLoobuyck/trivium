@@ -48,7 +48,7 @@ export async function renderSetup(refresh = false) {
         <h2>${t("s_courses")}</h2><div class="list" id="course-list"></div>
       </section>
 `,
-    links: () => `      <section class="setup-section">
+    links: () => `${s.simple ? "" : `      <section class="setup-section">
         <h2>${t("s_mac")}</h2><div class="list"><div class="key-row">
           <span><b>${t("mac_url")}</b></span>
           <input type="text" id="mac-url" value="${esc(s.mac.url || "")}" placeholder="http://macbook-pro:7862" autocomplete="off" spellcheck="false">
@@ -75,7 +75,7 @@ export async function renderSetup(refresh = false) {
         </div></div>
         <div><button class="btn btn-small" id="hub-import" ${s.hub.url && s.hub.code ? "" : "disabled"}>${t("hub_import")}</button></div>
         <p class="muted small" id="hub-result" aria-live="polite"></p>
-      </section>
+      </section>`}
       <section class="setup-section">
         <h2>${t("s_keys")}</h2><div class="list">${[["groq", "Groq", "https://console.groq.com/keys"], ["gemini", "Gemini", "https://aistudio.google.com/apikey"]].map(([k, label, url]) => `
           <div class="key-row">
@@ -86,7 +86,7 @@ export async function renderSetup(refresh = false) {
           </div>`).join("")}</div>
       </section>
 `,
-    share: shareSectionHtml,
+    ...(s.simple ? {} : { share: shareSectionHtml }),
     general: () => `      <section class="setup-section">
         <h2>${t("s_outputs")}</h2><div class="list">${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
           <label class="row toggle-row"><span class="row-text"><b>${t("o_" + k)}</b><span class="sub">${t("o_" + k + "_d")}</span></span>
@@ -116,6 +116,7 @@ export async function renderSetup(refresh = false) {
       </section>
 `,
   };
+  if (!tabs[tab]) tab = "models";
   view.innerHTML = `
     <h1 class="large-title">${t("setup_title")}</h1>
     <div class="segmented settings-tabs" role="group" aria-label="${t("setup_title")}">
@@ -180,9 +181,9 @@ function drawCourses() {
         <option value="">${esc(t("c_sem_auto", { sem: S.sem?.courses[c.id] && !c.semester ? fmtSem(S.sem.courses[c.id].semester) : "…" }))}</option>
         ${semesterChoices(c.semester).map((x) => `<option value="${x}" ${x === c.semester ? "selected" : ""}>${esc(fmtSem(x))}</option>`).join("")}
       </select></label>
-      <label class="form-field">${t("c_latex")}<select id="cf-latex">
+      ${S.setup?.simple ? "" : `<label class="form-field">${t("c_latex")}<select id="cf-latex">
         <option value="next" ${!c.notes_without_slides ? "selected" : ""}>${t("c_latex_next")}</option>
-        <option value="alone" ${c.notes_without_slides ? "selected" : ""}>${t("c_latex_alone")}</option></select></label>
+        <option value="alone" ${c.notes_without_slides ? "selected" : ""}>${t("c_latex_alone")}</option></select></label>`}
       <label class="form-field wide">${t("c_terms")}<input type="text" id="cf-terms" value="${esc((c.extra_terms || []).join(", "))}"></label>
       <label class="form-field wide">${t("c_fixes")}<textarea id="cf-fixes" rows="3" placeholder="nent = NAND">${esc(Object.entries(c.corrections || {}).map(([a, b]) => `${a} = ${b}`).join("\n"))}</textarea></label>
       <div class="row-end"><button class="btn btn-small" id="cf-cancel">${t("cancel")}</button><button class="btn btn-small btn-primary" id="cf-save">${t("c_save")}</button></div>
@@ -211,7 +212,7 @@ function drawCourses() {
       // a chosen semester decides archiving again (archived: automatic), so "2026-27 S1" puts it in your list
       semester: $("#cf-sem").value || null, archived: ($("#cf-sem").value || null) !== (old.semester || null) ? null : old.archived ?? null,
       extra_terms: $("#cf-terms").value.split(",").map((x) => x.trim()).filter(Boolean),
-      notes_without_slides: $("#cf-latex").value === "alone",
+      notes_without_slides: $("#cf-latex") ? $("#cf-latex").value === "alone" : !!old.notes_without_slides,
       corrections: fixes };
     if (!body.name) return;
     try { await post("/api/courses", body); toast(t("saved")); editingCourse = null; S.courses = await api("/api/courses"); drawCourses(); }

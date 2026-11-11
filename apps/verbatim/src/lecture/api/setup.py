@@ -98,7 +98,8 @@ def setup():
     tf_ok, tf_detail = termfix_status(conf)
     return {
         "app_name": "Lecture Transcriber",
-        "termfix": {"enabled": conf.termfix.enabled, "model": conf.termfix.model, "ok": tf_ok, "detail": tf_detail},
+        "simple": conf.app.simple,
+        "termfix": {"enabled": conf.termfix.enabled and not conf.app.simple, "model": conf.termfix.model, "ok": tf_ok, "detail": tf_detail},
         "stt": {"mode": mode, "local_available": local_ok, "gpu_ok": gpu_ok, "gpu": gpu_text,
                 "local_label": stt_label("local", conf), "cloud_label": stt_label("groq", conf),
                 "mac_label": stt_label("mac", conf), "mac_ok": mac_ok, "mac_detail": mac_detail,

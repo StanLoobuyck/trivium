@@ -481,5 +481,16 @@ def ui(
     serve(port, browser=not no_browser)
 
 
+@app.command("app")
+def app_command(
+    port: int = typer.Option(7861, "--port", help="Local port (the UI only listens on 127.0.0.1)."),
+    no_browser: bool = typer.Option(False, "--no-browser", help="Don't open a browser tab."),
+) -> None:
+    """Verbatim as one program: UI + worker in this process, with a tray icon (Windows, macOS)."""
+    from .app import run
+
+    run(port, browser=not no_browser)
+
+
 if __name__ == "__main__":  # `python -m lecture.cli …` (the UI starts the worker this way)
     app()

@@ -370,7 +370,7 @@ def suggestions(job_root: Path, conf: Config, rep: QueueReporter) -> None:
     from .job import Job
     from .providers.mac_whisper import MacUnavailable
 
-    if not conf.termfix.enabled:
+    if not conf.termfix.enabled or conf.app.simple:  # simple mode: no Mac to ask
         return
     try:
         pipeline.run_termfix(Job(job_root), conf, rep)

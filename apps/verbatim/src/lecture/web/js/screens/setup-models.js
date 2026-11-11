@@ -3,7 +3,7 @@
 import { api, post } from "../core/api.js";
 import { $, $$ } from "../core/dom.js";
 import { esc } from "../core/format.js";
-import { reason } from "../core/state.js";
+import { S, reason } from "../core/state.js";
 import { toast } from "../core/ui.js";
 
 const STT_PRESETS = ["mac", "groq"];
@@ -54,7 +54,7 @@ export function notesSectionHtml(s) {
 }
 
 function formHtml(kind) {
-  const presets = kind === "stt" ? STT_PRESETS : NOTES_PRESETS;
+  const presets = (kind === "stt" ? STT_PRESETS : NOTES_PRESETS).filter((p) => !(S.setup?.simple && p.includes("mac")));
   return `<form class="add-model panel" id="add-model" data-kind="${kind}">
     <h3>${t("m_add_title")}</h3>
     <div class="add-model-grid">

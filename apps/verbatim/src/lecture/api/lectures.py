@@ -74,7 +74,7 @@ def lecture(name: str):
             "sections_detail": sections["sections"] if sections else [],
             "slides_not_discussed": sections.get("slides_not_discussed", []) if sections else [],
             "notes": notes.model_dump() if notes else None, "review": review, "files": files,
-            "latex_pdf": bool(_latex_pdf(d)), "can_latex": (d / "sections.json").exists(),
+            "latex_pdf": bool(_latex_pdf(d)), "can_latex": (d / "sections.json").exists() and not cfgmod.load_config().app.simple,
             "media_available": bool(media and Path(media).is_file()),
             "media_on_mac": archive_status(d)["on_mac"],
             "media_name": Path(media).name if media else None,

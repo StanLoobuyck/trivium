@@ -20,7 +20,7 @@ def already_running(port: int) -> bool:
     import httpx
 
     try:
-        return "Lecture Transcriber" in httpx.get(url(port), timeout=2).text
+        return "<title>Verbatim</title>" in httpx.get(url(port), timeout=2).text
     except httpx.HTTPError:
         return False
 
