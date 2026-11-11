@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Literal
 
 from . import config as cfg
+from . import oscompat
 from .util import find_claude
 
 Status = Literal["ok", "warn", "fail", "info"]
@@ -149,7 +150,7 @@ def check_env_file() -> Iterator[Check]:
         yield Check(".env", "fail", f"{path} missing — run scripts/install.sh")
         return
     mode = stat.S_IMODE(path.stat().st_mode)
-    if mode & 0o077:
+    if mode & 0o077 and not oscompat.WINDOWS:  # Windows has no Unix modes; the user folder is private
         yield Check(".env", "warn", f"{path} is readable by others (mode {mode:o}) — run: chmod 600 {path}")
     else:
         yield Check(".env", "ok", str(path))

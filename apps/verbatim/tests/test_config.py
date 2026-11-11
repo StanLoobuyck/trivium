@@ -1,3 +1,4 @@
+import sys
 import os
 import stat
 
@@ -53,6 +54,7 @@ def test_keys_from_env_file_and_environment(xdg, monkeypatch):
                     "LECTURE_MAC_TOKEN": "", "LECTURE_HUB_CODE": ""}
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="no Unix file modes on Windows")
 def test_env_file_permissions(xdg):
     xdg.mkdir(parents=True)
     env = xdg / ".env"

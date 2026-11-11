@@ -1,5 +1,6 @@
 """End-to-end Phase 1 pipeline on synthetic audio with a fake Groq provider (offline, free)."""
 
+import sys
 import pytest
 
 from lecture import pipeline
@@ -331,6 +332,7 @@ def test_mac_drops_out_mid_lecture_rest_goes_to_next_provider(lecture_job, monke
     assert len(mac.calls) == 2 and len(local.calls) == n_chunks - 2   # nothing redone, nothing lost
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="reads Linux sysfs")
 def test_on_battery_the_laptop_gpu_is_last_resort(xdg, monkeypatch, tmp_path):
     from lecture.config import load_config
     from lecture.providers.local_whisper import LocalUnavailable

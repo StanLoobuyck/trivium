@@ -2,6 +2,9 @@
 
 import struct
 import subprocess
+import sys
+
+import pytest
 
 from lecture.player import ensure_player, player_path
 
@@ -55,6 +58,7 @@ def test_no_edit_list_and_old_copies_are_remade(tmp_path):
     assert ensure_player(job, src).read_bytes() != b"old copy"
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="VA-API (/dev/dri) is Linux-only")
 def test_sparse_keyframes_are_measured_and_only_the_worker_reencodes(tmp_path, monkeypatch):
     from pathlib import Path
 

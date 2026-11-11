@@ -1,6 +1,7 @@
 """Setup panel writes: settings.yaml layer, keys in .env, courses, folders."""
 
 import stat
+import sys
 
 import pytest
 
@@ -45,7 +46,7 @@ def test_keys_written_private_and_comments_kept(conf_dir):
     assert settings.key_status() == {"groq": False, "gemini": False, "mac": False, "hub": False}
     settings.set_key("gemini", "AIzaSyTESTKEY1234567890")
     assert settings.key_status() == {"groq": False, "gemini": True, "mac": False, "hub": False}
-    assert env.read_text().startswith("# keys") and stat.S_IMODE(env.stat().st_mode) == 0o600
+    assert env.read_text().startswith("# keys") and (sys.platform == "win32" or stat.S_IMODE(env.stat().st_mode) == 0o600)
     with pytest.raises(ValueError):
         settings.set_key("gemini", "not a key; rm -rf")
 

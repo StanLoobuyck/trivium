@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import json
 from datetime import date
 
@@ -52,6 +53,7 @@ def job(xdg, tmp_path):
     return root, upload
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="archiving to the Mac over ssh is Linux-only")
 def test_move_verifies_then_frees_space_and_restore_brings_it_back(job, tmp_path):
     root, upload = job
     remote = tmp_path / "mac-archive"
@@ -68,6 +70,7 @@ def test_move_verifies_then_frees_space_and_restore_brings_it_back(job, tmp_path
     assert (remote / root.name / "full.flac").exists()  # the remote copy stays as a backup
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="archiving to the Mac over ssh is Linux-only")
 def test_a_bad_copy_deletes_nothing(job, tmp_path, monkeypatch):
     root, upload = job
     monkeypatch.setattr(archive, "_remote_sha256", lambda remote, rel: "0" * 64)
@@ -77,6 +80,7 @@ def test_a_bad_copy_deletes_nothing(job, tmp_path, monkeypatch):
     assert "archive" not in json.loads((root / "manifest.json").read_text())
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="archiving to the Mac over ssh is Linux-only")
 def test_originals_outside_uploads_are_never_moved(job, tmp_path):
     root, _ = job
     original = tmp_path / "Videos" / "Recordings" / "les 6.mp4"

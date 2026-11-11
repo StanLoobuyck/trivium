@@ -103,7 +103,7 @@ def prompt(job_root: Path, work: Path, folder: Path, tex: Path, manifest: dict, 
     given = (f"Started from Verbatim. Lecture: {manifest.get('title')} ({manifest.get('date')}), "
              f"lecture number: {number if number else 'none: use the title'}. Job folder: {job_root}. "
              f"Work folder, already prepared: {work}. Course folder, already set up: {folder}. "
-             f"Lecture file to write: {tex.relative_to(folder)}. "
+             f"Lecture file to write: {tex.relative_to(folder).as_posix()}. "
              + ("Mode: without slides. " if without_slides else "Mode: next to the slides. ")
              + (f"main.pdf had {pages_before} pages before this lecture." if pages_before is not None else
                 "This lecture is being redone, so main.pdf already holds an older version: judge the page budget "
@@ -124,7 +124,7 @@ def stage_of(tool: str, tool_input: dict) -> str | None:
         return "latex_compile"
     if "crop.py" in command_line:
         return "latex_figures"
-    if tool in ("Write", "Edit") and "/lessen/" in str(tool_input.get("file_path", "")):
+    if tool in ("Write", "Edit") and "lessen" in Path(str(tool_input.get("file_path", ""))).parts[:-1]:
         return "latex_write"
     return "latex_read" if tool == "Read" else None
 

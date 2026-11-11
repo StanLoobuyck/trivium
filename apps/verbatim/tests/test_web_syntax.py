@@ -18,7 +18,7 @@ def test_js_parses(path):
     # ES modules (web/js/) need --input-type=module semantics: check them as .mjs via stdin
     is_module = "js" in path.relative_to(WEB).parts[:-1]
     cmd = ["node", "--check", "--input-type=module"] if is_module else ["node", "--check", str(path)]
-    r = subprocess.run(cmd, input=path.read_text() if is_module else None, capture_output=True, text=True)
+    r = subprocess.run(cmd, input=path.read_text(encoding="utf-8") if is_module else None, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
 
 
