@@ -16,7 +16,7 @@ export async function renderDashboard(sel = "") {
     <nav class="chips narrow-only" id="lib-chips" aria-label="${t("nav_courses")}"></nav>
     <div class="overview">
       <div class="overview-side flow"><section id="lib-hero"></section><section id="lib-busy"></section></div>
-      <div class="overview-main flow"><section class="stack-tight" id="lib-tools"></section><section id="lib-wrap"></section></div>
+      <div class="overview-main flow"><section id="lib-update"></section><section class="stack-tight" id="lib-tools"></section><section id="lib-wrap"></section></div>
       <div class="overview-extra flow" id="lib-actions"></div>
     </div>`;
   await refreshDashboard();
@@ -38,7 +38,43 @@ export async function refreshDashboard() {
   markSideLoaded();
   drawSidebar();
   if ($("#jobs-wrap")) drawJobs();
-  if ($("#lib-wrap")) { drawBusyLink(); drawLibrary(); }
+  if ($("#lib-wrap")) { drawUpdate(); drawBusyLink(); drawLibrary(); }
+}
+
+// --- update (Windows app) -------------------------------------------------------------------------------------
+
+let updating = false;
+
+function drawUpdate() {
+  const u = S.setup?.update;
+  const html = updating ? `<div class="banner" role="status"><span>${esc(t("upd_restarting"))}</span></div>`
+    : u ? `<div class="banner"><span>${esc(t("upd_ready", { version: u.version }))}</span>
+        <span class="banner-actions"><button class="btn btn-small btn-primary" id="upd-now">${esc(t("upd_now"))}</button></span></div>` : "";
+  if (!paint($("#lib-update"), html)) return;
+  $("#upd-now")?.addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    try {
+      await post("/api/update");
+    } catch (err) {
+      e.target.disabled = false;
+      toast(/busy/.test(err.message) ? t("upd_busy") : err.message, true);
+      return;
+    }
+    updating = true;
+    drawUpdate();
+    waitForRestart();
+  });
+}
+
+// The app quits, the installer puts the new version in place and starts it again: reload once it answers.
+function waitForRestart() {
+  let wentAway = false;
+  const timer = setInterval(async () => {
+    try {
+      await fetch("/api/today", { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(); });
+      if (wentAway) { clearInterval(timer); location.reload(); }
+    } catch { wentAway = true; }
+  }, 2000);
 }
 window.addEventListener("lt:folders", () => { if ($("#lib-wrap")) { $("#lib-wrap")._html = null; drawLibrary(); } });
 

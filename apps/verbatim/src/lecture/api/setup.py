@@ -56,6 +56,38 @@ def courses():
     return [c.model_dump() for c in cfgmod.load_courses()]
 
 
+def _update_info():
+    from .. import updates
+
+    if updates.install_dir() is None:
+        return None
+    new = updates.cached()
+    return {"current": updates.current_version(), "version": new["version"], "notes": new["notes"]} if new else None
+
+
+@router.post("/api/update")
+def update_now():
+    """Windows app: install the newer version and quit (the installer reopens Verbatim)."""
+    import os
+    import threading
+
+    from .. import updates
+
+    if updates.install_dir() is None:
+        raise HTTPException(400, "updates only apply to the Windows app")
+    if updates.busy(common.Queue().snapshot()):
+        raise HTTPException(409, "busy")
+    new = updates.cached()
+    if not new:
+        raise HTTPException(404, "no newer version")
+    try:
+        updates.start(cfgmod.load_config(), new)
+    except Exception as exc:  # noqa: BLE001 — offline, checksum, …: say why, keep running
+        raise HTTPException(502, f"update failed: {exc}") from None
+    threading.Timer(1.5, lambda: os._exit(0)).start()  # let this answer reach the page first
+    return {"ok": True, "version": new["version"]}
+
+
 @router.get("/api/setup")
 def setup():
     """Everything the Setup panel and the dashboard's tool strip show. Cheap checks only, no paid calls."""
@@ -101,6 +133,7 @@ def setup():
         "simple": conf.app.simple,
         "welcomed": conf.app.welcomed,
         "auto_notes": conf.app.auto_notes,
+        "update": _update_info(),
         "termfix": {"enabled": conf.termfix.enabled and not conf.app.simple, "model": conf.termfix.model, "ok": tf_ok, "detail": tf_detail},
         "stt": {"mode": mode, "local_available": local_ok, "gpu_ok": gpu_ok, "gpu": gpu_text,
                 "local_label": stt_label("local", conf), "cloud_label": stt_label("groq", conf),

@@ -32,6 +32,21 @@ def _worker(stop: threading.Event) -> None:
         stop.wait()
 
 
+def _check_updates(stop: threading.Event) -> None:
+    """The Windows app looks for a new version now and then (updates.check caches it for a day)."""
+    from . import updates
+
+    if updates.install_dir() is None:
+        return
+    told = set()
+    while not stop.is_set():
+        new = updates.check()
+        if new and new["version"] not in told:
+            told.add(new["version"])
+            notify.notify(APP_NAME, f"Version {new['version']} is ready: open Verbatim to update.")
+        stop.wait(6 * 3600)
+
+
 def _tray(port: int, quit_app):
     """The tray icon, or None when pystray (or a tray) isn't available."""
     try:
@@ -90,6 +105,7 @@ def run(port: int = 7861, browser: bool = True) -> None:
     server_thread.start()
     stop = threading.Event()
     threading.Thread(target=_worker, args=(stop,), name="worker", daemon=True).start()
+    threading.Thread(target=_check_updates, args=(stop,), name="updates", daemon=True).start()
 
     deadline = time.monotonic() + 15
     while not server.started and server_thread.is_alive() and time.monotonic() < deadline:

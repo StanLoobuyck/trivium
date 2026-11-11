@@ -66,6 +66,11 @@ en.OpenNow=Open Verbatim now
 [Tasks]
 Name: "autostart"; Description: "{cm:StartWithWindows}"
 
+[InstallDelete]
+; An update replaces Verbatim's code completely (files removed from Verbatim mustn't linger); .venv stays.
+Type: filesandordirs; Name: "{app}\verbatim\src"
+Type: filesandordirs; Name: "{app}\verbatim\prompts"
+
 [Files]
 Source: "{#StageDir}\uv.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#StageDir}\verbatim.ico"; DestDir: "{app}"; Flags: ignoreversion
@@ -80,6 +85,8 @@ Name: "{userstartup}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.
 Filename: "{app}\uv.exe"; Parameters: "sync --frozen --no-dev --python-preference only-managed --project ""{app}\verbatim"" --extra {code:WhisperExtra}"; StatusMsg: "{cm:Downloading}"; Flags: runhidden waituntilterminated
 Filename: "{app}\verbatim\.venv\Scripts\python.exe"; Parameters: "-m lecture.cli setup-simple ""{code:LecturesDir}"" --whisper {code:WhisperChoice}"; WorkingDir: "{app}\verbatim"; StatusMsg: "{cm:Configuring}"; Flags: runhidden waituntilterminated
 Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; Description: "{cm:OpenNow}"; Flags: postinstall nowait skipifsilent
+; An update from inside Verbatim (/RELAUNCH=1): open it again once the new version is in place
+Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; Flags: nowait; Check: IsRelaunch
 
 [UninstallDelete]
 ; The environment uv made (not in [Files]). Lectures, keys and settings stay: they are the user's.
@@ -110,6 +117,11 @@ begin
     WhisperPage.SelectedValueIndex := 1
   else
     WhisperPage.SelectedValueIndex := 0;
+end;
+
+function IsRelaunch: Boolean;
+begin
+  Result := ParamOr('RELAUNCH', '0') = '1';
 end;
 
 function LecturesDir(Param: String): String;
