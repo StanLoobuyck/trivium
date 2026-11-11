@@ -56,6 +56,12 @@ def courses():
     return [c.model_dump() for c in cfgmod.load_courses()]
 
 
+def _version() -> str:
+    from .. import updates
+
+    return updates.current_version()
+
+
 def _update_info():
     from .. import updates
 
@@ -130,6 +136,7 @@ def setup():
     tf_ok, tf_detail = termfix_status(conf)
     return {
         "app_name": "Lecture Transcriber",
+        "version": _version(),
         "simple": conf.app.simple,
         "welcomed": conf.app.welcomed,
         "auto_notes": conf.app.auto_notes,
