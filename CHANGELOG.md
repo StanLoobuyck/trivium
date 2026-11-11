@@ -1,8 +1,15 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Nieuw spoor: Verbatim voor Windows** (vriend, rechten, geen techneut, eigen laptop). Keuzes eigenaar: echte Windows-versie met installer; transcriberen met Groq (gratis sleutel), lokaal Whisper als terugval; notities optioneel met Gemini (overslaan mag). Fasen: **W1** code draait op Windows + CI (klaar) → **W2** welkomstscherm in de app (sleutels plakken + testknop, vakken, `Downloads/Verbatim`), worker zonder systemd (in het proces van de app) → **W3** installer (`.exe` uit CI, Python + ffmpeg mee, Startmenu, tray-icoon, meldingen; zonder certificaat één SmartScreen-waarschuwing) + korte Nederlandse handleiding → **W4** test op zijn laptop.
-2. **Volgende stap: W2.** Eerst vragen: map voor lessen op Windows (`Documenten\Verbatim`?), welke schermen hij ziet (Mac/hub/LaTeX/delen verbergen?), lokaal Whisper-model (grootte vs. snelheid op CPU) en of zijn laptop een NVIDIA-chip heeft.
+1. **Nieuw spoor: Verbatim voor Windows** (vriend, rechten, geen techneut, eigen laptop, ook Sequo). Keuzes eigenaar: echte Windows-versie met installer; transcriberen met Groq (gratis sleutel), lokaal Whisper als terugval; notities optioneel met Gemini; Mac-, hub-, LaTeX- en deelinstellingen verborgen; in de installer kiest hij zelf de map voor lessen en een van twee Whisper-modellen; Verbatim werkt samen met zijn Sequo (zonder hub). Fasen:
+   - **W1** code draait op Windows + CI — klaar (2026-11-11).
+   - **W2** app zonder systemd: één proces met UI + worker, tray-icoon, Windows-meldingen; eenvoudige modus verbergt Mac/hub/LaTeX/delen.
+   - **W3** welkomstscherm bij de eerste start: taal, Groq-sleutel (link, plakken, testknop), Gemini optioneel, vakken.
+   - **W4** Sequo ↔ Verbatim zonder hub: vakken uit Sequo in Verbatim, badge "notities klaar" in Sequo, rechtstreeks met de lokale Verbatim (127.0.0.1); eerst nagaan wat browsers toelaten.
+   - **W5** installer (`.exe` uit CI): map voor lessen en Whisper-model kiezen (snel/klein of nauwkeurig/groot; model downloadt bij eerste gebruik), Python + ffmpeg mee, Startmenu, start met Windows, verwijderen; zonder certificaat één SmartScreen-waarschuwing.
+   - **W6** updates in de app (melding + één klik, feed op de site zoals Velox) en een korte Nederlandse handleiding.
+   - **W7** test op zijn laptop (NVIDIA? de app ziet het zelf), fouten oplossen.
+2. **Volgende stap: W2.**
 3. **Velox in de Mac App Store** wacht nog op de vader: Admin-uitnodiging in App Store Connect + team-API-sleutel; bundel-id kiezen (nu tijdelijk `be.trivium.velox` in `safari-mac.sh`). Daarna bouwt en uploadt Claude ondertekend en schrijft teksten, schermafbeeldingen en privacylabels.
 4. **Wacht op eigenaar:** Mac-scherm terug met `~/velox-safari/resolution restore`; `~/inhaal-hub` en `.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden; vrienden de Trivium-link sturen.
 5. **Niet getest:** echte Velox-download in Firefox/Chrome met de nieuwe mp4; geluid; webcamles in Safari. Onafgewerkt: slidekoppeling bij gedeelde lessen; `design light` (Firefox) wisselvallig.
