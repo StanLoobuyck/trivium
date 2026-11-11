@@ -54,9 +54,11 @@
         <div class="app-head"><h2 class="title">Velox</h2><span class="micro">%%VELOX_VERSION%%</span></div>
         <p data-t="velox">Toledo-opnames aangenaam kijken: sneltoetsen, verdergaan waar je was, je snelheid onthouden en lessen downloaden als mp4.</p>
         <p class="label" data-t="velox_on">Browserextensie · Zen, Firefox, LibreWolf (updatet vanzelf) en Chrome, Edge, Brave</p>
-        <div class="app-actions">
-          <a class="btn btn-primary btn-small" href="%%VELOX_XPI%%" data-t="velox_ff">Firefox / Zen</a>
-          <a class="btn btn-small" href="%%VELOX_ZIP%%" data-t="velox_chrome">Chrome</a>
+        <p class="label" id="velox-chrome-note" data-t="velox_chrome_note" hidden>Chrome kan Velox niet met één klik installeren. Gebruik Edge (staat op elke Windows-laptop) of Firefox; in Chrome lukt het alleen via de ontwikkelaarsmodus.</p>
+        <div class="app-actions" id="velox-actions">
+          <a class="btn btn-small" id="velox-edge" href="#" data-t="velox_edge" hidden>Edge</a>
+          <a class="btn btn-primary btn-small" id="velox-ff" href="%%VELOX_XPI%%" data-t="velox_ff">Firefox / Zen</a>
+          <a class="btn btn-small" id="velox-zip" href="%%VELOX_ZIP%%" data-t="velox_chrome">Chrome</a>
           <a class="btn btn-plain btn-small" href="https://github.com/StanLoobuyck/trivium/blob/main/apps/velox/README_NL.md" data-href-en="https://github.com/StanLoobuyck/trivium/blob/main/apps/velox/README_EN.md" data-t="install">Installeren</a>
           <a class="btn btn-plain btn-small" href="./privacy/#velox">Privacy</a>
         </div>
@@ -84,7 +86,8 @@
         open: "Open",
         velox: "Watch Toledo recordings comfortably: keyboard shortcuts, continue where you left off, remember your speed and download lectures as mp4.",
         velox_on: "Browser extension · Zen, Firefox, LibreWolf (updates itself) and Chrome, Edge, Brave",
-        velox_ff: "Firefox / Zen", velox_chrome: "Chrome", install: "How to install",
+        velox_ff: "Firefox / Zen", velox_chrome: "Chrome", install: "How to install", velox_edge: "Edge",
+        velox_chrome_note: "Chrome can't install Velox with one click. Use Edge (on every Windows laptop) or Firefox; in Chrome it only works through developer mode.",
         experimental: "Experimental",
         verbatim: "From lecture recording and slides to a transcript per slide, subtitles and study notes.",
         verbatim_on: "Linux, ideally with an NVIDIA GPU · for those who like to install things themselves",
@@ -92,6 +95,20 @@
         foot: "Made by a student, independent of KU Leuven.", source: "Source code",
       },
     };
+    // Velox: the button for this browser first. EDGE_URL: the Edge Add-ons page, once Microsoft has approved Velox.
+    const EDGE_URL = "";
+    const ua = navigator.userAgent;
+    const browser = /Firefox\//.test(ua) ? "firefox" : /Edg\//.test(ua) ? "edge" : /Chrome\//.test(ua) ? "chromium" : "other";
+    const veloxBtn = (id) => document.getElementById(id);
+    if (EDGE_URL) {
+      veloxBtn("velox-edge").href = EDGE_URL;
+      veloxBtn("velox-edge").hidden = false;
+    }
+    // Chrome: no main button once Edge is in the store (the note explains); until then Firefox, as before
+    const first = browser === "edge" && EDGE_URL ? "velox-edge" : browser === "chromium" && EDGE_URL ? null : "velox-ff";
+    for (const id of ["velox-edge", "velox-ff", "velox-zip"]) veloxBtn(id).classList.toggle("btn-primary", id === first);
+    if (first) veloxBtn("velox-actions").prepend(veloxBtn(first));
+    veloxBtn("velox-chrome-note").hidden = !(browser === "chromium" && EDGE_URL); // "use Edge" only once it's in the store
     const nl = {};
     document.querySelectorAll("[data-t]").forEach((el) => { nl[el.dataset.t] = el.textContent; });
     document.querySelectorAll("[data-href-en]").forEach((el) => { el.dataset.hrefNl = el.getAttribute("href"); });
