@@ -1,12 +1,19 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Klaar:** Velox 5.4.0 uitgebracht (Safari-downloads, gewone mp4); eigenaar testte in Safari op de Mac via VNC ("works"); mp4 nagekeken met AVFoundation (120,0 s) en ffmpeg. Safari-app bouwt met versie 5.4.0, build 50400, macOS 12+ (`apps/velox/scripts/safari-mac.sh`, ongetekend). Getest: 107 Velox, 33 e2e, 145 root, lint schoon; CI-fout (testmedia ontbraken) hersteld.
-2. **Niet getest:** echte download in Firefox/Chrome met de nieuwe mp4; geluid; een les met webcam in Safari. Onafgewerkt: slidekoppeling bij gedeelde lessen; `design light` (Firefox) wisselvallig.
-3. **Volgende stap: Velox in de Mac App Store.** Vader maakt Stan **Admin** in App Store Connect (Users and Access → +); Stan maakt een **team-API-sleutel** (Integrations → Team Keys, rol Admin: `.p8` + Key ID + Issuer ID, op de Mac buiten de repo) en het app-record; Claude zet het bundel-id in `safari-mac.sh` (nu tijdelijk `be.trivium.velox`), bouwt ondertekend en uploadt met `xcodebuild -allowProvisioningUpdates`, en schrijft teksten, schermafbeeldingen en privacylabels ("Data Not Collected").
-4. **Wacht op eigenaar:** bundel-id kiezen met vader; uitnodiging + sleutel; Mac-scherm terug met `~/velox-safari/resolution restore` (of afmelden); `~/inhaal-hub` en `.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden; vrienden de Trivium-link sturen.
-5. **Wensen:** in Safari webcam en slides apart downloaden (met Velox alleen: alleen slides, zoals nu); wachtrij van Verbatim overdragen aan de Mac (meerdere sessies, eerst keuzes vragen).
-6. **Open:** notitiemodel in Verbatim (nu Gemini); ondertitels (grootte/positie); afspeelkopie EBS Les 6 (gefragmenteerde mp4). Niet te fixen: hoeken van de Velox-popup in Zen.
+1. **Nieuw spoor: Verbatim voor Windows** (vriend, rechten, geen techneut, eigen laptop). Keuzes eigenaar: echte Windows-versie met installer; transcriberen met Groq (gratis sleutel), lokaal Whisper als terugval; notities optioneel met Gemini (overslaan mag). Fasen: **W1** code draait op Windows + CI (klaar) → **W2** welkomstscherm in de app (sleutels plakken + testknop, vakken, `Downloads/Verbatim`), worker zonder systemd (in het proces van de app) → **W3** installer (`.exe` uit CI, Python + ffmpeg mee, Startmenu, tray-icoon, meldingen; zonder certificaat één SmartScreen-waarschuwing) + korte Nederlandse handleiding → **W4** test op zijn laptop.
+2. **Volgende stap: W2.** Eerst vragen: map voor lessen op Windows (`Documenten\Verbatim`?), welke schermen hij ziet (Mac/hub/LaTeX/delen verbergen?), lokaal Whisper-model (grootte vs. snelheid op CPU) en of zijn laptop een NVIDIA-chip heeft.
+3. **Velox in de Mac App Store** wacht nog op de vader: Admin-uitnodiging in App Store Connect + team-API-sleutel; bundel-id kiezen (nu tijdelijk `be.trivium.velox` in `safari-mac.sh`). Daarna bouwt en uploadt Claude ondertekend en schrijft teksten, schermafbeeldingen en privacylabels.
+4. **Wacht op eigenaar:** Mac-scherm terug met `~/velox-safari/resolution restore`; `~/inhaal-hub` en `.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden; vrienden de Trivium-link sturen.
+5. **Niet getest:** echte Velox-download in Firefox/Chrome met de nieuwe mp4; geluid; webcamles in Safari. Onafgewerkt: slidekoppeling bij gedeelde lessen; `design light` (Firefox) wisselvallig.
+6. **Wensen/open:** in Safari webcam en slides apart; wachtrij van Verbatim naar de Mac; notitiemodel (nu Gemini); ondertitels (grootte/positie); afspeelkopie EBS Les 6. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-11 — Verbatim W1: draait op Windows
+- Aanleiding: een vriend (rechten, Windows) wil Verbatim; delen helpt niet (andere vakken). Verbatim draaide alleen op Linux.
+- `oscompat.py`: bestandssloten (`fcntl` op Linux/macOS, `msvcrt` op Windows, blokkerend = opnieuw proberen), "leeft dit proces" (op Windows `OpenProcess`; `os.kill(pid, 0)` stuurt daar Ctrl+C), map/URL openen (`os.startfile`, `open`, `xdg-open`), losgekoppeld starten zonder consolevenster. Gebruikt in wachtrij, job, delen, quota, UI en API.
+- Tekst van subprocessen (ffmpeg, ffprobe, claude) altijd UTF-8 (Windows gebruikt anders cp1252); LaTeX-pad in de prompt met `/`, voortgang herkent `lessen` ook met `\`; `.env`-rechtencontrole niet op Windows.
+- CI: nieuwe job `verbatim-windows` (windows-latest, ffmpeg via choco). Eerste run 291/301, daarna 295 geslaagd + 6 overgeslagen (archiveren naar de Mac via ssh, VA-API, Linux-sysfs, Unix-rechten). Linux: 301 (4 nieuw voor sloten en processen), root 145.
+- Niet getest: op een echte Windows-laptop (alleen CI, geen GPU, geen UI). Worker en `lecture ui` op de laptop draaien nog de oude code; gedrag op Linux is ongewijzigd, herstart mag bij gelegenheid.
 
 ## 2026-11-09 — Velox in Safari, gewone mp4
 - Keuzes eigenaar: alleen macOS, via de Mac App Store onder het dev-account van zijn vader; downloaden eerst via de eenvoudige weg (Safari slaat op als gewone download).
