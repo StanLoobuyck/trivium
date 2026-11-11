@@ -10,7 +10,7 @@
    - **W6** updates in de app (melding + één klik, feed op de site zoals Velox) + korte Nederlandse handleiding.
    - **W7** test op zijn laptop, fouten oplossen.
    - **W8 (optioneel, later)** Sequo zonder hub.
-2. **Volgende stap: W4.** Wacht op eigenaar: gratis Microsoft Partner Center-account (Edge Add-ons, als individu). Ondertussen kan de knop per browser op de Trivium-pagina al.
+2. **Volgende stap: W4.** Partner Center-account met Edge-programma staat er (individu, 2026-11-11; verificatie nakijken). Volgende: Edge-pakket + winkeltekst klaarzetten, dan samen "Create new extension" invullen; knop per browser op de Trivium-pagina.
 3. **Velox in de Mac App Store** wacht nog op de vader: Admin-uitnodiging in App Store Connect + team-API-sleutel; bundel-id kiezen (nu tijdelijk `be.trivium.velox` in `safari-mac.sh`). Daarna bouwt en uploadt Claude ondertekend en schrijft teksten, schermafbeeldingen en privacylabels.
 4. **Wacht op eigenaar:** Mac-scherm terug met `~/velox-safari/resolution restore`; `~/inhaal-hub` en `.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden; vrienden de Trivium-link sturen.
 5. **Niet getest:** echte Velox-download in Firefox/Chrome met de nieuwe mp4; geluid; webcamles in Safari. Onafgewerkt: slidekoppeling bij gedeelde lessen; `design light` (Firefox) wisselvallig.
