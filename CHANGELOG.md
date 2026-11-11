@@ -4,17 +4,25 @@
 1. **Spoor: Verbatim voor Windows** (vriend, rechten, geen techneut, eigen laptop; gebruikt **Velox + Verbatim**, geen Sequo). Keuzes eigenaar: echte Windows-versie met installer; transcriberen met Groq (gratis sleutel), lokaal Whisper als terugval; notities optioneel met Gemini; Mac, hub, LaTeX en delen verborgen; in de installer kiest hij zelf de map voor lessen en een van twee Whisper-modellen. Fasen:
    - **W1** code draait op Windows + CI — klaar (2026-11-11).
    - **W2** `lecture app` (UI + worker in één proces, tray-icoon, meldingen via de tray) + eenvoudige modus (`app.simple`) — klaar (2026-11-11); tray nog niet op echte Windows gezien.
-   - **W3** welkomstscherm bij de eerste start: taal, Groq-sleutel (link, plakken, testknop), Gemini optioneel; nieuwe gebruiker begint met een **lege vakkenlijst** (nu krijgt hij de vakken uit de repo-`courses.yaml`); standaardketen `[groq, local]`.
-   - **W4** Velox → Verbatim op Windows: downloads in `Downloads\Verbatim\<vakcode>\` komen vanzelf binnen; een onbekende vakcode maakt zelf een vak aan (nu negeert de inbox die map).
+   - **W3** welkomstscherm (taal → Groq → Gemini → klaar), lege vakkenlijst, `lecture setup-simple <map>` — klaar (2026-11-11).
+   - **W4** Velox → Verbatim op Windows: downloads in `Downloads\Verbatim\<vakcode>\` komen vanzelf binnen; een onbekende vakcode maakt zelf een vak aan (nu negeert de inbox die map); notities voor Velox-downloads als hij Gemini heeft (inbox zet nu `notes: never`). **Velox in alle drie de browsers met één klik** (keuze eigenaar): Firefox kan al; **Chrome Web Store** (eigenaar: ontwikkelaarsaccount, eenmalig 5 dollar) en **Edge Add-ons** (eigenaar: Partner Center, gratis); Claude: pakketten uit CI, winkelteksten, privacyantwoorden, installknop per browser op de Trivium-pagina. Elke update daar: review van enkele dagen.
    - **W5** installer (`.exe` uit CI): map en Whisper-model kiezen (snel/klein of nauwkeurig/groot, eerst meten op Nederlands), Python + ffmpeg mee, Startmenu, start met Windows, verwijderen; zonder certificaat één SmartScreen-waarschuwing. Valkuil: in een bevroren build werkt `sys.executable -m lecture.cli worker` (knop "Start worker") niet.
    - **W6** updates in de app (melding + één klik, feed op de site zoals Velox) + korte Nederlandse handleiding.
    - **W7** test op zijn laptop, fouten oplossen.
    - **W8 (optioneel, later)** Sequo zonder hub.
-2. **Volgende stap: W3.**
+2. **Volgende stap: W4.** Wacht op eigenaar: Chrome Web Store-account (5 dollar) en Microsoft Partner Center-account (gratis).
 3. **Velox in de Mac App Store** wacht nog op de vader: Admin-uitnodiging in App Store Connect + team-API-sleutel; bundel-id kiezen (nu tijdelijk `be.trivium.velox` in `safari-mac.sh`). Daarna bouwt en uploadt Claude ondertekend en schrijft teksten, schermafbeeldingen en privacylabels.
 4. **Wacht op eigenaar:** Mac-scherm terug met `~/velox-safari/resolution restore`; `~/inhaal-hub` en `.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden; vrienden de Trivium-link sturen.
 5. **Niet getest:** echte Velox-download in Firefox/Chrome met de nieuwe mp4; geluid; webcamles in Safari. Onafgewerkt: slidekoppeling bij gedeelde lessen; `design light` (Firefox) wisselvallig.
 6. **Wensen/open:** in Safari webcam en slides apart; wachtrij van Verbatim naar de Mac; notitiemodel (nu Gemini); ondertitels (grootte/positie); afspeelkopie EBS Les 6. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-11 — Verbatim W3: welkomstscherm
+- Keuzes eigenaar: stappen, één per scherm; Groq overslaan mag met waarschuwing; geen vakkenstap (vakken komen van Velox of uit het uploadformulier).
+- `#/welcome` (`screens/welcome.js`), alleen in eenvoudige modus tot `app.welcomed`: ① taal ② Groq (knop naar de site, plakken, Test; overslaan → kalme uitleg "kan traag zijn" + "Toch overslaan") ③ Gemini optioneel ("Nu geen notities") ④ klaar: Velox (Trivium-pagina) of zelf een opname toevoegen. Geen zijbalk of tabbalk; op de gsm staan Terug/Volgende onderaan, op de laptop een kolom in het midden. Alle teksten NL + EN.
+- `POST /api/setup/key/test`: vraagt de modellenlijst (gratis, geen quota), bewaart de sleutel alleen als hij werkt; redenen: formaat (niet verstuurd), geweigerd, regio (Gemini), offline, fout. `POST /api/setup/welcome-done` → `settings.yaml`.
+- Nieuwe gebruiker in eenvoudige modus: geen vakken (was: de vakken uit de repo). `lecture setup-simple <map>` (voor de installer): eenvoudige modus, lessen in `<map>/jobs`, keten `[groq, local]`, lokaal ook op batterij, geen termcontrole; opnieuw draaien bewaart sleutels, vakken en welkomststatus.
+- Nagekeken in Chromium (375 en 1440 px, licht en donker, met minder beweging): doorverwijzing bij de eerste start, alle vier stappen, foute sleutel, overslaan, 0 px overloop, geen verticale scroll, geen consolefouten; afgewerkt → bibliotheek, en blijft bewaard. Twee fouten onderweg hersteld: stap knipperde bij elke hertekening (animatie nu alleen bij een nieuwe stap), rijen in stap 4 afgekapt op 375 px.
+- Getest: 315 Verbatim (10 nieuw), root 145. Niet getest: echte sleutels (alleen nep-antwoorden; een geldige Groq/Gemini-sleutel volgt bij W7).
 
 ## 2026-11-11 — Verbatim W2: één programma, eenvoudige modus
 - `lecture app`: webinterface (uvicorn in een thread) en worker in hetzelfde proces, tray-icoon met "Open Verbatim" en "Quit" (pystray + Pillow, alleen op Windows/macOS geïnstalleerd), meldingen via de tray (`notify.set_backend`). Draait er al een worker (systemd op Linux), dan alleen de UI. Zonder pystray loopt het tot Ctrl+C.
