@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <title>Verbatim voor Windows · Trivium</title>
+  <link rel="stylesheet" href="../design/tokens.css">
+  <link rel="stylesheet" href="../design/components.css">
+  <style>
+    /* alleen schikking en leesbaarheid; kleuren en maten komen uit packages/design */
+    .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .doc h2 { margin-top: var(--space-8); }
+    .doc p, .doc ol, .doc ul { margin: var(--space-2) 0 0; line-height: 1.45; }
+    .doc ol, .doc ul { padding-left: var(--space-5); }
+    .doc li + li { margin-top: var(--space-2); }
+    .doc .card { margin-top: var(--space-3); }
+    .doc a:not(.btn) { color: var(--accent-text); }
+    .download { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-4); }
+    kbd { font: inherit; font-weight: var(--weight-semibold); }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="head">
+      <a class="btn btn-plain btn-small" href="../">‹ Trivium</a>
+      <div class="segmented segmented-compact" role="group" aria-label="Taal / Language">
+        <button type="button" data-set-lang="nl" aria-pressed="true">NL</button>
+        <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </header>
+
+    <article class="doc" data-lang="nl">
+      <h1 class="large-title">Verbatim voor Windows</h1>
+      <p class="sub">Van lesopname naar transcript, ondertitels en (als je wil) notities. Gratis, je opnames blijven op je laptop.</p>
+      <div class="download">
+        <a class="btn btn-primary" data-download href="https://github.com/StanLoobuyck/trivium/releases?q=verbatim">Download voor Windows</a>
+        <span class="label" data-download-info>Windows 10 of 11, 64-bit · ongeveer 100 MB, daarna nog een paar honderd MB eenmalig</span>
+      </div>
+
+      <h2 class="title">1. Installeren</h2>
+      <ol>
+        <li>Open het gedownloade bestand <b>Verbatim-Setup</b>.</li>
+        <li>Windows zegt misschien <i>"Windows heeft uw pc beschermd"</i>. Dat komt omdat Verbatim gratis is en geen betaald certificaat heeft. Klik op <kbd>Meer info</kbd> en dan op <kbd>Toch uitvoeren</kbd>.</li>
+        <li>Kies waar je lessen komen (standaard <i>Documenten\Verbatim</i>) en laat <b>Nauwkeurig</b> aangevinkt.</li>
+        <li>Klik op <kbd>Installeren</kbd>. Het downloadt nog een paar minuten; daarna opent Verbatim in je browser.</li>
+      </ol>
+
+      <h2 class="title">2. Instellen (één keer)</h2>
+      <ol>
+        <li>Verbatim vraagt een <b>Groq-sleutel</b>: klik op <kbd>Open Groq</kbd>, maak een gratis account, klik op <i>Create API Key</i>, kopieer de sleutel en plak hem in Verbatim. <kbd>Test</kbd> zegt of hij werkt.</li>
+        <li>Notities (samenvatting, examentips, flashcards) zijn optioneel: daarvoor vraagt Verbatim een gratis <b>Gemini-sleutel</b> van Google. Gebruik een persoonlijk Google-account, geen KU Leuven-account.</li>
+      </ol>
+
+      <h2 class="title">3. Lessen downloaden met Velox</h2>
+      <ol>
+        <li>Installeer <a href="../">Velox</a> in <b>Edge</b> of <b>Firefox</b>.</li>
+        <li>Klik op het Velox-icoon → <kbd>Instellingen</kbd> en zet <b>Downloads naar Verbatim</b> aan.</li>
+        <li>Open een les op Toledo en klik op <kbd>Downloaden</kbd>. De les komt vanzelf in Verbatim, met het juiste vak. Je krijgt een melding als het transcript klaar is.</li>
+      </ol>
+      <p>Een opname die je al hebt? Klik in Verbatim op <kbd>Opnames toevoegen</kbd>.</p>
+
+      <h2 class="title">Goed om te weten</h2>
+      <ul>
+        <li><b>Verbatim terugvinden:</b> het icoon rechtsonder (bij de klok) → <i>Open Verbatim</i>, of in het Startmenu.</li>
+        <li><b>Nieuwe versie:</b> Verbatim toont dan bovenaan <kbd>Bijwerken</kbd>. Eén klik; je lessen en instellingen blijven.</li>
+        <li><b>Zonder internet</b> of als Groq vol zit (8 uur audio per dag), zet je laptop de les zelf om. Dat duurt langer: ongeveer een half uur tot een uur voor een les van 2 uur.</li>
+        <li><b>Iets werkt niet?</b> Stuur het bestand <i>app.log</i> door. Je vindt het door <code>%USERPROFILE%\.cache\lecture-transcriber</code> te plakken in de adresbalk van Verkenner.</li>
+        <li><b>Verwijderen:</b> Windows-instellingen → Apps → Verbatim. Je lessen blijven staan.</li>
+        <li><a href="../privacy/#verbatim">Privacy</a>: wat naar Groq en Google gaat, en wat niet.</li>
+      </ul>
+    </article>
+
+    <article class="doc" data-lang="en" hidden>
+      <h1 class="large-title">Verbatim for Windows</h1>
+      <p class="sub">From lecture recording to transcript, subtitles and (if you like) notes. Free, your recordings stay on your laptop.</p>
+      <div class="download">
+        <a class="btn btn-primary" data-download href="https://github.com/StanLoobuyck/trivium/releases?q=verbatim">Download for Windows</a>
+        <span class="label" data-download-info>Windows 10 or 11, 64-bit · about 100 MB, then a few hundred MB once</span>
+      </div>
+
+      <h2 class="title">1. Install</h2>
+      <ol>
+        <li>Open the downloaded file <b>Verbatim-Setup</b>.</li>
+        <li>Windows may say <i>"Windows protected your PC"</i>. That's because Verbatim is free and has no paid certificate. Click <kbd>More info</kbd>, then <kbd>Run anyway</kbd>.</li>
+        <li>Choose where your lectures go (by default <i>Documents\Verbatim</i>) and keep <b>Accurate</b> selected.</li>
+        <li>Click <kbd>Install</kbd>. It downloads for a few more minutes; then Verbatim opens in your browser.</li>
+      </ol>
+
+      <h2 class="title">2. Set up (once)</h2>
+      <ol>
+        <li>Verbatim asks for a <b>Groq key</b>: click <kbd>Open Groq</kbd>, make a free account, click <i>Create API Key</i>, copy the key and paste it into Verbatim. <kbd>Test</kbd> tells you whether it works.</li>
+        <li>Notes (summary, exam tips, flashcards) are optional: for those Verbatim asks for a free <b>Gemini key</b> from Google. Use a personal Google account, not a KU Leuven one.</li>
+      </ol>
+
+      <h2 class="title">3. Download lectures with Velox</h2>
+      <ol>
+        <li>Install <a href="../">Velox</a> in <b>Edge</b> or <b>Firefox</b>.</li>
+        <li>Click the Velox icon → <kbd>Settings</kbd> and turn on <b>Downloads to Verbatim</b>.</li>
+        <li>Open a lecture on Toledo and click <kbd>Download</kbd>. It lands in Verbatim by itself, under the right course. You get a notification when the transcript is ready.</li>
+      </ol>
+      <p>A recording you already have? Click <kbd>Add recordings</kbd> in Verbatim.</p>
+
+      <h2 class="title">Good to know</h2>
+      <ul>
+        <li><b>Finding Verbatim:</b> the icon bottom right (by the clock) → <i>Open Verbatim</i>, or in the Start menu.</li>
+        <li><b>New version:</b> Verbatim shows <kbd>Update</kbd> at the top. One click; your lectures and settings stay.</li>
+        <li><b>Without internet</b>, or when Groq is full (8 hours of audio a day), your laptop transcribes the lecture itself. That takes longer: about half an hour to an hour for a 2-hour lecture.</li>
+        <li><b>Something wrong?</b> Send the file <i>app.log</i>. Find it by pasting <code>%USERPROFILE%\.cache\lecture-transcriber</code> into Explorer's address bar.</li>
+        <li><b>Uninstall:</b> Windows Settings → Apps → Verbatim. Your lectures stay.</li>
+        <li><a href="../privacy/#verbatim">Privacy</a>: what goes to Groq and Google, and what doesn't.</li>
+      </ul>
+    </article>
+  </main>
+  <script type="module">
+    import { initLang } from "../lang.js";
+    initLang();
+    // The newest Windows installer (release verbatim-v…); without an answer the buttons keep the releases page.
+    try {
+      const releases = await (await fetch("https://api.github.com/repos/StanLoobuyck/trivium/releases?per_page=30")).json();
+      const exe = releases.filter((r) => /^verbatim-v/.test(r.tag_name) && !r.draft && !r.prerelease)
+        .flatMap((r) => r.assets.filter((a) => /^Verbatim-Setup-[\d.]+\.exe$/.test(a.name)).map((a) => ({ r, a })))[0];
+      if (exe) {
+        const mb = Math.round(exe.a.size / 1e6);
+        document.querySelectorAll("[data-download]").forEach((a) => { a.href = exe.a.browser_download_url; });
+        document.querySelectorAll("[data-download-info]").forEach((el) => {
+          el.textContent = el.closest("[data-lang]").dataset.lang === "en"
+            ? `Version ${exe.r.tag_name.slice(10)} · Windows 10 or 11, 64-bit · ${mb} MB, then a few hundred MB once`
+            : `Versie ${exe.r.tag_name.slice(10)} · Windows 10 of 11, 64-bit · ${mb} MB, daarna nog een paar honderd MB eenmalig`;
+        });
+      }
+    } catch { /* offline or rate-limited: the releases page */ }
+  </script>
+</body>
+</html>

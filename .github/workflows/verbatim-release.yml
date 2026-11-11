@@ -1,0 +1,41 @@
+name: Verbatim release
+
+# A tag verbatim-v<version> (same version as apps/verbatim/pyproject.toml): build the Windows installer, install
+# and try it on a clean machine, then publish it as a GitHub release. The Windows app finds it there (updates.py).
+# The release notes are the tag's message: git tag -a verbatim-v0.2.0 -m "What changed".
+
+on:
+  push:
+    tags: ["verbatim-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/verbatim
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag matches pyproject.toml
+        run: |
+          $tag = "${{ github.ref_name }}".Substring("verbatim-v".Length)
+          $version = (Select-String -Path pyproject.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+          if ($tag -ne $version) { throw "tag $tag but pyproject.toml says $version" }
+      - run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+      - run: ./packaging/windows/build.ps1
+      - run: ./packaging/windows/test-install.ps1
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -l --format='%(contents)' "${{ github.ref_name }}" | Out-File -Encoding utf8 notes.md
+          $exe = (Get-ChildItem dist -Filter "Verbatim-Setup-*.exe" | Select-Object -First 1).FullName
+          # Not "Latest": that stays with Velox (its Firefox updates point there).
+          $title = "Verbatim " + "${{ github.ref_name }}".Substring("verbatim-v".Length)
+          gh release create "${{ github.ref_name }}" $exe --title $title --notes-file notes.md --latest=false
