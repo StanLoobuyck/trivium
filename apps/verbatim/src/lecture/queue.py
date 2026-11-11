@@ -13,7 +13,6 @@ Status flow: queued → transcribing → transcribed → notes → done
 
 from __future__ import annotations
 
-import fcntl
 import shutil
 import os
 import threading
@@ -27,7 +26,7 @@ from typing import Any
 
 from . import config as cfgmod
 from .config import Config
-from . import hub, share
+from . import hub, oscompat, share
 from .notify import notify
 from .providers.claude_cli import schedule_allows
 from .util import read_json, write_json
@@ -54,13 +53,13 @@ class Queue:
     def _locked(self) -> Iterator[dict[str, Any]]:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.with_suffix(".lock").open("w") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            oscompat.lock(lock)
             try:
                 state = read_json(self.path) if self.path.exists() else {"items": [], "notes_paused": False}
                 yield state
                 write_json(self.path, state)
             finally:
-                fcntl.flock(lock, fcntl.LOCK_UN)
+                oscompat.unlock(lock)
 
     def snapshot(self) -> dict[str, Any]:
         with self._locked() as state:
@@ -270,15 +269,7 @@ class QueueReporter:
 
 
 def _pid_alive(pid: int) -> bool:
-    if pid <= 0:
-        return False
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-    except PermissionError:
-        return True
-    return True
+    return oscompat.pid_alive(pid)
 
 
 class WorkerRunning(RuntimeError):
@@ -291,13 +282,13 @@ def worker_lock() -> Iterator[None]:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as fh:
         try:
-            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            oscompat.lock(fh, blocking=False)
         except BlockingIOError:
             raise WorkerRunning("a lecture worker is already running") from None
         try:
             yield
         finally:
-            fcntl.flock(fh, fcntl.LOCK_UN)
+            oscompat.unlock(fh)
 
 
 def worker_running() -> bool:

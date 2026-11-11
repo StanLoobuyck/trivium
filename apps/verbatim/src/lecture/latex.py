@@ -164,7 +164,7 @@ def prepare(job_root: Path, work: Path) -> None:
     if not uv:
         raise LatexFailed("uv not found")
     done = subprocess.run([uv, "run", str(SKILL_DIR / "scripts" / "prepare.py"), "--job", str(job_root),
-                           "--out", str(work)], capture_output=True, text=True)
+                           "--out", str(work)], capture_output=True, text=True, encoding="utf-8", errors="replace")
     if done.returncode:
         raise LatexFailed(f"prepare.py: {done.stderr.strip()[-300:]}")
 
@@ -188,7 +188,7 @@ def run(job_root: Path, conf: Config, rep: Reporter) -> Path:
     pages_before = None if redo else pdf_pages(pdf)
     before = pdf.stat().st_mtime if pdf.exists() else 0.0
 
-    proc = subprocess.Popen(command(exe, job_root, folder), cwd=folder, text=True, stdin=subprocess.PIPE,
+    proc = subprocess.Popen(command(exe, job_root, folder), cwd=folder, text=True, encoding="utf-8", errors="replace", stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     timer = threading.Timer(TIMEOUT_S, proc.kill)
     timer.start()

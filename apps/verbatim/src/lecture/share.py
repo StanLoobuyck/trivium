@@ -8,7 +8,6 @@ from the "sync now" button. A file lock keeps two processes from uploading the s
 
 from __future__ import annotations
 
-import fcntl
 import hashlib
 import json
 from contextlib import contextmanager
@@ -17,6 +16,7 @@ from pathlib import Path
 import httpx
 
 from . import config as cfgmod
+from . import oscompat
 from .util import read_json, write_json
 
 TIMEOUT = httpx.Timeout(30.0, write=600.0)  # a 300 MB video over Tailscale takes ~15 s; leave room for slow links
@@ -79,14 +79,14 @@ def _lock(path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
         try:
-            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            oscompat.lock(f, blocking=False)
         except BlockingIOError:
             yield False
             return
         try:
             yield True
         finally:
-            fcntl.flock(f, fcntl.LOCK_UN)
+            oscompat.unlock(f)
 
 
 def _local(courses: set[str]) -> list[dict]:

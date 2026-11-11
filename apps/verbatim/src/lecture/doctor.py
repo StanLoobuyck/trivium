@@ -31,7 +31,7 @@ class Check:
 
 
 def _version_line(binary: str) -> str:
-    out = subprocess.run([binary, "-version"], capture_output=True, text=True, timeout=10)
+    out = subprocess.run([binary, "-version"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
     return out.stdout.splitlines()[0] if out.stdout else "unknown version"
 
 
@@ -93,7 +93,7 @@ def check_gpu(conf: cfg.Config, calls: bool) -> Iterator[Check]:
         yield Check("gpu", "warn", "nvidia-smi not found — local Whisper unavailable, Groq will be used")
         return
     out = subprocess.run(["nvidia-smi", "--query-gpu=name,driver_version,memory.used,memory.total",
-                          "--format=csv,noheader"], capture_output=True, text=True, timeout=20)
+                          "--format=csv,noheader"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20)
     if out.returncode != 0:
         from .status import nvidia_smi_problem
 
@@ -139,7 +139,7 @@ def check_claude_cli(conf: cfg.Config) -> Iterator[Check]:
     if not path:
         yield Check("claude cli", "warn", "`claude` not found — notes will use the next provider (Gemini)")
         return
-    out = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=20)
+    out = subprocess.run([path, "--version"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20)
     yield Check("claude cli", "ok" if out.returncode == 0 else "warn", (out.stdout or out.stderr).strip()[:80])
 
 

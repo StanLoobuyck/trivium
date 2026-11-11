@@ -290,7 +290,7 @@ def eval_(
     courses = {c.id: c for c in cfgmod.load_courses()}
     if ref.suffix in (".yaml", ".yml"):
         base = ref.parent
-        items = [{**i, "ref": base / i["ref"], "job": base / i["job"]} for i in yaml.safe_load(ref.read_text())]
+        items = [{**i, "ref": base / i["ref"], "job": base / i["job"]} for i in yaml.safe_load(ref.read_text(encoding="utf-8"))]
     else:
         if not (job_dir and start and end):
             raise typer.BadParameter("a .txt reference needs JOB_DIR, --start and --end")

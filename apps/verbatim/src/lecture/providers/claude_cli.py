@@ -81,7 +81,7 @@ class ClaudeCLI:
         self.workdir.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
         try:
-            proc = subprocess.run(self.command(system, schema), input=user, capture_output=True, text=True,
+            proc = subprocess.run(self.command(system, schema), input=user, capture_output=True, text=True, encoding="utf-8", errors="replace",
                                   cwd=self.workdir, timeout=self.conf.notes.timeout_s)
         except subprocess.TimeoutExpired as exc:
             raise LLMBadOutput(f"claude -p took longer than {self.conf.notes.timeout_s:.0f} s") from exc

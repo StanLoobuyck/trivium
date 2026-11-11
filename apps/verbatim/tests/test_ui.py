@@ -189,7 +189,7 @@ def test_upload_rejects_broken_files_and_skips_duplicates(env, tmp_path):
 def test_open_folder_falls_back_while_a_lecture_runs(env, monkeypatch):
     client, _, _, job = env
     opened = []
-    monkeypatch.setattr("lecture.api.lectures.subprocess.Popen", lambda cmd, **kw: opened.append(cmd[1]))
+    monkeypatch.setattr("lecture.oscompat.open_with_desktop", opened.append)
     headers = {"x-lecture-ui": "1"}
     assert client.post(f"/api/lectures/{job.name}/open-folder", headers=headers).status_code == 200
     (job / "outputs" / "review.md").unlink()

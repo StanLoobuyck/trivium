@@ -7,8 +7,9 @@ the tab of the running instance.
 
 from __future__ import annotations
 
-import subprocess
 import threading
+
+from . import oscompat
 
 
 def url(port: int) -> str:
@@ -25,8 +26,7 @@ def already_running(port: int) -> bool:
 
 
 def open_browser(port: int) -> None:
-    subprocess.Popen(["xdg-open", url(port)], start_new_session=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    oscompat.open_with_desktop(url(port))
 
 
 def serve(port: int = 7861, browser: bool = True) -> None:

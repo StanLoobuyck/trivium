@@ -37,7 +37,7 @@ def upload_problem(path: Path) -> str | None:
         return "the file is empty (still downloading?)"
     if path.suffix.lower() in VIDEO_EXT:
         out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
-                              str(path)], capture_output=True, text=True, timeout=60)
+                              str(path)], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
         if out.returncode != 0 or not out.stdout.strip():
             return "can't read this recording (incomplete download or not a video/audio file)"
     return None

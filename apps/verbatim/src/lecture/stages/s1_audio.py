@@ -24,7 +24,7 @@ def probe(media: Path) -> dict:
     """Duration (s) and stream info of a media file."""
     out = subprocess.run(
         ["ffprobe", "-v", "error", "-print_format", "json", "-show_streams", "-show_format", str(media)],
-        capture_output=True, text=True, check=False,
+        capture_output=True, text=True, encoding="utf-8", errors="replace", check=False,
     )
     if out.returncode != 0:
         raise RuntimeError(f"ffprobe can't read {media}: {out.stderr.strip()}")
@@ -42,7 +42,7 @@ def probe(media: Path) -> dict:
 
 def _run_ffmpeg_with_progress(cmd: list[str], duration_s: float, reporter: Reporter, text: str) -> None:
     proc = subprocess.Popen(cmd + ["-progress", "pipe:1", "-nostats"], stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, text=True)
+                            stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
     assert proc.stdout is not None
     for line in proc.stdout:
         key, _, value = line.strip().partition("=")

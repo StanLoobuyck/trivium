@@ -61,7 +61,7 @@ def gpu() -> str:
         return "NVIDIA GPU asleep (not woken to check)"
     try:
         out = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.used,memory.total,utilization.gpu",
-                              "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10)
+                              "--format=csv,noheader,nounits"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
     except (OSError, subprocess.SubprocessError) as exc:
         return f"nvidia-smi failed: {exc}"
     if out.returncode != 0:

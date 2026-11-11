@@ -43,7 +43,7 @@ def _version_path(job_root: Path) -> Path:
 
 def _info(job_root: Path) -> dict:
     try:
-        return json.loads(_version_path(job_root).read_text())
+        return json.loads(_version_path(job_root).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}  # copies from before versioning: version 1 (with the edit list)
 
@@ -64,7 +64,7 @@ def keyframe_interval(media: Path, seconds: float = 120.0) -> float | None:
     """Average seconds between video keyframes over the first `seconds` (None if it can't be measured)."""
     out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-skip_frame", "nokey",
                           "-show_entries", "frame=pts_time", "-of", "csv=p=0", "-read_intervals", f"%+{seconds}",
-                          str(media)], capture_output=True, text=True, check=False)
+                          str(media)], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
     times = [float(x) for x in out.stdout.split() if x.replace(".", "", 1).isdigit()]
     return (times[-1] - times[0]) / (len(times) - 1) if len(times) > 1 else None
 
@@ -83,7 +83,7 @@ def amd_render_node() -> Path | None:
 
 def _codecs(media: Path) -> tuple[str | None, str | None]:
     out = subprocess.run(["ffprobe", "-v", "error", "-print_format", "json", "-show_streams", str(media)],
-                         capture_output=True, text=True, check=False)
+                         capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
     if out.returncode != 0:
         return None, None
     streams = json.loads(out.stdout).get("streams", [])
@@ -144,5 +144,5 @@ def _make(job_root: Path, media: Path, out: Path, reencode: bool = False) -> Pat
         part.unlink(missing_ok=True)
         return None
     part.replace(out)
-    _version_path(job_root).write_text(json.dumps(info))
+    _version_path(job_root).write_text(json.dumps(info), encoding="utf-8")
     return out

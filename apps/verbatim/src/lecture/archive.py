@@ -41,7 +41,7 @@ def _split(remote: str) -> tuple[str | None, str]:
 
 
 def _run(cmd: list[str], timeout: float = 3600) -> str:
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     if r.returncode != 0:
         raise ArchiveError(f"{cmd[0]} failed: {(r.stderr or r.stdout).strip()[:300]}")
     return r.stdout

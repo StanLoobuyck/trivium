@@ -106,7 +106,7 @@ def stopped(video: Path) -> bool:
 
 def _run_stoppable(cmd: list[str], video: Path) -> tuple[int, str]:
     """ffmpeg, ended within a second when the user stops the pair."""
-    proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace")
     while True:
         try:
             _, err = proc.communicate(timeout=1.0)

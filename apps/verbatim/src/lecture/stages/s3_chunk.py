@@ -140,7 +140,7 @@ def cut_audio(full_audio: Path, start: float, end: float, out: Path) -> None:
          "-ss", f"{start:.3f}", "-i", str(full_audio), "-t", f"{end - start:.3f}",
          "-af", "asetnsamples=n=4096:p=0,aformat=sample_fmts=s16",
          "-c:a", "flac", "-f", "flac", str(part)],
-        capture_output=True, text=True,
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
     if proc.returncode != 0:
         part.unlink(missing_ok=True)

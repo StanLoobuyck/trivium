@@ -11,6 +11,7 @@ from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
 
 from .. import config as cfgmod
+from .. import oscompat
 from ..naming import guess_title
 from ..util import read_json
 from . import common
@@ -79,7 +80,7 @@ def start_worker():
     log = cfgmod.cache_dir() / "worker.log"
     with log.open("a") as fh:
         subprocess.Popen([sys.executable, "-m", "lecture.cli", "worker"], stdout=fh, stderr=subprocess.STDOUT,
-                         stdin=subprocess.DEVNULL, start_new_session=True)
+                         stdin=subprocess.DEVNULL, **oscompat.detached())
     return {"started": True, "log": str(log)}
 
 

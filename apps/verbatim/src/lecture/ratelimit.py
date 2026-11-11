@@ -7,7 +7,6 @@ never both think the same budget is free.
 
 from __future__ import annotations
 
-import fcntl
 import time
 import uuid
 from collections.abc import Callable, Iterator
@@ -16,6 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from . import oscompat
 from .report import NullReporter, Reporter
 from .util import read_json, write_json
 
@@ -58,7 +58,7 @@ class Ledger:
     def _locked(self) -> Iterator[list[dict]]:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.lock_path.open("w") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+            oscompat.lock(lock)
             try:
                 events = read_json(self.path)["events"] if self.path.exists() else []
                 horizon = self.clock() - DAY_S
@@ -66,7 +66,7 @@ class Ledger:
                 yield events
                 write_json(self.path, {"events": events})
             finally:
-                fcntl.flock(lock, fcntl.LOCK_UN)
+                oscompat.unlock(lock)
 
     def _wait_needed(self, events: list[dict], bucket: str, windows: list[Window],
                      amounts: dict[str, float]) -> tuple[float, Window | None]:

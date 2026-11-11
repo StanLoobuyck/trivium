@@ -66,6 +66,18 @@ jobs:
       - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
       - run: uv run pytest -q
 
+  # Verbatim draait ook op Windows (voor gebruikers zonder Linux).
+  verbatim-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/verbatim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: choco install ffmpeg -y --no-progress
+      - run: uv run pytest -q
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [sequo, hub]

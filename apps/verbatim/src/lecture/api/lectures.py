@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
 from pathlib import Path
 
 from fastapi import APIRouter, Body, HTTPException
@@ -13,7 +12,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from .. import config as cfgmod
-from .. import library
+from .. import library, oscompat
 from ..naming import guess_title
 from ..util import read_json, write_json
 from . import common
@@ -147,8 +146,7 @@ def open_folder(name: str):
     d = job_dir(name)
     # A lecture still running has no outputs yet: show its folder rather than nothing.
     target = d / "outputs" if (d / "outputs").is_dir() else d
-    subprocess.Popen(["xdg-open", str(target)], stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL, start_new_session=True)
+    oscompat.open_with_desktop(str(target))
     return {"ok": True}
 
 

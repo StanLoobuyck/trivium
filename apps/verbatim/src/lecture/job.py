@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import fcntl
 import logging
 import shutil
 from collections.abc import Iterator
@@ -11,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from . import oscompat
 from .util import file_fingerprint, read_json, slugify, write_json
 
 MANIFEST_VERSION = 1
@@ -198,13 +198,13 @@ class Job:
         """Only one process may work on a job at a time."""
         with (self.root / ".lock").open("w") as fh:
             try:
-                fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                oscompat.lock(fh, blocking=False)
             except BlockingIOError:
                 raise JobLockedError(f"another process is already working on {self.root}") from None
             try:
                 yield
             finally:
-                fcntl.flock(fh, fcntl.LOCK_UN)
+                oscompat.unlock(fh)
 
     def logger(self) -> logging.Logger:
         log = logging.getLogger(f"lecture.job.{self.root.name}")

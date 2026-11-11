@@ -231,7 +231,7 @@ def _claude_login() -> dict[str, Any]:
     if not exe:
         return {"installed": False, "logged_in": False}
     try:
-        out = subprocess.run([exe, "auth", "status"], capture_output=True, text=True, timeout=15)
+        out = subprocess.run([exe, "auth", "status"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15)
         data = json.loads(out.stdout)
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
         return {"installed": True, "logged_in": None}
