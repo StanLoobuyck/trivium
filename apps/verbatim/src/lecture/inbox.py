@@ -132,6 +132,58 @@ def course_folders(conf: Config, courses: list[Course]) -> list[tuple[Path, str]
     return found
 
 
+CATALOGUE = "https://onderwijsaanbod.kuleuven.be/syllabi/n/{code}N.htm"
+
+
+def catalogue_name(code: str, client=None) -> str | None:
+    """The course's official name from KU Leuven's public course catalogue; None when it has no page.
+    Raises httpx.HTTPError when offline (the caller tries again later)."""
+    import httpx
+
+    r = (client or httpx).get(CATALOGUE.format(code=code), timeout=10, follow_redirects=True)
+    if r.status_code != 200:
+        return None
+    m = re.search(r"<title>\s*([^<|]+?)\s*(?:\|[^<]*)?</title>", r.text)
+    return " ".join(m[1].split()) if m else None
+
+
+def adopt_new_codes(conf: Config, courses: list[Course], client=None) -> list[Course]:
+    """Simple mode: a Velox folder (Downloads/Verbatim/<code>/) with a recording but no course yet becomes a
+    course, named from the catalogue (or the code). Returns the new courses."""
+    from . import settings
+
+    import httpx
+
+    known = {code.upper() for c in courses for code in c.codes}
+    ids = {c.id for c in courses}
+    root = conf.paths.downloads_inbox
+    new = []
+    for folder in sorted(root.iterdir()) if root.is_dir() else []:
+        code = folder.name.upper()
+        if not folder.is_dir() or code in known or not re.fullmatch(r"[A-Z](?=[A-Z]*\d)[A-Z0-9]{3,11}", code):  # KU Leuven: H01A0B, C00A1A
+            continue
+        if not any(p.suffix.lower() in VIDEO_EXT for p in folder.iterdir() if p.is_file()):
+            continue
+        try:
+            name = catalogue_name(code, client) or code
+        except httpx.HTTPError:
+            continue  # offline: next round
+        slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:40] or code.lower()
+        course_id = slug if slug not in ids else f"{slug}-{code.lower()}"
+        course = settings.save_course({"id": course_id, "name": name, "codes": [code], "language": "nl"})
+        ids.add(course.id)
+        known.add(code)
+        new.append(course)
+    return new
+
+
+def notes_policy(conf: Config) -> str:
+    """Notes for lectures from the inbox: only in simple mode, when switched on and a Gemini key is set."""
+    from .settings import key_status
+
+    return "now" if conf.app.simple and conf.app.auto_notes and key_status()["gemini"] else "never"
+
+
 def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[dict]:
     """New recordings in the course folders: {media, course, title, date, slides, why, ready}."""
     now = time.time() if now is None else now
@@ -173,14 +225,19 @@ def tick(queue, conf: Config, rep=None) -> list[dict]:
         return []
     try:
         courses = cfgmod.load_courses()
+        if conf.app.simple and (new := adopt_new_codes(conf, courses)):
+            courses = cfgmod.load_courses()
+            if rep:
+                rep("inbox: new course " + ", ".join(f"{c.name} ({c.codes[0]})" for c in new))
         ensure_folders(conf, courses)
+        policy = notes_policy(conf)
         added = []
         for found in scan(conf, courses):
             if found.get("combine"):
                 pair.start(Path(found["media"]), Path(found["combine"]), rep)
             if found["ready"]:
                 added.append(queue.add(Path(found["media"]), found["course"], [Path(s) for s in found["slides"]],
-                                       found["title"], found["date"], notes="never"))
+                                       found["title"], found["date"], notes=policy))
                 if rep:
                     rep(f"inbox: queued {found['title']} ({found['course']}, slides: {found['why']})")
         return added

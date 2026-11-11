@@ -163,6 +163,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .btn:active { transform: scale(0.97); opacity: 0.8; }
 .btn:disabled { opacity: 0.4; cursor: default; }
+.switch:disabled { opacity: 0.4; cursor: default; }
 .btn-primary { background: var(--accent); color: var(--on-accent); }
 .btn-plain { background: none; padding-inline: var(--space-2); }
 .btn-danger { color: var(--danger); }

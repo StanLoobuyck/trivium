@@ -285,6 +285,7 @@ class AppConfig(_Strict):
     # Simple mode (Windows installer, users without the Mac/hub): hides the Mac, hub, sharing and LaTeX parts
     simple: bool = False
     welcomed: bool = False  # the welcome steps (simple mode) were finished or skipped
+    auto_notes: bool = True  # simple mode: notes for lectures from the inbox, when a Gemini key is set
 
 
 class Config(_Strict):

@@ -87,7 +87,12 @@ export async function renderSetup(refresh = false) {
       </section>
 `,
     ...(s.simple ? {} : { share: shareSectionHtml }),
-    general: () => `      <section class="setup-section">
+    general: () => `${s.simple ? `      <section class="setup-section">
+        <h2>${t("s_auto")}</h2><div class="list">
+          <label class="row toggle-row"><span class="row-text"><b>${t("o_auto_notes")}</b><span class="sub">${t(s.keys.gemini ? "o_auto_notes_d" : "o_auto_notes_nokey")}</span></span>
+            <input type="checkbox" class="switch" id="auto-notes" ${s.auto_notes && s.keys.gemini ? "checked" : ""} ${s.keys.gemini ? "" : "disabled"}></label></div>
+      </section>
+` : ""}      <section class="setup-section">
         <h2>${t("s_outputs")}</h2><div class="list">${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
           <label class="row toggle-row"><span class="row-text"><b>${t("o_" + k)}</b><span class="sub">${t("o_" + k + "_d")}</span></span>
             <input type="checkbox" class="switch" data-out="${k}" ${s.outputs[k] ? "checked" : ""}></label>`).join("")}</div>
@@ -134,6 +139,7 @@ export async function renderSetup(refresh = false) {
   $$("[data-theme-choice]").forEach((b) => b.addEventListener("click", () => { setTheme(b.dataset.themeChoice); rerender(); }));
   $$("[data-lang]").forEach((b) => b.addEventListener("click", () => { setLang(b.dataset.lang); route(); }));
   $$("[data-model]").forEach((b) => b.addEventListener("click", () => apply("/api/setup/notes-model", { value: b.dataset.model })));
+  $("#auto-notes")?.addEventListener("change", (e) => apply("/api/setup/auto-notes", { value: e.target.checked }));
   $$("[data-out]").forEach((c) => c.addEventListener("change", () => apply("/api/setup/outputs", { [c.dataset.out]: c.checked })));
   $$("[data-savekey]").forEach((b) => b.addEventListener("click", () => {
     const input = $(`[data-key="${b.dataset.savekey}"]`);

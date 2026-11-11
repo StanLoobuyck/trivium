@@ -100,6 +100,7 @@ def setup():
         "app_name": "Lecture Transcriber",
         "simple": conf.app.simple,
         "welcomed": conf.app.welcomed,
+        "auto_notes": conf.app.auto_notes,
         "termfix": {"enabled": conf.termfix.enabled and not conf.app.simple, "model": conf.termfix.model, "ok": tf_ok, "detail": tf_detail},
         "stt": {"mode": mode, "local_available": local_ok, "gpu_ok": gpu_ok, "gpu": gpu_text,
                 "local_label": stt_label("local", conf), "cloud_label": stt_label("groq", conf),
@@ -140,6 +141,12 @@ def set_notes_model(body: Choice):
 def set_stt(body: Choice):
     from .. import settings
     return _apply(settings.set_stt_mode, body.value)
+
+
+@router.post("/api/setup/auto-notes")
+def set_auto_notes(body: Flag):
+    from .. import settings
+    return _apply(settings.update_settings, {"app": {"auto_notes": body.value}})
 
 
 @router.post("/api/setup/stt-battery")

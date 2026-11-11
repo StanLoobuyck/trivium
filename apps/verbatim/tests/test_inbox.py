@@ -112,3 +112,83 @@ def test_moved_old_recording_still_gets_its_full_wait(box, monkeypatch):
     assert not f["ready"] and "30 min" in f["why"]
     (f,) = inbox.scan(conf, load_courses(), now=time.time() + inbox.MISSING_DECK_WAIT_S)
     assert f["ready"] and [Path(s).name for s in f["slides"]] == ["les 1.pdf"]
+
+
+# --- simple mode: Velox folders become courses -------------------------------------------------------------
+
+import httpx  # noqa: E402
+
+from lecture import settings  # noqa: E402
+
+PAGE = "<html><head><title>Inleiding tot het recht | KU Leuven | Onderwijsaanbod</title></head></html>"
+
+
+class Catalogue:
+    def __init__(self, pages=None, offline=False):
+        self.pages, self.offline, self.asked = pages or {}, offline, []
+
+    def get(self, url, timeout, follow_redirects):
+        self.asked.append(url)
+        if self.offline:
+            raise httpx.ConnectError("no network")
+        code = url.rsplit("/", 1)[1].removesuffix("N.htm")
+        return httpx.Response(200, text=self.pages[code]) if code in self.pages else httpx.Response(500, text="")
+
+
+@pytest.fixture
+def simple_box(xdg, tmp_path, no_inbox):
+    xdg.mkdir(parents=True)
+    (xdg / "config.yaml").write_text(
+        f"app:\n  simple: true\npaths:\n  jobs_dir: {tmp_path / 'jobs'}\n  inbox_dir: {tmp_path / 'inbox'}\n"
+        f"  downloads_inbox: {tmp_path / 'dl'}\n")
+    return load_config(), tmp_path / "dl", q.Queue(tmp_path / "queue.json"), no_inbox
+
+
+def test_catalogue_name():
+    assert inbox.catalogue_name("C00A1A", Catalogue({"C00A1A": PAGE})) == "Inleiding tot het recht"
+    assert inbox.catalogue_name("C99Z9Z", Catalogue()) is None
+
+
+def test_velox_folder_becomes_a_course(simple_box):
+    conf, dl, _, _ = simple_box
+    put(dl / "C00A1A" / "Hoorcollege 1.mp4", 120)
+    put(dl / "C00B2B" / "Les 2.mp4", 120)              # no catalogue page: named after the code
+    (dl / "C00C3C").mkdir()                             # no recording yet: not a course
+    (dl / "notes").mkdir()                              # not a course code
+    put(dl / "notes" / "x.mp4", 120)
+    cat = Catalogue({"C00A1A": PAGE})
+    new = inbox.adopt_new_codes(conf, load_courses(), cat)
+    assert [(c.name, c.codes, c.id) for c in new] == [
+        ("Inleiding tot het recht", ["C00A1A"], "inleiding-tot-het-recht"), ("C00B2B", ["C00B2B"], "c00b2b")]
+    assert inbox.adopt_new_codes(conf, load_courses(), cat) == [] and len(cat.asked) == 2  # once only
+
+
+def test_offline_tries_again_later(simple_box):
+    conf, dl, _, _ = simple_box
+    put(dl / "C00A1A" / "Hoorcollege 1.mp4", 120)
+    assert inbox.adopt_new_codes(conf, load_courses(), Catalogue(offline=True)) == []
+    assert inbox.adopt_new_codes(conf, load_courses(), Catalogue({"C00A1A": PAGE}))[0].name == "Inleiding tot het recht"
+
+
+def test_same_name_gets_its_own_id(simple_box):
+    conf, dl, _, _ = simple_box
+    settings.save_course({"id": "inleiding-tot-het-recht", "name": "Inleiding tot het recht", "language": "nl"})
+    put(dl / "C00A1A" / "Hoorcollege 1.mp4", 120)
+    new = inbox.adopt_new_codes(conf, load_courses(), Catalogue({"C00A1A": PAGE}))
+    assert new[0].id == "inleiding-tot-het-recht-c00a1a" and len(load_courses()) == 2
+
+
+def test_tick_queues_velox_download_with_notes_when_gemini_is_set(simple_box, monkeypatch):
+    conf, dl, queue, tick = simple_box
+    monkeypatch.setattr(q, "Queue", lambda: queue)
+    monkeypatch.setattr(inbox, "catalogue_name", lambda code, client=None: "Inleiding tot het recht")
+    monkeypatch.setattr(inbox, "EMPTY_SHELF_WAIT_S", 0)
+    put(dl / "C00A1A" / "Hoorcollege 1.mp4", 120)
+    added = tick(queue, conf)
+    assert [(i["course"], i["notes"]) for i in added] == [("inleiding-tot-het-recht", "never")]  # no Gemini key
+    settings.set_key("gemini", "AIza" + "b" * 35)
+    put(dl / "C00A1A" / "Hoorcollege 2.mp4", 120)
+    assert [i["notes"] for i in tick(queue, conf)] == ["now"]
+    settings.update_settings({"app": {"auto_notes": False}})
+    put(dl / "C00A1A" / "Hoorcollege 3.mp4", 120)
+    assert [i["notes"] for i in tick(queue, load_config())] == ["never"]
