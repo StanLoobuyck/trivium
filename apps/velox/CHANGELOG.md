@@ -3,6 +3,11 @@
 All notable changes to Velox. Versions follow [semantic versioning](https://semver.org/):
 **major** for big changes, **minor** for new features, **patch** for fixes.
 
+## 5.5.0
+
+**New**
+- Verbatim on the same computer is recognised: downloads then go to Verbatim by themselves, so you don't have to find "Downloads to Verbatim" in the settings. Once you change that setting yourself, Velox leaves it alone
+
 ## 5.4.0
 
 **Fixed**
