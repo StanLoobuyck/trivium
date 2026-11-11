@@ -7,13 +7,18 @@ Velox makes Toledo (Kaltura) lecture recordings nicer to watch:
 - **Remembers your playback speed**
 - **Download lectures** as `.mp4`, with a clear name (course – lecture – date)
 
-Works in **Zen, Firefox, LibreWolf** and **Chrome, Edge, Brave, Opera, Vivaldi, Arc**.
+Works in **Edge, Zen, Firefox, LibreWolf** (they update it themselves) and **Chrome, Brave, Opera, Vivaldi, Arc** (developer mode).
 
 ---
 
 ## Installing
 
-### Zen, Firefox or LibreWolf (recommended: updates itself)
+### Edge (updates itself)
+
+Open [Velox in the Edge Add-ons store](https://microsoftedge.microsoft.com/addons/detail/velox/oojejooncahlokgpffoomionmgnlaibk) and click **Get**. Edge is on every Windows laptop, so this is the
+easiest way on Windows.
+
+### Zen, Firefox or LibreWolf (updates itself)
 
 1. Download **velox-firefox.xpi** with the *Firefox / Zen* button on the [Trivium page](https://stanloobuyck.github.io/trivium/).
 2. Open `about:addons`, click the **gear** (⚙) → **Install Add-on From File…** and choose the downloaded file. (Dragging the file into the window works too.)
@@ -21,7 +26,7 @@ Works in **Zen, Firefox, LibreWolf** and **Chrome, Edge, Brave, Opera, Vivaldi, 
 
 New versions are then installed **automatically**.
 
-### Chrome, Edge, Brave, Opera, Vivaldi or Arc
+### Chrome, Brave, Opera, Vivaldi or Arc (developer mode)
 
 1. Download **velox-chrome.zip** with the *Chrome* button on the [Trivium page](https://stanloobuyck.github.io/trivium/) and unzip it into a folder you'll **keep** (e.g. `Documents/Velox`). Deleting the folder removes the extension.
 2. Open `chrome://extensions` (Edge: `edge://extensions`).

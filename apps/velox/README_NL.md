@@ -7,13 +7,18 @@ Velox maakt lesopnames in Toledo (Kaltura) aangenamer om te bekijken:
 - **Je afspeelsnelheid onthouden**
 - **Lessen downloaden** als `.mp4`, met een duidelijke naam (vak – les – datum)
 
-Werkt in **Zen, Firefox, LibreWolf** en **Chrome, Edge, Brave, Opera, Vivaldi, Arc**.
+Werkt in **Edge, Zen, Firefox, LibreWolf** (updaten vanzelf) en **Chrome, Brave, Opera, Vivaldi, Arc** (ontwikkelaarsmodus).
 
 ---
 
 ## Installeren
 
-### Zen, Firefox of LibreWolf (aanbevolen: updatet vanzelf)
+### Edge (updatet vanzelf)
+
+Open [Velox in de Edge-winkel](https://microsoftedge.microsoft.com/addons/detail/velox/oojejooncahlokgpffoomionmgnlaibk) en klik op **Downloaden**. Edge staat op elke Windows-laptop, dus op
+Windows is dit de eenvoudigste weg.
+
+### Zen, Firefox of LibreWolf (updatet vanzelf)
 
 1. Download **velox-firefox.xpi** via de knop *Firefox / Zen* op de [Trivium-pagina](https://stanloobuyck.github.io/trivium/).
 2. Open in je browser `about:addons`, klik op het **tandwiel** (⚙) → **Add-on installeren via bestand…** en kies het gedownloade bestand. (Het bestand in het venster slepen werkt ook.)
@@ -21,7 +26,7 @@ Werkt in **Zen, Firefox, LibreWolf** en **Chrome, Edge, Brave, Opera, Vivaldi, A
 
 Nieuwe versies worden daarna **automatisch** geïnstalleerd.
 
-### Chrome, Edge, Brave, Opera, Vivaldi of Arc
+### Chrome, Brave, Opera, Vivaldi of Arc (ontwikkelaarsmodus)
 
 1. Download **velox-chrome.zip** via de knop *Chrome* op de [Trivium-pagina](https://stanloobuyck.github.io/trivium/) en pak het uit naar een map die je **laat staan** (bv. `Documenten/Velox`). Als je de map verwijdert, verdwijnt de extensie.
 2. Open `chrome://extensions` (Edge: `edge://extensions`).

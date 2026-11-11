@@ -53,7 +53,7 @@
       <li class="card app">
         <div class="app-head"><h2 class="title">Velox</h2><span class="micro">%%VELOX_VERSION%%</span></div>
         <p data-t="velox">Toledo-opnames aangenaam kijken: sneltoetsen, verdergaan waar je was, je snelheid onthouden en lessen downloaden als mp4.</p>
-        <p class="label" data-t="velox_on">Browserextensie · Zen, Firefox, LibreWolf (updatet vanzelf) en Chrome, Edge, Brave</p>
+        <p class="label" data-t="velox_on">Browserextensie · Edge, Firefox, Zen en LibreWolf (updaten vanzelf) · Chrome en Brave via de ontwikkelaarsmodus</p>
         <p class="label" id="velox-chrome-note" data-t="velox_chrome_note" hidden>Chrome kan Velox niet met één klik installeren. Gebruik Edge (staat op elke Windows-laptop) of Firefox; in Chrome lukt het alleen via de ontwikkelaarsmodus.</p>
         <div class="app-actions" id="velox-actions">
           <a class="btn btn-small" id="velox-edge" href="#" data-t="velox_edge" hidden>Edge</a>
@@ -86,7 +86,7 @@
         sequo_on: "iPhone, Android and laptop · in your browser, also offline",
         open: "Open",
         velox: "Watch Toledo recordings comfortably: keyboard shortcuts, continue where you left off, remember your speed and download lectures as mp4.",
-        velox_on: "Browser extension · Zen, Firefox, LibreWolf (updates itself) and Chrome, Edge, Brave",
+        velox_on: "Browser extension · Edge, Firefox, Zen and LibreWolf (update themselves) · Chrome and Brave through developer mode",
         velox_ff: "Firefox / Zen", velox_chrome: "Chrome", install: "How to install", velox_edge: "Edge",
         velox_chrome_note: "Chrome can't install Velox with one click. Use Edge (on every Windows laptop) or Firefox; in Chrome it only works through developer mode.",
         experimental: "Experimental",
@@ -97,7 +97,7 @@
       },
     };
     // Velox: the button for this browser first. EDGE_URL: the Edge Add-ons page, once Microsoft has approved Velox.
-    const EDGE_URL = "";
+    const EDGE_URL = "https://microsoftedge.microsoft.com/addons/detail/velox/oojejooncahlokgpffoomionmgnlaibk";
     const ua = navigator.userAgent;
     const browser = /Firefox\//.test(ua) ? "firefox" : /Edg\//.test(ua) ? "edge" : /Chrome\//.test(ua) ? "chromium" : "other";
     const veloxBtn = (id) => document.getElementById(id);
