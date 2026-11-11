@@ -8,8 +8,7 @@ on:
 permissions:
   contents: read
 
-# ubuntu-latest became 26.04 on 2026-11-01: no ffmpeg preinstalled, apt and Playwright's --with-deps hung there.
-# Pinned to 24.04; apt never asks questions.
+# Pinned to 24.04 (ubuntu-latest became 26.04 on 2026-11-01); apt never asks questions.
 env:
   DEBIAN_FRONTEND: noninteractive
 
@@ -26,6 +25,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      # azure.archive.ubuntu.com timed out on every package (2026-11-11): use Ubuntu's own server.
+      - run: sudo sed -i 's|http://azure.archive.ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list 2>/dev/null || true
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
       - uses: actions/upload-pages-artifact@v3
@@ -53,6 +54,8 @@ jobs:
           cache-dependency-path: apps/velox/package-lock.json
       - run: npm ci
       # Echte TS-naar-MP4-test en testmedia voor de lokale pagina's.
+      # azure.archive.ubuntu.com timed out on every package (2026-11-11): use Ubuntu's own server.
+      - run: sudo sed -i 's|http://azure.archive.ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list 2>/dev/null || true
       - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
       - run: npm test
       - run: npm run lint
@@ -68,6 +71,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      # azure.archive.ubuntu.com timed out on every package (2026-11-11): use Ubuntu's own server.
+      - run: sudo sed -i 's|http://azure.archive.ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list 2>/dev/null || true
       - run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
       - run: uv run pytest -q
 
