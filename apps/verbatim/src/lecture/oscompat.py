@@ -97,3 +97,29 @@ def open_with_desktop(target: str) -> None:
         return
     subprocess.Popen(["open" if MACOS else "xdg-open", target], stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL, **detached())
+
+
+def prepare_windows_app() -> None:
+    """The installed Windows app (`pythonw -m lecture.cli app`, no console):
+
+    - ffmpeg/ffprobe come with the installer in <install>\\bin: put that folder first on PATH;
+    - every helper (ffmpeg, ffprobe, claude) would open a console window of its own: start them without one.
+    """
+    if not WINDOWS:
+        return
+    from pathlib import Path
+
+    for root in list(Path(sys.prefix).parents)[:3]:
+        if (root / "bin" / "ffmpeg.exe").is_file():
+            os.environ["PATH"] = str(root / "bin") + os.pathsep + os.environ.get("PATH", "")
+            break
+    if getattr(subprocess.Popen, "_verbatim_no_window", False):
+        return
+    original = subprocess.Popen.__init__
+
+    def init(self, *args, **kwargs):
+        kwargs["creationflags"] = kwargs.get("creationflags", 0) | subprocess.CREATE_NO_WINDOW
+        original(self, *args, **kwargs)
+
+    subprocess.Popen.__init__ = init
+    subprocess.Popen._verbatim_no_window = True

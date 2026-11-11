@@ -38,6 +38,9 @@ local = [
     "nvidia-cudnn-cu12>=9,<10",
 ]
 
+# Local Whisper on the CPU only (Windows installer without an NVIDIA GPU): no 1.5 GB of CUDA libraries.
+whisper-cpu = ["faster-whisper>=1.1"]
+
 [project.scripts]
 lecture = "lecture.cli:app"
 

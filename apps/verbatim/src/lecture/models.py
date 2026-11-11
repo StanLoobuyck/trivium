@@ -189,6 +189,11 @@ def stt_status(conf: Config, entry: str, gpu_ok: bool, groq_key: bool) -> tuple[
 
         if conf.stt.local.skip_on_battery and on_battery():  # also explains a GPU switched off on battery
             return False, "on battery: only if nothing else works"
+        if conf.stt.local.device != "cuda":  # cpu/auto: works wherever faster-whisper is installed
+            import importlib.util
+
+            installed = importlib.util.find_spec("faster_whisper") is not None
+            return installed, ("" if gpu_ok else "on the processor (slower)") if installed else "not installed"
         return gpu_ok, "" if gpu_ok else "no usable NVIDIA GPU"
     return groq_key, "" if groq_key else "GROQ_API_KEY missing"
 

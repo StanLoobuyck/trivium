@@ -484,11 +484,12 @@ def ui(
 @app.command("setup-simple")
 def setup_simple(
     folder: Path = typer.Argument(..., help="Folder for the lectures (jobs and inbox go inside)."),
+    whisper: str = typer.Option("accurate", "--whisper", help="Local Whisper: accurate (large-v3-turbo) or fast (small)."),
 ) -> None:
     """Set up simple mode for a new user (run by the Windows installer)."""
     from .settings import setup_simple as run
 
-    run(folder)
+    run(folder, whisper)
     typer.echo(f"Simple mode set up; lectures in {folder}")
 
 

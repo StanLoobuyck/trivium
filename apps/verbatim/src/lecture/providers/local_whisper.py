@@ -1,4 +1,4 @@
-"""Local Whisper (faster-whisper / CTranslate2) on an NVIDIA GPU.
+"""Local Whisper (faster-whisper / CTranslate2) on an NVIDIA GPU, or on the CPU (stt.local.device: cpu/auto).
 
 Returns responses in the same shape as Groq's verbose_json, so stitching, the repair pass, eval and
 subtitles work unchanged. Needs the optional `local` extra: `uv sync --extra local`.
@@ -41,6 +41,19 @@ def preload_cuda_libraries() -> list[str]:
         import nvidia.cudnn
     except ImportError:
         return loaded  # fall back to system libraries, if any
+    import sys
+
+    if sys.platform == "win32":  # the wheels keep their DLLs in bin/; Windows looks there once it's told to
+        import os
+
+        for pkg in (nvidia.cublas, nvidia.cudnn):
+            bin_dir = Path(next(iter(pkg.__path__))) / "bin"
+            if bin_dir.is_dir():
+                os.add_dll_directory(str(bin_dir))
+                os.environ["PATH"] = str(bin_dir) + os.pathsep + os.environ.get("PATH", "")
+                loaded.append(str(bin_dir))
+        _preloaded = True
+        return loaded
     # order matters: cuBLASLt before cuBLAS, the cuDNN core before its sub-libraries
     patterns = [(nvidia.cublas, ["libcublasLt.so.*", "libcublas.so.*"]),
                 (nvidia.cudnn, ["libcudnn.so.*", "libcudnn_graph.so.*", "libcudnn_*.so.*"])]
@@ -68,6 +81,19 @@ def load_audio(path: Path) -> np.ndarray:
     return np.frombuffer(out.stdout, dtype=np.float32)
 
 
+def resolve_device(device: str) -> str:
+    """"auto" → "cuda" when CTranslate2 sees an NVIDIA GPU, else "cpu"."""
+    if device != "auto":
+        return device
+    try:
+        preload_cuda_libraries()
+        import ctranslate2
+
+        return "cuda" if ctranslate2.get_cuda_device_count() > 0 else "cpu"
+    except Exception:  # noqa: BLE001 — no CUDA libraries at all: the CPU it is
+        return "cpu"
+
+
 class LocalWhisper:
     name = "local"
 
@@ -77,6 +103,17 @@ class LocalWhisper:
         self.reporter = reporter or NullReporter()
         self._model = None
         self._compute_type: str | None = None
+        self._device: str | None = None
+
+    @property
+    def device(self) -> str:
+        if self._device is None:
+            self._device = resolve_device(self.lc.device)
+        return self._device
+
+    @property
+    def compute_types(self) -> list[str]:
+        return self.lc.compute_types if self.device == "cuda" else self.lc.cpu_compute_types
 
     @property
     def model_label(self) -> str:
@@ -93,17 +130,22 @@ class LocalWhisper:
         except OSError as exc:
             raise LocalUnavailable(f"CUDA libraries could not be loaded: {exc}") from exc
         last_error: Exception | None = None
-        for compute_type in compute_types or self.lc.compute_types:
+        for compute_type in compute_types or self.compute_types:
             try:
                 t0 = time.time()
-                self._model = WhisperModel(self.lc.model, device=self.lc.device, compute_type=compute_type)
+                self._model = WhisperModel(self.lc.model, device=self.device, compute_type=compute_type)
                 self._compute_type = compute_type
-                self.reporter.info(f"Local Whisper {self.lc.model} loaded on {self.lc.device} "
+                self.reporter.info(f"Local Whisper {self.lc.model} loaded on {self.device} "
                                    f"({compute_type}) in {time.time() - t0:.0f} s")
                 return self._model
             except (RuntimeError, ValueError) as exc:  # e.g. out of memory, unsupported compute type
                 last_error = exc
                 self.reporter.warn(f"Local Whisper with {compute_type} failed: {exc}")
+        if self.lc.device == "auto" and self.device == "cuda" and compute_types is None:
+            # "auto" picked the GPU but it won't load (missing DLLs, too little memory): the CPU still works
+            self.reporter.warn("Local Whisper on the GPU failed; using the processor instead")
+            self._device = "cpu"
+            return self._load()
         raise LocalUnavailable(f"model {self.lc.model} could not be loaded: {last_error}")
 
     def check(self) -> None:
@@ -126,7 +168,8 @@ class LocalWhisper:
                 raise
             # GPU memory taken mid-run (e.g. a game started): retry once with the smaller compute types.
             # Never switch to Groq here — that would mix providers within one run.
-            smaller = self.lc.compute_types[self.lc.compute_types.index(self._compute_type) + 1:]
+            types = self.compute_types
+            smaller = types[types.index(self._compute_type) + 1:] if self._compute_type in types else []
             self.reporter.warn(f"Local Whisper ran out of GPU memory ({self._compute_type})"
                                + (f"; retrying with {smaller[0]}" if smaller else ""))
             self.close()
@@ -147,7 +190,7 @@ class LocalWhisper:
             audio,
             language=language,
             task="transcribe",
-            beam_size=lc.beam_size,
+            beam_size=lc.beam_size if self.device == "cuda" else lc.cpu_beam_size,
             temperature=list(lc.temperatures),
             condition_on_previous_text=lc.condition_on_previous_text,
             initial_prompt=prompt or None,
@@ -170,7 +213,8 @@ class LocalWhisper:
         response = {
             "task": "transcribe", "language": info.language, "duration": info.duration,
             "text": "".join(s["text"] for s in segs), "segments": segs, "words": words,
-            "x_local": {"model": lc.model, "compute_type": self._compute_type, "beam_size": lc.beam_size,
+            "x_local": {"model": lc.model, "device": self.device, "compute_type": self._compute_type,
+                        "beam_size": lc.beam_size if self.device == "cuda" else lc.cpu_beam_size,
                         "vad_filter": lc.vad_filter, "elapsed_s": round(elapsed, 2),
                         "realtime_factor": round(info.duration / elapsed, 1) if elapsed > 0 else None},
         }

@@ -1,0 +1,78 @@
+# CI: install Verbatim silently with the built installer and check that it works on a clean Windows.
+# Run from apps/verbatim after build.ps1:  pwsh packaging/windows/test-install.ps1
+
+$ErrorActionPreference = "Stop"
+$root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$setup = Get-ChildItem (Join-Path $root "dist") -Filter "Verbatim-Setup-*.exe" | Select-Object -First 1
+$lectures = Join-Path $env:RUNNER_TEMP "Mijn lessen"
+$app = Join-Path $env:LOCALAPPDATA "Programs\Verbatim"
+$py = Join-Path $app "verbatim\.venv\Scripts\python.exe"
+$pyw = Join-Path $app "verbatim\.venv\Scripts\pythonw.exe"
+
+Write-Host "== install $($setup.Name) ($([math]::Round($setup.Length / 1MB, 1)) MB)"
+$t = Get-Date
+$p = Start-Process $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/LOG=$env:RUNNER_TEMP\setup.log", "/LECTURES=`"$lectures`"", "/WHISPER=fast", "/TASKS=" -Wait -PassThru
+Write-Host "exit $($p.ExitCode) after $([math]::Round(((Get-Date) - $t).TotalSeconds)) s"
+if ($p.ExitCode -ne 0) { Get-Content "$env:RUNNER_TEMP\setup.log" -Tail 40; throw "installer failed" }
+foreach ($f in "uv.exe", "bin\ffmpeg.exe", "bin\ffprobe.exe", "verbatim\.venv\Scripts\pythonw.exe") {
+  if (-not (Test-Path (Join-Path $app $f))) { throw "missing $f" }
+}
+if (-not (Test-Path (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Verbatim.lnk"))) { throw "no Start menu shortcut" }
+Write-Host "venv size: $([math]::Round((Get-ChildItem (Join-Path $app 'verbatim\.venv') -Recurse | Measure-Object Length -Sum).Sum / 1MB)) MB"
+
+Write-Host "== settings written by the installer"
+& $py -c @"
+from lecture import config, oscompat
+import shutil, sys
+c = config.load_config()
+assert c.app.simple and c.stt.providers == ['groq', 'local'] and c.stt.local.model == 'small', c
+assert c.stt.local.device == 'auto' and not c.termfix.enabled
+assert str(c.paths.jobs_dir).endswith('Mijn lessen\\jobs'), c.paths.jobs_dir
+assert config.load_courses() == []
+oscompat.prepare_windows_app()
+ff = shutil.which('ffmpeg')
+assert ff and ff.lower().startswith(r'$app'.lower()), ff
+print('ok:', c.paths.jobs_dir, ff)
+"@
+if ($LASTEXITCODE -ne 0) { throw "settings check failed" }
+
+Write-Host "== local Whisper (small) on the processor"
+& $py -c @"
+import subprocess, tempfile, pathlib
+from lecture import config, oscompat
+from lecture.providers.local_whisper import LocalWhisper
+oscompat.prepare_windows_app()
+wav = pathlib.Path(tempfile.mkdtemp()) / 'tone.wav'
+subprocess.run(['ffmpeg', '-loglevel', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=5', str(wav)], check=True)
+w = LocalWhisper(config.load_config())
+r = w.transcribe(wav, 5.0, 'nl', '')
+print('ok:', w.device, r.response['x_local'])
+assert w.device == 'cpu'
+"@
+if ($LASTEXITCODE -ne 0) { throw "local Whisper failed" }
+
+Write-Host "== the app (no console), as the Start menu shortcut starts it"
+$proc = Start-Process $pyw -ArgumentList "-m", "lecture.cli", "app", "--no-browser", "--port", "7871" -WorkingDirectory (Join-Path $app "verbatim") -PassThru
+try {
+  $ok = $false
+  for ($i = 0; $i -lt 60 -and -not $ok; $i++) {
+    Start-Sleep 1
+    try { $s = Invoke-RestMethod "http://127.0.0.1:7871/api/setup"; $ok = $true } catch {}
+  }
+  if (-not $ok) { throw "the app didn't answer" }
+  if (-not $s.simple -or $s.welcomed -or -not $s.worker) { throw "unexpected state: $($s | ConvertTo-Json -Depth 2 -Compress)" }
+  $page = Invoke-WebRequest "http://127.0.0.1:7871/" -UseBasicParsing
+  if ($page.Content -notmatch "<title>Verbatim</title>") { throw "no Verbatim page" }
+  Write-Host "ok: simple mode, worker running, page served"
+} finally {
+  Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+}
+
+Write-Host "== uninstall keeps the lectures folder"
+New-Item -ItemType Directory -Force $lectures | Out-Null
+$un = Start-Process (Join-Path $app "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES" -Wait -PassThru
+# The uninstaller restarts itself from a temporary copy, so -Wait returns early: wait for the result.
+for ($i = 0; $i -lt 60 -and (Test-Path (Join-Path $app "verbatim\.venv")); $i++) { Start-Sleep 2 }
+if (Test-Path (Join-Path $app "verbatim\.venv")) { throw "environment left behind" }
+if (-not (Test-Path $lectures)) { throw "lectures folder removed" }
+Write-Host "ok: uninstalled ($($un.ExitCode)), lectures kept"

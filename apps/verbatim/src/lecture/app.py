@@ -50,6 +50,9 @@ def _tray(port: int, quit_app):
 
 
 def run(port: int = 7861, browser: bool = True) -> None:
+    from . import oscompat
+
+    oscompat.prepare_windows_app()
     if ui.already_running(port):
         if browser:
             ui.open_browser(port)

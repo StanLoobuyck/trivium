@@ -50,3 +50,22 @@ def test_pid_alive():
     child.wait()
     assert not oscompat.pid_alive(child.pid)
     assert not oscompat.pid_alive(0)
+
+
+def test_prepare_windows_app_is_a_no_op_elsewhere(monkeypatch):
+    if oscompat.WINDOWS:
+        pytest.skip("Windows: covered by the installer test in CI")
+    path = os.environ.get("PATH")
+    oscompat.prepare_windows_app()
+    assert os.environ.get("PATH") == path and not getattr(subprocess.Popen, "_verbatim_no_window", False)
+
+
+@pytest.mark.skipif(not oscompat.WINDOWS, reason="Windows only")
+def test_prepare_windows_app_finds_bundled_ffmpeg(tmp_path, monkeypatch):
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "ffmpeg.exe").write_bytes(b"")
+    monkeypatch.setattr(sys, "prefix", str(tmp_path / "verbatim" / ".venv"))
+    monkeypatch.setenv("PATH", "C:\\other")
+    oscompat.prepare_windows_app()
+    assert os.environ["PATH"].split(os.pathsep)[0] == str(tmp_path / "bin")
+    assert subprocess.run([sys.executable, "-c", "pass"]).returncode == 0  # still starts processes

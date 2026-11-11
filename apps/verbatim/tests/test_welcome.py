@@ -79,7 +79,15 @@ def test_setup_simple_sets_the_defaults_and_keeps_the_rest(xdg, tmp_path):
     conf = cfgmod.load_config()
     assert conf.app.simple and conf.app.welcomed
     assert conf.stt.providers == ["groq", "local"] and conf.stt.local.skip_on_battery is False
+    assert conf.stt.local.device == "auto" and conf.stt.local.model == "large-v3-turbo"
     assert conf.termfix.enabled is False
     assert conf.paths.jobs_dir == (tmp_path / "Mijn lessen" / "jobs").resolve()
     assert settings.key_status()["groq"] is True
     assert cfgmod.load_courses() == []
+
+
+def test_setup_simple_fast_whisper_and_bad_choice(xdg, tmp_path):
+    settings.setup_simple(tmp_path / "L", "fast")
+    assert cfgmod.load_config().stt.local.model == "small"
+    with pytest.raises(ValueError):
+        settings.setup_simple(tmp_path / "L", "huge")

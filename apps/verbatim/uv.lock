@@ -577,6 +577,9 @@ local = [
     { name = "nvidia-cublas-cu12" },
     { name = "nvidia-cudnn-cu12" },
 ]
+whisper-cpu = [
+    { name = "faster-whisper" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -587,6 +590,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
     { name = "faster-whisper", marker = "extra == 'local'", specifier = ">=1.1" },
+    { name = "faster-whisper", marker = "extra == 'whisper-cpu'", specifier = ">=1.1" },
     { name = "google-genai", specifier = ">=1.20" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "jinja2", specifier = ">=3.1" },
@@ -611,7 +615,7 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.30" },
     { name = "wordfreq", specifier = ">=3.1.1" },
 ]
-provides-extras = ["local"]
+provides-extras = ["local", "whisper-cpu"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest", specifier = ">=8.0" }]

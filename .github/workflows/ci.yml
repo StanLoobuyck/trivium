@@ -88,6 +88,25 @@ jobs:
       - run: choco install ffmpeg -y --no-progress
       - run: uv run pytest -q
 
+  # The Windows installer: built, installed silently on a clean machine and tried (packaging/windows/).
+  verbatim-installer:
+    needs: verbatim-windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/verbatim
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+      - run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+      - run: ./packaging/windows/build.ps1
+      - run: ./packaging/windows/test-install.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verbatim-windows-installer
+          path: apps/verbatim/dist/Verbatim-Setup-*.exe
+          retention-days: 30
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [sequo, hub]

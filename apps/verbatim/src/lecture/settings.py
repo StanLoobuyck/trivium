@@ -288,14 +288,20 @@ def finish_welcome() -> None:
     update_settings({"app": {"welcomed": True}})
 
 
-def setup_simple(folder: Path) -> None:
+WHISPER_CHOICES = {"accurate": "large-v3-turbo", "fast": "small"}  # measured on a CPU, CHANGELOG 2026-11-11
+
+
+def setup_simple(folder: Path, whisper: str = "accurate") -> None:
     """Simple mode for a new user (the Windows installer runs `lecture setup-simple`): no Mac, hub or LaTeX;
     Groq first with local Whisper as fallback; lectures in `folder`. Written to settings.yaml, so a second run
     (an update) only changes these keys and keeps the keys, courses and welcome state."""
+    if whisper not in WHISPER_CHOICES:
+        raise ValueError(f"whisper must be one of {', '.join(WHISPER_CHOICES)}")
     folder = folder.expanduser().resolve()
     update_settings({
         "app": {"simple": True},
         "paths": {"jobs_dir": str(folder / "jobs"), "inbox_dir": str(folder / "inbox")},
-        "stt": {"providers": ["groq", "local"], "local": {"skip_on_battery": False}},
+        "stt": {"providers": ["groq", "local"],
+                "local": {"skip_on_battery": False, "device": "auto", "model": WHISPER_CHOICES[whisper]}},
         "termfix": {"enabled": False},
     })

@@ -54,9 +54,11 @@ class Paths(_Strict):
 class LocalSttConfig(_Strict):
     model: str
     skip_on_battery: bool = True  # on battery the laptop GPU is only used when nothing else in the chain works
-    device: str
+    device: str  # cuda · cpu · auto (cuda when an NVIDIA GPU is usable, else cpu: laptops without one)
     compute_types: list[str]
     beam_size: int
+    cpu_compute_types: list[str] = Field(default_factory=lambda: ["int8"])  # int8 is the fast choice on a CPU
+    cpu_beam_size: int = 1  # beam search costs ~2-3x on a CPU for little gain
     temperatures: list[float]
     condition_on_previous_text: bool
     vad_filter: bool
