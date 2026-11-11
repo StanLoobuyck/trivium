@@ -1,19 +1,27 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Nieuw spoor: Verbatim voor Windows** (vriend, rechten, geen techneut, eigen laptop, ook Sequo). Keuzes eigenaar: echte Windows-versie met installer; transcriberen met Groq (gratis sleutel), lokaal Whisper als terugval; notities optioneel met Gemini; Mac-, hub-, LaTeX- en deelinstellingen verborgen; in de installer kiest hij zelf de map voor lessen en een van twee Whisper-modellen; Verbatim werkt samen met zijn Sequo (zonder hub). Fasen:
+1. **Spoor: Verbatim voor Windows** (vriend, rechten, geen techneut, eigen laptop; gebruikt **Velox + Verbatim**, geen Sequo). Keuzes eigenaar: echte Windows-versie met installer; transcriberen met Groq (gratis sleutel), lokaal Whisper als terugval; notities optioneel met Gemini; Mac, hub, LaTeX en delen verborgen; in de installer kiest hij zelf de map voor lessen en een van twee Whisper-modellen. Fasen:
    - **W1** code draait op Windows + CI — klaar (2026-11-11).
-   - **W2** app zonder systemd: één proces met UI + worker, tray-icoon, Windows-meldingen; eenvoudige modus verbergt Mac/hub/LaTeX/delen.
-   - **W3** welkomstscherm bij de eerste start: taal, Groq-sleutel (link, plakken, testknop), Gemini optioneel, vakken.
-   - **W4** Sequo ↔ Verbatim zonder hub: vakken uit Sequo in Verbatim, badge "notities klaar" in Sequo, rechtstreeks met de lokale Verbatim (127.0.0.1); eerst nagaan wat browsers toelaten.
-   - **W5** installer (`.exe` uit CI): map voor lessen en Whisper-model kiezen (snel/klein of nauwkeurig/groot; model downloadt bij eerste gebruik), Python + ffmpeg mee, Startmenu, start met Windows, verwijderen; zonder certificaat één SmartScreen-waarschuwing.
-   - **W6** updates in de app (melding + één klik, feed op de site zoals Velox) en een korte Nederlandse handleiding.
-   - **W7** test op zijn laptop (NVIDIA? de app ziet het zelf), fouten oplossen.
-2. **Volgende stap: W2.**
+   - **W2** `lecture app` (UI + worker in één proces, tray-icoon, meldingen via de tray) + eenvoudige modus (`app.simple`) — klaar (2026-11-11); tray nog niet op echte Windows gezien.
+   - **W3** welkomstscherm bij de eerste start: taal, Groq-sleutel (link, plakken, testknop), Gemini optioneel; nieuwe gebruiker begint met een **lege vakkenlijst** (nu krijgt hij de vakken uit de repo-`courses.yaml`); standaardketen `[groq, local]`.
+   - **W4** Velox → Verbatim op Windows: downloads in `Downloads\Verbatim\<vakcode>\` komen vanzelf binnen; een onbekende vakcode maakt zelf een vak aan (nu negeert de inbox die map).
+   - **W5** installer (`.exe` uit CI): map en Whisper-model kiezen (snel/klein of nauwkeurig/groot, eerst meten op Nederlands), Python + ffmpeg mee, Startmenu, start met Windows, verwijderen; zonder certificaat één SmartScreen-waarschuwing. Valkuil: in een bevroren build werkt `sys.executable -m lecture.cli worker` (knop "Start worker") niet.
+   - **W6** updates in de app (melding + één klik, feed op de site zoals Velox) + korte Nederlandse handleiding.
+   - **W7** test op zijn laptop, fouten oplossen.
+   - **W8 (optioneel, later)** Sequo zonder hub.
+2. **Volgende stap: W3.**
 3. **Velox in de Mac App Store** wacht nog op de vader: Admin-uitnodiging in App Store Connect + team-API-sleutel; bundel-id kiezen (nu tijdelijk `be.trivium.velox` in `safari-mac.sh`). Daarna bouwt en uploadt Claude ondertekend en schrijft teksten, schermafbeeldingen en privacylabels.
 4. **Wacht op eigenaar:** Mac-scherm terug met `~/velox-safari/resolution restore`; `~/inhaal-hub` en `.paar-fout-2026-11-02/` mogen weg na akkoord; `latex-notes.zip` uploaden; vrienden de Trivium-link sturen.
 5. **Niet getest:** echte Velox-download in Firefox/Chrome met de nieuwe mp4; geluid; webcamles in Safari. Onafgewerkt: slidekoppeling bij gedeelde lessen; `design light` (Firefox) wisselvallig.
 6. **Wensen/open:** in Safari webcam en slides apart; wachtrij van Verbatim naar de Mac; notitiemodel (nu Gemini); ondertitels (grootte/positie); afspeelkopie EBS Les 6. Niet te fixen: hoeken van de Velox-popup in Zen.
+
+## 2026-11-11 — Verbatim W2: één programma, eenvoudige modus
+- `lecture app`: webinterface (uvicorn in een thread) en worker in hetzelfde proces, tray-icoon met "Open Verbatim" en "Quit" (pystray + Pillow, alleen op Windows/macOS geïnstalleerd), meldingen via de tray (`notify.set_backend`). Draait er al een worker (systemd op Linux), dan alleen de UI. Zonder pystray loopt het tot Ctrl+C.
+- Eenvoudige modus (`app: {simple: true}` in de gebruikersconfig): geen Mac- en hubinstellingen (sleutels blijven), geen tab Delen, geen LaTeX-knop of -keuze per vak, geen Mac-presets bij modellen, archief zonder "video naar de Mac", geen termcontrole op de Mac (ook niet in de worker). Nieuw veld met standaardwaarde, dus lopende processen van de eigenaar blijven werken.
+- Bug gevonden: `already_running` zocht "Lecture Transcriber" op de pagina, maar die heet al een tijd "Verbatim"; een tweede start probeerde dezelfde poort. Hersteld en getest.
+- Nagekeken: `lecture app` in eenvoudige modus met een lege config op poort 7871, Chromium op 375 en 1440 px, licht en donker: tabs Modellen/Vakken/Verbindingen/Algemeen, onder Verbindingen alleen de sleutels, 0 px overloop, geen consolefouten.
+- Getest: 305 Verbatim (4 nieuw: app met nep-tray, tweede start, herkenning, eenvoudige modus), Windows-CI 299 + 6 overgeslagen, root 145. Niet getest: tray-icoon en meldingen op echte Windows.
 
 ## 2026-11-11 — Verbatim W1: draait op Windows
 - Aanleiding: een vriend (rechten, Windows) wil Verbatim; delen helpt niet (andere vakken). Verbatim draaide alleen op Linux.
