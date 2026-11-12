@@ -42,6 +42,7 @@ def _lecture_rows() -> list[dict]:
         m = read_json(d / "manifest.json")
         st = archive.status(d)
         rows.append({"id": d.name, "title": m.get("title") or d.name, "course": m.get("course"), "date": m.get("date"),
+                     "created": m.get("created"),
                      "duration_s": m.get("stages", {}).get("audio", {}).get("duration_s"),
                      "on_mac": st["on_mac"], "local_bytes": st["local_bytes"]})
     return rows

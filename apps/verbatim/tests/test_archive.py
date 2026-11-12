@@ -34,6 +34,18 @@ def test_past_courses_are_archived_unless_kept():
     assert list(ov["semesters"]) == ["2026-27 S1", "2025-26 S2"]
 
 
+def test_an_old_recording_downloaded_now_belongs_to_this_semester():
+    """Toledo's 'DEP Les 13 - April 12th 2023' downloaded in November 2026 went to the 2022-23 archive (G14,
+    2026-11-12): the day it was added decides the semester, the recording date stays its date."""
+    dep = Course(id="dep", name="DEP", language="nl", notes_language="nl")
+    ov = overview([dep], [{"course": "dep", "date": "2023-04-12", "created": "2026-11-12T22:57:12"}], date(2026, 11, 12))
+    assert ov["courses"]["dep"] == {"semester": "2026-27 S1", "archived": False, "explicit": False}
+    from lecture import library
+    rows = [{"course": "dep", "title": "Les 13 deel 1", "date": "2023-04-12", "created": "2026-11-12T22:57:12"}]
+    library.arrange(rows)
+    assert rows[0]["semester"] == "2026-27 S1"
+
+
 @pytest.fixture
 def job(xdg, tmp_path):
     inbox = tmp_path / "inbox"

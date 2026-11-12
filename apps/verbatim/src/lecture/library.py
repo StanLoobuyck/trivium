@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .naming import guess_title
-from .semesters import semester_of
+from .semesters import lecture_day, semester_of
 
 _LESSON = re.compile(r"\b(?:les|lecture|college|hoorcollege|week)\s*0*(\d+)", re.I)
 _PART = re.compile(r"\b(?:deel|part)\s*0*(\d+)", re.I)
@@ -56,7 +56,7 @@ def arrange(lectures: list[dict]) -> None:
     A lecture without a number sits after the numbered one held on or before its date."""
     for x in lectures:
         x["lesson"], x["part"] = parse_lesson(x["title"])
-        x["semester"] = semester_of(x["date"]) if x.get("date") else ""
+        x["semester"] = semester_of(lecture_day(x)) if lecture_day(x) else ""
         x["group"] = f"{x['course']}|{x['semester']}|{x['lesson']}" if x["lesson"] is not None and x["part"] else None
     by_course: dict[str, list[dict]] = {}
     for x in lectures:

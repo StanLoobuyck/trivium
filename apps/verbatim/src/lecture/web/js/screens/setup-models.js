@@ -34,7 +34,7 @@ export function sttSectionHtml(s) {
         </span>
       </li>`).join("")}</ol>
     ${adding === "stt" ? formHtml("stt") : `<div><button type="button" class="btn btn-small" data-add="stt">${t("m_add_stt")}</button></div>`}
-    <div class="list"><label class="row toggle-row"><span class="row-text"><b>${t("m_battery")}</b><span class="sub">${t(s.stt.on_battery ? "m_battery_now" : "m_battery_d")}</span></span>
+    <div class="list"><label class="row toggle-row"><span class="row-text"><b>${t("m_battery")}</b><span class="sub">${t((s.stt.on_battery ? "m_battery_now" : "m_battery_d") + (s.simple ? "_simple" : ""))}</span></span>
       <input type="checkbox" class="switch" id="skip-battery" ${s.stt.skip_on_battery ? "checked" : ""}></label></div>
   </section>`;
 }

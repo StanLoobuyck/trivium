@@ -61,7 +61,7 @@ function courseHtml(c, busy) {
       <div class="arch-media muted small">${mediaLine(c.lectures)}</div>
       <div class="arch-actions">
         <button class="btn btn-small" data-arch="${esc(c.id)}" data-to="${c.archived ? "0" : "1"}" ${busy ? "disabled" : ""}>${c.archived ? t("arch_course_back") : t("arch_course")}</button>
-        ${local ? `<button class="btn btn-small" data-move="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_move_media")}</button>` : ""}
+        ${local && !S.setup?.simple ? `<button class="btn btn-small" data-move="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_move_media")}</button>` : ""}
         ${onMac ? `<button class="btn btn-small" data-restore="${esc(c.id)}" ${busy ? "disabled" : ""}>${t("arch_restore")}</button>` : ""}
       </div>
     </div>

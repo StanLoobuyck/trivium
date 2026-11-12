@@ -134,13 +134,13 @@ def known_media(conf: Config) -> set[str]:
 
 def ensure_folders(conf: Config, courses: list[Course]) -> None:
     """A folder per course that isn't archived (never removes any)."""
-    from .semesters import course_semester, is_archived
+    from .semesters import course_semester, is_archived, lecture_day
 
     dates: dict[str, list[str]] = {}
     if conf.paths.jobs_dir.exists():
         for mf in conf.paths.jobs_dir.glob("*/manifest.json"):
             m = read_json(mf)
-            dates.setdefault(m.get("course"), []).append(m.get("date") or "")
+            dates.setdefault(m.get("course"), []).append(lecture_day(m))
     for c in courses:
         if c.id not in RESERVED and not is_archived(c, course_semester(c, dates.get(c.id, []))):
             (conf.paths.inbox_dir / c.id).mkdir(parents=True, exist_ok=True)

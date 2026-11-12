@@ -70,8 +70,8 @@ def stt_label(provider: str | None, conf) -> str:
         return m.label or (f"Whisper {m.model} · Mac at home" if m.provider == "mac" else f"{m.model} · Groq cloud")
     if provider == "mac":
         return f"Whisper {conf.stt.mac.model if conf.stt.mac else '?'} · Mac at home"
-    if provider == "local":
-        return f"Whisper {conf.stt.local.model} · your GPU"
+    if provider == "local":  # GPU or processor (device auto): "this laptop" is true either way
+        return f"Whisper {conf.stt.local.model} · {'your GPU' if conf.stt.local.device == 'cuda' else 'this laptop'}"
     return f"Whisper {conf.stt.model.removeprefix('whisper-')} · Groq cloud"
 
 
@@ -139,7 +139,7 @@ def lecture_summary(d: Path, queued: dict[str, dict], courses: dict, conf=None, 
     lessons = library_lessons() if lessons is None else lessons
     title = display_title(m.get("title") or d.name, Path(media).stem if media else None, m.get("date"),
                           lessons.get(m.get("course"), []), course.language if course else "nl")
-    return {"id": d.name, "title": title, "date": m.get("date"), "course": m.get("course"),
+    return {"id": d.name, "title": title, "date": m.get("date"), "created": m.get("created"), "course": m.get("course"),
             "course_name": course.name if course else m.get("course"), "status": status,
             "duration_s": st.get("audio", {}).get("duration_s"), "sections": sections, "has_notes": has_notes,
             "has_slides": bool(m.get("slides")), "queue": item,

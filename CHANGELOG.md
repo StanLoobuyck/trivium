@@ -1,11 +1,18 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **G14:** 0.2.2 geïnstalleerd na Verbatim afsluiten (NVIDIA-onderdelen in 1 min 31 s; GPU niet zichtbaar, wellicht Eco-modus). 0.2.3 (CI groen) stopt een draaiende Verbatim zelf. Daarbovenop nu: eigen API-sleutels, notitiemodellen leeg bij de start en allemaal verwijderbaar, "Start zonder slides" (zie de entry hieronder). Nog niet uitgebracht.
-2. **Volgende stap:** eigenaar test de nieuwe functies (via tag `verbatim-v0.2.3` en Bijwerken, of vanuit de repo); vraag vóór de tag. Daarna de checklist (Groq-sleutel, Velox, testles, Startmenu, herstart).
+1. **Verbatim is af** (geen "experimenteel" meer op de site). 0.2.3 getagd: eigen API-sleutels, notitiemodellen naar keuze, start zonder slides, installer sluit Verbatim. 0.2.4 getagd: semester volgt de dag van toevoegen, geen Mac meer in de Windows-versie.
+2. **Volgende stap:** eigenaar test 0.2.4 op Windows (Bijwerken in de app), daarna op Arch, daarna de minder technische vriend. Checklist: Groq-sleutel, Velox, testles, Startmenu, herstart, Modellen/Verbindingen, Start zonder slides, archief.
 3. **Niet getest / onaf:** de 0.2.3-installer is niet lokaal gecompileerd (geen Inno op Linux; alleen CI). Installeren als gewone gebruiker in CI (stap blokkeert niet); tray en meldingen op echte Windows; een volledige les via Velox op Windows. Velox 5.5.0 nog niet in de Edge-winkel.
 4. **Wacht op eigenaar:** G14-test; daarna de minder technische vriend; Mac-scherm terug (`~/velox-safari/resolution restore`), `latex-notes.zip` uploaden, Velox in de Mac App Store (wacht op de vader).
 5. **Later (W8, optioneel):** Sequo zonder hub. Open: notitiemodel (nu Gemini), ondertitels (grootte/positie), afspeelkopie EBS Les 6.
+
+## 2026-11-12 — Verbatim 0.2.4: semester van de dag van toevoegen, geen Mac in de Windows-versie, niet meer experimenteel
+- G14: de testles "DEP Les 13, part1 - April 12th 2023" (de lesgever hergebruikt een opname van 2023) kreeg datum 2023-04-12, dus semester 2022-23 S2, dus archief. Nu bepaalt de dag van toevoegen (`created` in het manifest) het semester, in de vakkenlijst, het archief, de bibliotheek en de inboxmappen; de opnamedatum blijft de datum van de les. Semestergrenzen ongewijzigd: S1 september–januari, S2 februari–augustus. Geldt voor elke versie (ook Linux).
+- Eenvoudige modus: geen knop "Video en audio naar de Mac" meer in het archief; batterijtekst zonder Mac; lokaal Whisper heet "deze laptop" i.p.v. "your GPU" (behalve met `device: cuda`). Tab Suggesties was al weg sinds 0.2.2 (die komen van Ollama op de Mac).
+- Site: "Experimenteel" weg bij Verbatim (landingspagina, privacy); privacy noemt de nieuwe aanbieders voor notities.
+- Geschiedenis: vier commits (`e338be4`, `93008a9`, `ddc5064`, `b41ab90`) herschreven op vraag van de eigenaar: auteur was "Claude" of het privé-e-mailadres; nu het noreply-adres. Inhoud identiek (zelfde tree), force-push met lease. `user.email` van deze repo staat nu op het noreply-adres.
+- Getest: Verbatim 332 (1 nieuw voor het semester), lokaal 1 bekende fout (symlinks op Windows vragen beheerdersrechten).
 
 ## 2026-11-12 — Verbatim: eigen API-sleutels, notitiemodellen naar keuze, start zonder slides
 - Keuzes eigenaar: notitiemodellen beginnen leeg (Claude vraagt Claude Code, nutteloos voor vrienden); een Gemini-sleutel voegt Gemini 3.8 Flash één keer toe en maakt het hoofdmodel als er nog geen is; elk model heeft Verwijderen, ook de ingebouwde (het volgende neemt over). Alleen bij de eerste `setup-simple` (geen `llm` in `settings.yaml`): een update houdt de keuze.

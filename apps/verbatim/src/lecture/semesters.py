@@ -28,6 +28,13 @@ def semester_of(d: date | str) -> str:
     return f"{start}-{(start + 1) % 100:02d} S{sem}"
 
 
+def lecture_day(lecture: dict) -> str:
+    """The day that decides a lecture's semester: when it was added to Verbatim ("created"), else its date.
+    Lecturers reuse old recordings: Toledo's "Les 13 - April 12th 2023" downloaded this semester belongs to this
+    semester, not to 2022-23 (owner, 2026-11-12). The recording date stays the lecture's date."""
+    return (lecture.get("created") or lecture.get("date") or "")[:10]
+
+
 def current_semester(today: date | None = None) -> str:
     return semester_of(today or date.today())
 
@@ -50,7 +57,7 @@ def overview(courses: list[Course], lectures: list[dict], today: date | None = N
     """Per course: semester + archived; per semester: its courses. lectures: dicts with course and date."""
     by_course: dict[str, list[str]] = {}
     for lec in lectures:
-        by_course.setdefault(lec.get("course"), []).append(lec.get("date") or "")
+        by_course.setdefault(lec.get("course"), []).append(lecture_day(lec))
     out = {"current": current_semester(today), "courses": {}, "semesters": {}}
     for c in courses:
         sem = course_semester(c, by_course.get(c.id, []))

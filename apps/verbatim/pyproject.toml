@@ -1,6 +1,6 @@
 [project]
 name = "lecture-transcriber"
-version = "0.2.3"
+version = "0.2.4"
 description = "Slide-aligned lecture transcripts and study notes from free cloud AI services"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
