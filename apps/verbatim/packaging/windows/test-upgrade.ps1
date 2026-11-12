@@ -25,9 +25,12 @@ $releases = gh api "repos/StanLoobuyck/trivium/releases?per_page=30" | ConvertFr
 $old = $releases | Where-Object { $_.tag_name -like "verbatim-v*" -and -not $_.draft -and (-not $From -or $_.tag_name -eq $From) } | Select-Object -First 1
 if (-not $old) { if ($From) { throw "release $From not found" }; Write-Host "no published release yet: nothing to update from"; exit 0 }
 $oldExe = Join-Path $tmp "old.exe"
-gh release download $old.tag_name --repo StanLoobuyck/trivium --pattern "Verbatim-Setup-*.exe" --output $oldExe
+gh release download $old.tag_name --repo StanLoobuyck/trivium --pattern "Verbatim-Setup-*.exe" --output $oldExe --clobber
+if ($LASTEXITCODE -ne 0) { throw "downloading $($old.tag_name) failed" }
 $p = Start-Process $oldExe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/LOG=$tmp\setup.log", "/LECTURES=`"$lectures`"", "/WHISPER=fast", "/TASKS=" -Wait -PassThru
 Wait-Installed $p "installing $($old.tag_name)"
+$oldVersion = & $py -I -c "from lecture import updates; print(updates.current_version())"
+if ("verbatim-v$oldVersion" -ne $old.tag_name) { throw "installed $oldVersion, expected $($old.tag_name)" }
 Write-Host "installed $($old.tag_name)"
 
 Write-Host "== use it like a user"
