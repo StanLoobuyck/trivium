@@ -14,6 +14,7 @@ export async function renderLecture(id, tab) {
   try { lec = await api(`/api/lectures/${encodeURIComponent(id)}`); }
   catch (e) { view.innerHTML = `<div class="empty"><h2>${t("not_found")}</h2><p>${esc(e.message)}</p></div>`; return; }
   if (!S.courses.length) S.courses = await api("/api/courses").catch(() => []);
+  if (!S.setup) S.setup = await api("/api/setup").catch(() => null);  // simple mode decides which tabs show
   lecTab = tab || (lec.notes ? "notes" : "transcript");
   const meta = [fmtDate(lec.date), lec.duration_s ? fmtDuration(lec.duration_s) : "", lec.sections ? t("sections_n", { n: lec.sections }) : ""].filter(Boolean);
   const canNotes = ["transcribed", "done", "failed", "notes_pending"].includes(lec.status);
@@ -211,7 +212,7 @@ function drawTabs() {
   if (n?.flashcards?.length) tabs.push(["cards", "tab_cards", n.flashcards.length]);
   if (n?.glossary?.length) tabs.push(["glossary", "tab_glossary", n.glossary.length]);
   if (lec.terms.length || lec.fixes.length) tabs.push(["terms", "tab_terms", lec.terms.length]);
-  if (lec.termfix || lec.segments.length) tabs.push(["suggest", "tab_suggest", (lec.termfix?.suggestions || []).filter((x) => x.status === "open").length]);
+  if (!S.setup?.simple && (lec.termfix || lec.segments.length)) tabs.push(["suggest", "tab_suggest", (lec.termfix?.suggestions || []).filter((x) => x.status === "open").length]);
   tabs.push(["review", "tab_review", null]);
   if (!tabs.some(([id]) => id === lecTab)) lecTab = "notes";
   $("#tabs").innerHTML = tabs.map(([id, key, count]) => `<button data-tab="${id}" aria-pressed="${lecTab === id}">${t(key)}${count ? `<span class="count">${count}</span>` : ""}</button>`).join("");
