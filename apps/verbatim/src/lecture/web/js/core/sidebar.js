@@ -104,7 +104,7 @@ function drawStatus() {
   const row = (label, state, tone, title = label) =>
     `<a class="model-row" href="#/setup" title="${esc(title)}"><span>${esc(label)}</span><span class="model-state"><span class="status-dot ${tone}"></span><span>${esc(state)}</span></span></a>`;
   const html = `${row(t("side_stt"), s.stt.active, !sttOk ? "bad" : fallback ? "wait" : "")}
-    ${row(t("side_notes"), s.notes.label, s.notes_paused ? "wait" : s.notes.ok ? "" : "bad")}
+    ${row(t("side_notes"), s.notes.label || t("r_none"),s.notes_paused ? "wait" : s.notes.ok ? "" : "bad")}
     ${s.termfix?.enabled ? row(t("side_terms"), t(s.termfix.ok ? "side_ready" : "side_unreachable"), s.termfix.ok ? "" : "bad", s.termfix.ok ? t("side_suggest") : s.termfix.detail) : ""}
     ${s.worker ? "" : row(t("side_worker"), t("worker_off"), "bad")}`;
   paint($("#side-status"), html);

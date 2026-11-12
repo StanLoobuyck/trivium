@@ -23,7 +23,19 @@ from .config import Course
 from .util import find_claude, read_json, write_json, write_text
 
 STT_MODES = {"mac": ["mac", "local", "groq"], "local": ["local", "groq"], "cloud": ["groq"]}
-KEY_FIELDS = {"groq": "GROQ_API_KEY", "gemini": "GEMINI_API_KEY", "mac": "LECTURE_MAC_TOKEN", "hub": "LECTURE_HUB_CODE"}
+# API keys of AI providers (Settings › Connections, and the "Add a model" form): name → (.env name, label, where
+# to get one). A model on another OpenAI-compatible server keeps its key under its own name (models.add_model).
+PROVIDER_KEYS = {
+    "groq": ("GROQ_API_KEY", "Groq", "https://console.groq.com/keys"),
+    "gemini": ("GEMINI_API_KEY", "Gemini", "https://aistudio.google.com/apikey"),
+    "openai": ("OPENAI_API_KEY", "OpenAI", "https://platform.openai.com/api-keys"),
+    "anthropic": ("ANTHROPIC_API_KEY", "Anthropic", "https://console.anthropic.com/settings/keys"),
+    "mistral": ("MISTRAL_API_KEY", "Mistral", "https://console.mistral.ai/api-keys"),
+    "openrouter": ("OPENROUTER_API_KEY", "OpenRouter", "https://openrouter.ai/keys"),
+}
+KEY_FIELDS = {**{name: env for name, (env, _, _) in PROVIDER_KEYS.items()},
+              "mac": "LECTURE_MAC_TOKEN", "hub": "LECTURE_HUB_CODE"}
+GEMINI_NOTES = "gemini:gemini-3.8-flash"  # added to the notes models when a Gemini key is saved
 
 
 def _read(path: Path) -> dict:
@@ -108,19 +120,74 @@ def key_status() -> dict[str, bool]:
     return {name: bool(keys[env]) for name, env in KEY_FIELDS.items()}
 
 
-def set_key(name: str, value: str) -> None:
+def _env_name(name: str) -> str:
+    """'gemini' → GEMINI_API_KEY; a model's own key ('LMSTUDIO_API_KEY') stays as it is."""
+    if name in KEY_FIELDS:
+        return KEY_FIELDS[name]
+    if cfgmod._OWN_KEY.fullmatch(name):
+        return name
+    raise ValueError(f"unknown key {name!r}")
+
+
+def set_key(name: str, value: str, add_models: bool = True) -> None:
+    """Save an API key in .env. add_models=False: the caller adds the model itself (the "Add a model" form)."""
     from dotenv import set_key as dotenv_set
 
-    if name not in KEY_FIELDS:
-        raise ValueError(f"unknown key {name!r}")
+    env = _env_name(name)
     value = value.strip()
     if not re.fullmatch(r"[A-Za-z0-9_\-.]{10,200}", value):
         raise ValueError("that doesn't look like an API key")
     path = cfgmod.env_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.touch(mode=0o600, exist_ok=True)
-    dotenv_set(str(path), KEY_FIELDS[name], value, quote_mode="never")
+    dotenv_set(str(path), env, value, quote_mode="never")
     path.chmod(0o600)
+    if env == "GEMINI_API_KEY" and add_models:
+        add_gemini_notes()
+
+
+def remove_key(name: str) -> None:
+    """Settings › Connections › Remove. Models that need the key stay, marked as missing it."""
+    from dotenv import dotenv_values, unset_key
+
+    env = _env_name(name)
+    path = cfgmod.env_path()
+    if path.exists() and env in dotenv_values(path):
+        unset_key(str(path), env, quote_mode="never")
+
+
+def add_gemini_notes() -> None:
+    """A Gemini key makes Gemini a notes model (owner's choice 2026-11-12), unless a Gemini model is already in
+    the list. With no notes model yet, it becomes the one that writes the notes."""
+    conf = cfgmod.load_config()
+
+    def is_gemini(entry: str) -> bool:
+        return entry.startswith("gemini:") or (entry.startswith("custom:") and conf.model_entry(entry).provider == "gemini")
+
+    if any(is_gemini(c) for c in conf.llm.notes_choices):
+        return
+    update_settings({"llm": {"notes_choices": [*conf.llm.notes_choices, GEMINI_NOTES]}})
+    if not conf.llm.tasks["notes"]:
+        set_notes_model(GEMINI_NOTES)
+
+
+def api_keys(conf) -> list[dict[str, Any]]:
+    """Settings › Connections: every provider key that is set or used by a model, Groq and Gemini always.
+    Only whether a key is set leaves this function, never the key."""
+    keys = cfgmod.load_keys()
+    used: dict[str, list[str]] = {}
+    for m in conf.models:
+        env = KEY_FIELDS["gemini"] if m.provider == "gemini" else m.key_name
+        if env:
+            used.setdefault(env, []).append(m.label or m.model)
+    out = []
+    for name, (env, label, url) in PROVIDER_KEYS.items():
+        if name in ("groq", "gemini") or keys.get(env) or env in used:
+            out.append({"name": name, "label": label, "url": url, "set": bool(keys.get(env)), "used_by": used.get(env, [])})
+    for env, by in used.items():
+        if env not in KEY_FIELDS.values():
+            out.append({"name": env, "label": ", ".join(by), "url": None, "set": bool(keys.get(env)), "used_by": by})
+    return out
 
 
 # --- courses -----------------------------------------------------------------------------------------------
@@ -298,6 +365,11 @@ def setup_simple(folder: Path, whisper: str = "accurate") -> None:
     if whisper not in WHISPER_CHOICES:
         raise ValueError(f"whisper must be one of {', '.join(WHISPER_CHOICES)}")
     folder = folder.expanduser().resolve()
+    if "llm" not in _read(cfgmod.settings_path()):
+        # First run: no notes models (Claude needs Claude Code; owner's choice 2026-11-12). A Gemini key adds
+        # Gemini (add_gemini_notes); an update keeps whatever the user chose since.
+        start = [GEMINI_NOTES] if key_status()["gemini"] else []
+        update_settings({"llm": {"notes_choices": start, "tasks": {"notes": start}}})
     update_settings({
         "app": {"simple": True},
         "paths": {"jobs_dir": str(folder / "jobs"), "inbox_dir": str(folder / "inbox")},

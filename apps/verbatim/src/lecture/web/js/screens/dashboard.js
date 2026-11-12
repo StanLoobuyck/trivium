@@ -129,6 +129,12 @@ function drawJobs() {
     stop(b.dataset.stop, () => post(`/api/queue/${b.dataset.stop}/stop`))));
   $$("[data-stop-media]", wrap).forEach((b) => b.addEventListener("click", () =>
     stop(b.dataset.stopMedia, () => post("/api/inbox/stop", { media: b.dataset.stopMedia }))));
+  $$("[data-start-media]", wrap).forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true;
+    try { await post("/api/inbox/start", { media: b.dataset.startMedia }); toast(t("inbox_started")); }
+    catch (e) { toast(e.message, true); b.disabled = false; }
+    refreshDashboard();
+  }));
 }
 function jobHtml(i) {
   const job = i.job ? i.job.split("/").pop() : null;
@@ -158,7 +164,7 @@ function inboxHtml(w) {
         <div class="prog-sub">${esc(courseName(w.course))} · ${t("inbox_label")}</div></div>
       <div class="prog-actions">${combining(w)
         ? `<button class="btn btn-small btn-plain" data-stop-media="${esc(w.media)}">${t("stop")}</button>`
-        : `<a class="btn btn-small" href="#/add">${t("inbox_add")}</a>`}</div>
+        : `${w.slides_wait ? `<button class="btn btn-small" data-start-media="${esc(w.media)}">${t("inbox_start")}</button>` : ""}<a class="btn btn-small ${w.slides_wait ? "btn-plain" : ""}" href="#/add">${t("inbox_add")}</a>`}</div>
     </div>
     <div class="prog-state"><span>${t("inbox_waiting")}</span><span class="muted">${esc(w.why)}</span></div>
   </div>`;

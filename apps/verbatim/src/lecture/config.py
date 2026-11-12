@@ -17,7 +17,10 @@ APP_NAME = "lecture-transcriber"
 # LECTURE_HOME overrides it, e.g. for tests.
 REPO_DIR = Path(os.environ.get("LECTURE_HOME", Path(__file__).resolve().parents[2]))
 
-KEY_NAMES = ("GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "LECTURE_MAC_TOKEN", "LECTURE_HUB_CODE")
+KEY_NAMES = ("GROQ_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
+             "MISTRAL_API_KEY", "LECTURE_MAC_TOKEN", "LECTURE_HUB_CODE")
+# A model on another OpenAI-compatible server gets its own key in .env: <MODEL ID>_API_KEY (models.add_model)
+_OWN_KEY = re.compile(r"[A-Z][A-Z0-9_]{0,60}_API_KEY")
 
 
 def config_dir() -> Path:
@@ -407,7 +410,7 @@ def load_keys() -> dict[str, str]:
     """API keys from the user's .env; real environment variables take precedence."""
     values = dotenv_values(env_path()) if env_path().exists() else {}
     keys = {}
-    for name in KEY_NAMES:
+    for name in dict.fromkeys([*KEY_NAMES, *(n for n in values if _OWN_KEY.fullmatch(n))]):
         value = os.environ.get(name) or values.get(name) or ""
         keys[name] = value.strip()
     return keys

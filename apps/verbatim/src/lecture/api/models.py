@@ -20,6 +20,7 @@ class ModelIn(BaseModel):
     label: str = ""
     base_url: str | None = None
     key_name: str | None = None
+    key: str | None = None  # the API key pasted in the form (never sent back)
 
 
 class OrderIn(BaseModel):
@@ -49,12 +50,24 @@ def list_models():
 
 @router.post("")
 def add_model(body: ModelIn):
-    return {"id": _apply(models.add_model, body.kind, body.preset, body.model, body.label, body.base_url, body.key_name)}
+    return {"id": _apply(models.add_model, body.kind, body.preset, body.model, body.label, body.base_url, body.key_name,
+                       body.key)}
 
 
 @router.delete("/{model_id}")
 def remove_model(model_id: str):
     _apply(models.remove_model, model_id)
+    return {"ok": True}
+
+
+class NotesIn(BaseModel):
+    entry: str
+
+
+@router.post("/notes/remove")
+def remove_notes(body: NotesIn):
+    """Any notes model, also the built-in ones; one the user added goes completely."""
+    _apply(models.remove_notes_choice, body.entry)
     return {"ok": True}
 
 

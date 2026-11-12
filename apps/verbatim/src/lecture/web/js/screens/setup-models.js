@@ -7,7 +7,11 @@ import { S, reason } from "../core/state.js";
 import { toast } from "../core/ui.js";
 
 const STT_PRESETS = ["mac", "groq"];
-const NOTES_PRESETS = ["ollama-mac", "groq", "openrouter", "claude", "gemini", "openai"];
+// preset → the API key it uses (s.keys / s.api_keys name); "other" gets a key of its own (optional)
+const NOTES_PRESETS = { openai: "openai", anthropic: "anthropic", gemini: "gemini", groq: "groq", mistral: "mistral",
+  openrouter: "openrouter", other: null, "ollama-mac": null, claude: null };
+const NO_KEY = ["ollama-mac", "claude"];
+const NOT_SIMPLE = ["ollama-mac", "claude"];  // need the Mac or Claude Code: not for the Windows app
 let adding = null;  // "stt" | "notes" while that section's form is open
 
 const dot = (ok) => `<span class="status-dot ${ok ? "" : "bad"}" aria-hidden="true"></span>`;
@@ -38,7 +42,8 @@ export function sttSectionHtml(s) {
 export function notesSectionHtml(s) {
   return `<section class="setup-section">
     <h2>${t("s_notes")}</h2>
-    <ol class="list rank">${s.notes.choices.map((c) => `
+    ${s.notes.choices.length ? "" : `<p class="muted small">${t("m_notes_empty")}</p>`}
+    <ol class="list rank" ${s.notes.choices.length ? "" : "hidden"}>${s.notes.choices.map((c) => `
       <li class="rank-row ${c.value === s.notes.choice ? "on" : ""}">
         <button type="button" class="rank-what rank-pick" data-model="${esc(c.value)}">
           <b>${esc(c.label)}${c.value === s.notes.choice ? ` <span class="muted small">· ${t("m_main")}</span>` : ""}</b>
@@ -46,7 +51,7 @@ export function notesSectionHtml(s) {
         <span class="rank-actions">
           <span class="test-out muted small" data-test-out="notes:${esc(c.value)}"></span>
           ${rowBtn(`data-test="notes" data-entry="${esc(c.value)}"`, t("m_test"))}
-          ${c.value.startsWith("custom:") ? rowBtn(`data-remove="${esc(c.value.slice(7))}"`, t("m_remove")) : ""}
+          ${rowBtn(`data-remove-notes="${esc(c.value)}"`, t("m_remove"))}
         </span>
       </li>`).join("")}</ol>
     ${adding === "notes" ? formHtml("notes") : `<div><button type="button" class="btn btn-small" data-add="notes">${t("m_add_notes")}</button></div>`}
@@ -54,15 +59,17 @@ export function notesSectionHtml(s) {
 }
 
 function formHtml(kind) {
-  const presets = (kind === "stt" ? STT_PRESETS : NOTES_PRESETS).filter((p) => !(S.setup?.simple && p.includes("mac")));
+  const presets = kind === "stt" ? STT_PRESETS.filter((p) => !(S.setup?.simple && p === "mac"))
+    : Object.keys(NOTES_PRESETS).filter((p) => !(S.setup?.simple && NOT_SIMPLE.includes(p)));
   return `<form class="add-model panel" id="add-model" data-kind="${kind}">
     <h3>${t("m_add_title")}</h3>
     <div class="add-model-grid">
       <label class="form-field">${t("m_preset")}<select name="preset">${presets.map((p) => `<option value="${p}">${esc(t("p_" + p))}</option>`).join("")}</select></label>
-      <label class="form-field">${t("m_model")}<input name="model" required placeholder="${t("m_model_ph")}"></label>
+      <label class="form-field">${t("m_model")}<input name="model" required placeholder="${t("m_model_ph")}" autocomplete="off" spellcheck="false"></label>
       <label class="form-field">${t("m_label")}<input name="label" placeholder="${t("m_label_ph")}"></label>
-      <label class="form-field only-openai" hidden>${t("m_base")}<input name="base_url" placeholder="http://localhost:1234/v1"></label>
-      <label class="form-field only-openai" hidden>${t("m_key")}<input name="key_name" placeholder="${t("m_key_ph")}"></label>
+      <label class="form-field only-other" hidden>${t("m_base")}<input name="base_url" placeholder="http://localhost:1234/v1" autocomplete="off" spellcheck="false"></label>
+      ${kind === "notes" ? `<label class="form-field only-key" hidden>${t("m_key")}<input name="key" type="password" autocomplete="off" spellcheck="false">
+        <a class="small key-link" target="_blank" rel="noopener" hidden>${t("m_get_key")}</a></label>` : ""}
     </div>
     <div class="row-end"><span class="error" id="add-model-error"></span>
       <button type="button" class="btn btn-small" id="add-model-cancel">${t("cancel")}</button>
@@ -95,6 +102,11 @@ export function bindModels(s, rerender) {
     try { await post("/api/models/order", { order }); } catch (e) { toast(e.message, true); }
     rerender();
   }));
+  $$("[data-remove-notes]").forEach((b) => b.addEventListener("click", async () => {
+    try { await post("/api/models/notes/remove", { entry: b.dataset.removeNotes }); toast(t("saved")); }
+    catch (e) { toast(e.message, true); }
+    rerender();
+  }));
   $$("[data-remove]").forEach((b) => b.addEventListener("click", async () => {
     try { await api(`/api/models/${encodeURIComponent(b.dataset.remove)}`, { method: "DELETE" }); toast(t("saved")); }
     catch (e) { toast(e.message, true); }
@@ -102,15 +114,26 @@ export function bindModels(s, rerender) {
   }));
   const form = $("#add-model");
   if (!form) return;
-  const syncOpenai = () => $$(".only-openai", form).forEach((el) => { el.hidden = form.preset.value !== "openai"; });
-  form.preset.addEventListener("change", syncOpenai);
-  syncOpenai();
+  // the address only for another server; the key field for every provider that needs one, empty when it is saved
+  const syncPreset = () => {
+    const p = form.preset.value, keyName = NOTES_PRESETS[p];
+    $$(".only-other", form).forEach((el) => { el.hidden = p !== "other"; });
+    if (!form.key) return;
+    const info = (s.api_keys || []).find((k) => k.name === keyName);
+    form.key.closest(".only-key").hidden = NO_KEY.includes(p) || form.dataset.kind !== "notes";
+    form.key.placeholder = info?.set ? t("m_key_saved") : p === "other" ? t("m_key_optional") : t("m_key_ph");
+    const link = $(".key-link", form), url = keyName && s.key_links?.[keyName];
+    link.hidden = !url;
+    if (url) link.href = url;
+  };
+  form.preset.addEventListener("change", syncPreset);
+  syncPreset();
   form.model.focus();
   $("#add-model-cancel").addEventListener("click", () => { adding = null; rerender(); });
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const body = { kind: form.dataset.kind, preset: form.preset.value, model: form.model.value.trim(), label: form.label.value.trim(),
-      base_url: form.base_url.value.trim() || null, key_name: form.key_name.value.trim() || null };
+      base_url: form.base_url.value.trim() || null, key: form.key?.value.trim() || null };
     try { await post("/api/models", body); adding = null; toast(t("saved")); rerender(); }
     catch (err) { $("#add-model-error").textContent = err.message; }
   });

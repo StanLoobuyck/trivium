@@ -43,9 +43,9 @@ def test_stt_mode_outputs_and_rollback(conf_dir):
 def test_keys_written_private_and_comments_kept(conf_dir):
     env = conf_dir / ".env"
     env.write_text("# keys\nGROQ_API_KEY=\n")
-    assert settings.key_status() == {"groq": False, "gemini": False, "mac": False, "hub": False}
+    assert not any(settings.key_status().values())
     settings.set_key("gemini", "AIzaSyTESTKEY1234567890")
-    assert settings.key_status() == {"groq": False, "gemini": True, "mac": False, "hub": False}
+    assert [k for k, v in settings.key_status().items() if v] == ["gemini"]
     assert env.read_text().startswith("# keys") and (sys.platform == "win32" or stat.S_IMODE(env.stat().st_mode) == 0o600)
     with pytest.raises(ValueError):
         settings.set_key("gemini", "not a key; rm -rf")

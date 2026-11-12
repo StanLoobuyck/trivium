@@ -7,8 +7,9 @@ import time
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
-from lecture import inbox
+from lecture import inbox, webapp
 from lecture import queue as q
 from lecture.config import load_config, load_courses
 
@@ -114,6 +115,29 @@ def test_moved_old_recording_still_gets_its_full_wait(box, monkeypatch):
     assert f["ready"] and [Path(s).name for s in f["slides"]] == ["les 1.pdf"]
 
 
+def test_start_without_slides_skips_the_wait(box, monkeypatch):
+    """Owner's request 2026-11-12: Start without slides on a lecture that waits for its deck (10 or 30 min)."""
+    conf, root, queue, tick = box
+    monkeypatch.setattr(q, "Queue", lambda: queue)
+    dep = root / "digitale-elektronica"
+    put(dep / "les 1.pdf", 3600)
+    put(dep / "les 3.mp4", 120)                               # numbered decks, none for lecture 3: waits 30 min
+    put(root / "algemene-economie" / "week 2.mp4", 120)       # empty shelf: waits 10 min
+    put(dep / "les 1.mp4", 5)                                 # has its deck, still downloading: no button
+    found = {Path(f["media"]).name: f for f in inbox.scan(conf, load_courses())}
+    assert found["les 3.mp4"]["slides_wait"] and found["week 2.mp4"]["slides_wait"]
+    assert not found["les 1.mp4"]["slides_wait"]
+
+    client = TestClient(webapp.create_app(), base_url="http://127.0.0.1")
+    W = {"x-lecture-ui": "1"}
+    assert client.post("/api/inbox/start", json={"media": found["les 1.mp4"]["media"]}, headers=W).status_code == 404
+    for name in ("les 3.mp4", "week 2.mp4"):
+        assert client.post("/api/inbox/start", json={"media": found[name]["media"]}, headers=W).status_code == 200
+    added = tick(queue, conf)
+    assert sorted((i["title"], i["slides"]) for i in added) == [("Les 3", []), ("Week 2", [])]
+    assert inbox.no_slides(conf) == set()                    # forgotten once queued
+
+
 # --- simple mode: Velox folders become courses -------------------------------------------------------------
 
 import httpx  # noqa: E402
@@ -183,6 +207,7 @@ def test_tick_queues_velox_download_with_notes_when_gemini_is_set(simple_box, mo
     monkeypatch.setattr(q, "Queue", lambda: queue)
     monkeypatch.setattr(inbox, "catalogue_name", lambda code, client=None: "Inleiding tot het recht")
     monkeypatch.setattr(inbox, "EMPTY_SHELF_WAIT_S", 0)
+    monkeypatch.setattr(settings, "claude_login", lambda: {"installed": False, "logged_in": None})  # this laptop has it
     put(dl / "C00A1A" / "Hoorcollege 1.mp4", 120)
     added = tick(queue, conf)
     assert [(i["course"], i["notes"]) for i in added] == [("inleiding-tot-het-recht", "never")]  # no Gemini key

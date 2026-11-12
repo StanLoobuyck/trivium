@@ -139,7 +139,7 @@ def test_setup_reports_models_without_secrets_and_applies_changes(env, monkeypat
     s = client.get("/api/setup").json()
     assert s["notes"]["label"] == "Claude Sonnet 5.5" and s["notes"]["detail"] == "claude_sub"
     assert s["outputs"] == {"exam_hints": False, "quiz": False, "flashcards": False, "glossary": False}
-    assert "email" not in json.dumps(s) and set(s["keys"]) == {"groq", "gemini", "mac", "hub"}
+    assert "email" not in json.dumps(s) and set(s["keys"]) == {"groq", "gemini", "openai", "anthropic", "mistral", "openrouter", "mac", "hub"}
     assert client.post("/api/setup/notes-model", headers=W, json={"value": "claude:claude-haiku-5-5"}).status_code == 200
     assert client.get("/api/setup").json()["notes"]["label"] == "Claude Haiku 5.5"
     assert client.post("/api/setup/stt", headers=W, json={"value": "nonsense"}).status_code == 400

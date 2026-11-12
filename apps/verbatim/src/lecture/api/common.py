@@ -97,7 +97,7 @@ def step_model(item: dict, conf) -> str | None:
             if prov:
                 return stt_label(prov, conf)
         return stt_label(conf.stt.providers[0], conf)
-    if item["status"] == "notes":
+    if item["status"] == "notes" and conf.llm.tasks["notes"]:
         return llm_label(conf.llm.tasks["notes"][0], conf)
     return None
 

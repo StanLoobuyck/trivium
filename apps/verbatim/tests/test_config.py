@@ -47,11 +47,12 @@ def test_bad_task_chain_is_rejected(xdg):
 
 def test_keys_from_env_file_and_environment(xdg, monkeypatch):
     xdg.mkdir(parents=True)
-    (xdg / ".env").write_text("GROQ_API_KEY=from-file\nGEMINI_API_KEY= spaced \n")
+    (xdg / ".env").write_text("GROQ_API_KEY=from-file\nGEMINI_API_KEY= spaced \nLM_STUDIO_API_KEY=own\nPATH=no\n")
     monkeypatch.setenv("OPENROUTER_API_KEY", "from-env")
     keys = cfg.load_keys()
     assert keys == {"GROQ_API_KEY": "from-file", "GEMINI_API_KEY": "spaced", "OPENROUTER_API_KEY": "from-env",
-                    "LECTURE_MAC_TOKEN": "", "LECTURE_HUB_CODE": ""}
+                    "OPENAI_API_KEY": "", "ANTHROPIC_API_KEY": "", "MISTRAL_API_KEY": "",
+                    "LECTURE_MAC_TOKEN": "", "LECTURE_HUB_CODE": "", "LM_STUDIO_API_KEY": "own"}  # a model's own key; not PATH
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="no Unix file modes on Windows")

@@ -150,10 +150,14 @@ def setup():
                 "fallback": bool(first_ok), "order": order,
                 "skip_on_battery": conf.stt.local.skip_on_battery, "on_battery": on_battery()},
         "claude_plan": plan,
-        "notes": {"choice": chain[0], "label": llm_label(chain[0], conf), "ok": notes_ok(chain[0])[0],
-                  "detail": notes_ok(chain[0])[1], "choices": choices, "fallbacks": fallbacks},
+        # no notes model yet (simple mode starts empty): choice None, detail "none"
+        "notes": {"choice": chain[0] if chain else None, "label": llm_label(chain[0], conf) if chain else "",
+                  "ok": bool(chain) and notes_ok(chain[0])[0], "detail": notes_ok(chain[0])[1] if chain else "none",
+                  "choices": choices, "fallbacks": fallbacks, "any_ok": any(c["ok"] for c in choices)},
         "outputs": conf.notes.outputs.model_dump(),
         "keys": keys,
+        "api_keys": settings.api_keys(conf),
+        "key_links": {name: url for name, (_, _, url) in settings.PROVIDER_KEYS.items()},
         "mac": {"url": conf.stt.mac.url if conf.stt.mac else None, "token": keys["mac"]},
         "hub": {"url": conf.hub.url, "code": keys["hub"]},
         "worker": common.worker_running(),
@@ -205,6 +209,16 @@ def set_outputs(body: Outputs):
 def set_key(body: KeyIn):
     from .. import settings
     return _apply(settings.set_key, body.name, body.value)
+
+
+class KeyName(BaseModel):
+    name: str
+
+
+@router.post("/api/setup/key/remove")
+def remove_key(body: KeyName):
+    from .. import settings
+    return _apply(settings.remove_key, body.name)
 
 
 @router.post("/api/setup/key/test")

@@ -77,20 +77,22 @@ export async function renderSetup(refresh = false) {
         <p class="muted small" id="hub-result" aria-live="polite"></p>
       </section>`}
       <section class="setup-section">
-        <h2>${t("s_keys")}</h2><div class="list">${[["groq", "Groq", "https://console.groq.com/keys"], ["gemini", "Gemini", "https://aistudio.google.com/apikey"]].map(([k, label, url]) => `
+        <h2>${t("s_keys")}</h2><p class="muted small">${t("s_keys_sub")}</p><div class="list">${s.api_keys.map((k) => `
           <div class="key-row">
-            <span><b>${label}</b> <span class="pill ${s.keys[k] ? "ok" : ""}">${s.keys[k] ? t("k_set") : t("k_missing")}</span></span>
-            <input type="password" data-key="${k}" placeholder="${t("k_paste")}" autocomplete="off">
-            <span style="display:flex;gap:6px"><button class="btn btn-small" data-savekey="${k}">${t("k_save")}</button>
-              <a class="btn btn-small btn-plain" href="${url}" target="_blank" rel="noopener">${t("k_get")}</a></span>
+            <span><b>${esc(k.label)}</b> <span class="pill ${k.set ? "ok" : ""}">${k.set ? t("k_set") : t("k_missing")}</span>
+              ${k.used_by.length ? `<span class="muted small">${esc(t("k_used_by", { names: k.used_by.join(", ") }))}</span>` : ""}</span>
+            <input type="password" data-key="${esc(k.name)}" placeholder="${t("k_paste")}" autocomplete="off" aria-label="${esc(k.label)}">
+            <span style="display:flex;gap:6px"><button class="btn btn-small" data-savekey="${esc(k.name)}">${t("k_save")}</button>
+              ${k.set ? `<button class="btn btn-small btn-plain" data-removekey="${esc(k.name)}">${t("k_remove")}</button>` : ""}
+              ${k.url ? `<a class="btn btn-small btn-plain" href="${esc(k.url)}" target="_blank" rel="noopener">${t("k_get")}</a>` : ""}</span>
           </div>`).join("")}</div>
       </section>
 `,
     ...(s.simple ? {} : { share: shareSectionHtml }),
     general: () => `${s.simple ? `      <section class="setup-section">
         <h2>${t("s_auto")}</h2><div class="list">
-          <label class="row toggle-row"><span class="row-text"><b>${t("o_auto_notes")}</b><span class="sub">${t(s.keys.gemini ? "o_auto_notes_d" : "o_auto_notes_nokey")}</span></span>
-            <input type="checkbox" class="switch" id="auto-notes" ${s.auto_notes && s.keys.gemini ? "checked" : ""} ${s.keys.gemini ? "" : "disabled"}></label></div>
+          <label class="row toggle-row"><span class="row-text"><b>${t("o_auto_notes")}</b><span class="sub">${t(s.notes.any_ok ? "o_auto_notes_d" : "o_auto_notes_nokey")}</span></span>
+            <input type="checkbox" class="switch" id="auto-notes" ${s.auto_notes && s.notes.any_ok ? "checked" : ""} ${s.notes.any_ok ? "" : "disabled"}></label></div>
       </section>
 ` : ""}      <section class="setup-section">
         <h2>${t("s_outputs")}</h2><div class="list">${["exam_hints", "quiz", "flashcards", "glossary"].map((k) => `
@@ -145,6 +147,7 @@ export async function renderSetup(refresh = false) {
     const input = $(`[data-key="${b.dataset.savekey}"]`);
     if (input.value.trim()) apply("/api/setup/key", { name: b.dataset.savekey, value: input.value.trim() });
   }));
+  $$("[data-removekey]").forEach((b) => b.addEventListener("click", () => apply("/api/setup/key/remove", { name: b.dataset.removekey })));
   $("#setup-start")?.addEventListener("click", startWorker);
   $("#hub-save")?.addEventListener("click", () => apply("/api/setup/hub", { url: $("#hub-url").value.trim() }));
   $("#hub-import")?.addEventListener("click", async (e) => {

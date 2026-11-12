@@ -110,6 +110,21 @@ def inbox_waiting():
     return _inbox_cache["data"]
 
 
+@router.post("/api/inbox/start")
+def inbox_start(body: dict = Body(...)):
+    """Start a recording that waits for its slides right away, without slides (the worker queues it next round)."""
+    from .. import inbox
+
+    conf = cfgmod.load_config()
+    media = Path(str(body.get("media") or "")).resolve()
+    waiting = {Path(f["media"]).resolve() for f in inbox.scan(conf, cfgmod.load_courses()) if f.get("slides_wait")}
+    if media not in waiting:
+        raise HTTPException(404, "not waiting for slides")
+    inbox.start_without_slides(conf, media)
+    _inbox_cache["data"] = None
+    return {"ok": True}
+
+
 @router.post("/api/inbox/stop")
 def inbox_stop(body: dict = Body(...)):
     """Stop a recording that waits in the watch folder (also while slides and webcam are being combined):

@@ -16,14 +16,18 @@ from typing import Any
 from . import config as cfgmod
 from .config import Config, ModelEntry
 
-# Presets for the "Add a model" form: provider type + address + key, so the user only types the model id
+# Presets for the "Add a model" form: provider type + address + key, so the user only types the model id (and
+# pastes a key the first time). Anthropic and Mistral also speak the OpenAI chat API.
 NOTES_PRESETS = {
-    "ollama-mac": {"provider": "openai", "base_url": "http://my-mac:11434/v1", "key_name": None},
+    "openai": {"provider": "openai", "base_url": "https://api.openai.com/v1", "key_name": "OPENAI_API_KEY"},
+    "anthropic": {"provider": "openai", "base_url": "https://api.anthropic.com/v1/", "key_name": "ANTHROPIC_API_KEY"},
+    "gemini": {"provider": "gemini", "key_name": "GEMINI_API_KEY"},
     "groq": {"provider": "openai", "base_url": "https://api.groq.com/openai/v1", "key_name": "GROQ_API_KEY"},
+    "mistral": {"provider": "openai", "base_url": "https://api.mistral.ai/v1", "key_name": "MISTRAL_API_KEY"},
     "openrouter": {"provider": "openai", "base_url": "https://openrouter.ai/api/v1", "key_name": "OPENROUTER_API_KEY"},
-    "claude": {"provider": "claude"},
-    "gemini": {"provider": "gemini"},
-    "openai": {"provider": "openai"},  # any other OpenAI-compatible server: the user gives base_url (+ key name)
+    "other": {"provider": "openai"},  # any other OpenAI-compatible server: the user gives base_url (+ a key)
+    "ollama-mac": {"provider": "openai", "base_url": "http://my-mac:11434/v1", "key_name": None},
+    "claude": {"provider": "claude"},  # Claude Code on this computer (not in simple mode)
 }
 STT_PRESETS = {"mac": {"provider": "mac"}, "groq": {"provider": "groq"}}
 
@@ -43,28 +47,42 @@ def new_id(label: str, taken: set[str]) -> str:
 
 
 def add_model(kind: str, preset: str, model: str, label: str = "", base_url: str | None = None,
-              key_name: str | None = None) -> str:
-    """Add a model (validated by loading the config); speech-to-text models go to the end of the order."""
-    from .settings import update_settings
+              key_name: str | None = None, key: str | None = None) -> str:
+    """Add a model (validated by loading the config); speech-to-text models go to the end of the order.
+    key: the API key pasted in the form, saved in .env under the provider's name (or the model's own name for
+    another server); needed unless that key is already saved. With no notes model yet, this one writes them."""
+    from .settings import set_key, set_notes_model, update_settings
 
     presets = STT_PRESETS if kind == "stt" else NOTES_PRESETS
     if preset not in presets:
         raise ValueError(f"unknown provider {preset!r}")
+    if not model.strip():
+        raise ValueError("enter the model's name")
     conf = cfgmod.load_config()
     spec = {**presets[preset]}
+    model_id = new_id(label or model, {m.id for m in conf.models})
     if preset == "ollama-mac":  # same machine as the speech-to-text server
         spec["base_url"] = f"http://{urlsplit(conf.stt.mac.url).hostname}:11434/v1"
-    if spec["provider"] == "openai" and preset == "openai":
-        spec.update(base_url=base_url, key_name=key_name or None)
-    entry = {"id": new_id(label or model, {m.id for m in conf.models}), "kind": kind, "model": model.strip(),
-             "label": label.strip(), **{k: v for k, v in spec.items() if v is not None}}
+    if preset == "other":
+        spec.update(base_url=(base_url or "").strip() or None,
+                    key_name=key_name or (f"{model_id.upper().replace('-', '_')}_API_KEY" if key else None))
+    key = (key or "").strip()
+    env = spec.get("key_name")
+    if env and not key and not cfgmod.load_keys().get(env):
+        raise ValueError("paste the API key")
+    entry = {"id": model_id, "kind": kind, "model": model.strip(), "label": label.strip(),
+             **{k: v for k, v in spec.items() if v is not None and not (k == "key_name" and spec["provider"] == "gemini")}}
     ModelEntry.model_validate(entry)
+    if key and env:
+        set_key(env, key, add_models=False)  # checks the format before anything is saved
     patch: dict[str, Any] = {"models": [*_settings_models(), entry]}
     if kind == "stt":
         patch["stt"] = {"providers": [*conf.stt.providers, f"custom:{entry['id']}"]}
     else:
         patch["llm"] = {"notes_choices": [*conf.llm.notes_choices, f"custom:{entry['id']}"]}
     update_settings(patch)
+    if kind == "notes" and not conf.llm.tasks["notes"]:
+        set_notes_model(f"custom:{entry['id']}")
     return entry["id"]
 
 
@@ -79,9 +97,36 @@ def remove_model(model_id: str) -> None:
         order = [p for p in conf.stt.providers if p != ref]
         patch["stt"] = {"providers": order or ["groq"]}
     if ref in conf.llm.notes_choices or ref in conf.llm.tasks["notes"]:
-        patch["llm"] = {"notes_choices": [c for c in conf.llm.notes_choices if c != ref],
-                        "tasks": {"notes": [c for c in conf.llm.tasks["notes"] if c != ref] or conf.llm.tasks["notes"][:1]}}
+        patch["llm"] = _without_notes(conf, ref)
     update_settings(patch)
+    _new_main(conf, ref)
+
+
+def _without_notes(conf: Config, entry: str) -> dict[str, Any]:
+    return {"notes_choices": [c for c in conf.llm.notes_choices if c != entry],
+            "tasks": {"notes": [c for c in conf.llm.tasks["notes"] if c != entry]}}
+
+
+def _new_main(before: Config, removed: str) -> None:
+    """The removed model wrote the notes: the next one in the list takes over (none left: no notes)."""
+    from .settings import set_notes_model
+
+    if before.llm.tasks["notes"][:1] == [removed] and (rest := cfgmod.load_config().llm.notes_choices):
+        set_notes_model(rest[0])
+
+
+def remove_notes_choice(entry: str) -> None:
+    """Settings › Notes model › Remove, also for the built-in ones (Claude, Gemini): owner's choice 2026-11-12.
+    A model the user added goes completely (remove_model)."""
+    from .settings import update_settings
+
+    if entry.startswith("custom:"):
+        return remove_model(entry[7:])
+    conf = cfgmod.load_config()
+    if entry not in conf.llm.notes_choices and entry not in conf.llm.tasks["notes"]:
+        raise ValueError(f"unknown notes model {entry!r}")
+    update_settings({"llm": _without_notes(conf, entry)})
+    _new_main(conf, entry)
 
 
 def set_stt_order(order: list[str]) -> None:

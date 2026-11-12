@@ -419,6 +419,11 @@ def notes_providers(conf: Config, rep: Reporter, only: str | None = None) -> lis
     for entry in conf.llm.tasks["notes"]:
         if only is None or entry.split(":", 1)[0] == only:
             out.append((entry, notes_factory(conf, rep, entry)))
+    if not out and only is None:  # no notes model chosen: the job waits with this reason (notes_pending)
+        def none():
+            from .providers.llm import LLMUnavailable
+            raise LLMUnavailable("no notes model yet: add one in Settings › Models")
+        return [("notes", none)]
     if not out:
         raise ValueError(f"no '{only}' entry in llm.tasks.notes")
     return out

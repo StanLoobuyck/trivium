@@ -92,6 +92,33 @@ def unignore(conf: Config, media: Path) -> None:
         write_json(_ignored_file(conf), sorted(left))
 
 
+def _no_slides_file(conf: Config) -> Path:
+    return conf.paths.jobs_dir / "inbox_no_slides.json"
+
+
+def no_slides(conf: Config) -> set[str]:
+    """Recordings the user started without slides (resolved paths): they skip the wait for slides."""
+    path = _no_slides_file(conf)
+    return set(read_json(path) or []) if path.exists() else set()
+
+
+def start_without_slides(conf: Config, media: Path) -> None:
+    """Bezig › Start without slides (owner's request 2026-11-12): queued on the next round without waiting
+    the 10 or 30 min for slides; decks already on the shelf are left out too."""
+    from .util import write_json
+
+    conf.paths.jobs_dir.mkdir(parents=True, exist_ok=True)
+    write_json(_no_slides_file(conf), sorted(no_slides(conf) | {str(Path(media).resolve())}))
+
+
+def _forget_no_slides(conf: Config, media: Path) -> None:
+    from .util import write_json
+
+    left = no_slides(conf) - {str(Path(media).resolve())}
+    if _no_slides_file(conf).exists():
+        write_json(_no_slides_file(conf), sorted(left))
+
+
 def known_media(conf: Config) -> set[str]:
     """Recordings already in a job or in the queue, or stopped by the user (resolved paths)."""
     from .queue import Queue
@@ -178,16 +205,25 @@ def adopt_new_codes(conf: Config, courses: list[Course], client=None) -> list[Co
 
 
 def notes_policy(conf: Config) -> str:
-    """Notes for lectures from the inbox: only in simple mode, when switched on and a Gemini key is set."""
-    from .settings import key_status
+    """Notes for lectures from the inbox: only in simple mode, when switched on and a notes model can be used
+    (any of them: Gemini with its key, or a model the user added with a key)."""
+    if not (conf.app.simple and conf.app.auto_notes and conf.llm.tasks["notes"]):
+        return "never"
+    from .models import notes_status
+    from .settings import claude_login, key_status
 
-    return "now" if conf.app.simple and conf.app.auto_notes and key_status()["gemini"] else "never"
+    keys = key_status()
+    claude = {"installed": False, "logged_in": None}
+    if any(e.startswith("claude") for e in conf.llm.tasks["notes"]):
+        claude = claude_login()
+    return "now" if any(notes_status(conf, e, keys, claude)[0] for e in conf.llm.tasks["notes"]) else "never"
 
 
 def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[dict]:
     """New recordings in the course folders: {media, course, title, date, slides, why, ready}."""
     now = time.time() if now is None else now
     known = known_media(conf)
+    without = no_slides(conf)
     out = []
     for folder, course_id in course_folders(conf, courses):
         files = [p for p in folder.iterdir() if p.is_file() and not p.name.startswith(".")]
@@ -208,15 +244,20 @@ def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[
             # A moved or copied file keeps its old mtime; ctime tells when it landed here. Never negative: on
             # Windows a file's creation time can be a few ms after time.time() (flaky CI, 2026-11-12).
             waited = max(0.0, now - max(st.st_mtime, st.st_ctime))
-            slides, why = pick_slides(video, decks, waited)
-            ready = slides is not None and st.st_size > 0 and now - st.st_mtime >= STABLE_S
-            if ready and not slides and waited < EMPTY_SHELF_WAIT_S:
-                ready, why = False, "no slides in the course folder yet (waits 10 min)"
+            if str(video.resolve()) in without:
+                slides, why = [], "started without slides"
+            else:
+                slides, why = pick_slides(video, decks, waited)
+            stable = st.st_size > 0 and now - st.st_mtime >= STABLE_S
+            ready = slides is not None and stable
+            slides_wait = slides is None  # waiting for this lecture's deck
+            if ready and not slides and waited < EMPTY_SHELF_WAIT_S and why != "started without slides":
+                ready, why, slides_wait = False, "no slides in the course folder yet (waits 10 min)", True
             elif slides is not None and not ready:
                 why = "still being copied or downloaded"
             out.append({"media": str(video), "course": course_id, "title": guess_title(video.stem),
                         "date": guess_date(video.stem, st.st_mtime), "slides": [str(s) for s in slides or []],
-                        "why": why, "ready": ready})
+                        "why": why, "ready": ready, "slides_wait": slides_wait and not ready})
     return out
 
 
@@ -239,6 +280,7 @@ def tick(queue, conf: Config, rep=None) -> list[dict]:
             if found["ready"]:
                 added.append(queue.add(Path(found["media"]), found["course"], [Path(s) for s in found["slides"]],
                                        found["title"], found["date"], notes=policy))
+                _forget_no_slides(conf, Path(found["media"]))
                 if rep:
                     rep(f"inbox: queued {found['title']} ({found['course']}, slides: {found['why']})")
         return added
