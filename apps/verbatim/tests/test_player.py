@@ -93,6 +93,10 @@ def test_render_node_is_never_the_nvidia_card(tmp_path, monkeypatch):
 
     dri, drm = tmp_path / "dri", tmp_path / "drm"
     dri.mkdir()
+    try:  # Linux sysfs is made of symlinks; Windows only allows them with admin rights (CI has them)
+        (tmp_path / "probe").symlink_to(dri)
+    except OSError:
+        pytest.skip("symlinks need admin rights here")
     for node, driver in (("renderD128", "nvidia"), ("renderD129", "amdgpu")):
         (dri / node).touch()
         (drm / node / "device").mkdir(parents=True)

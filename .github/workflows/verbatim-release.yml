@@ -29,18 +29,13 @@ jobs:
           if ($tag -ne $version) { throw "tag $tag but pyproject.toml says $version" }
       - run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
       - run: ./packaging/windows/build.ps1
+      # The installer that gets published, tried once more: install, and the Update button over the last release.
+      # The rest (unit tests, the 0.2.1 "still running" case) already ran in CI on this commit.
       - run: ./packaging/windows/test-install.ps1
-      - run: ./packaging/windows/test-standard-user.ps1
-        continue-on-error: true
       - name: Update over the published version
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./packaging/windows/test-upgrade.ps1
-      # The G14 case (2026-11-12): 0.2.1 still running while a double-clicked Setup replaces its environment.
-      - name: Update from 0.2.1 while it runs, double-clicked
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: ./packaging/windows/test-upgrade.ps1 -From verbatim-v0.2.1 -Manual
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}

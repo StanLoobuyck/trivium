@@ -45,7 +45,10 @@ whisper-cpu = ["faster-whisper>=1.1"]
 lecture = "lecture.cli:app"
 
 [dependency-groups]
-dev = ["pytest>=8.0"]
+dev = [
+    "pytest>=8.0",
+    "pytest-xdist>=3.6",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -57,4 +60,5 @@ packages = ["src/lecture"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["live: calls real APIs (needs keys, uses free quota)"]
-addopts = "-m 'not live'"
+# -n auto: tests run in parallel (2.5 min → under 1 min); -n 0 for one at a time (e.g. with --pdb)
+addopts = "-m 'not live' -n auto"

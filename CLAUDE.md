@@ -29,6 +29,7 @@ details en blijft lokaal; beide staan in `.gitignore`.
 - Houd `CHANGELOG.md` bij: nieuwste eerst, gemeten getallen, bovenaan "▶ Start here".
 - Test elk scherm op iPhone-formaat (375 px) en 1440 px, licht en donker. Vertel wat je niet kon testen.
 - Antwoord in de taal van de eigenaar (Nederlands of Engels).
+- Wachten kost de eigenaar tijd: tijdens het werk alleen de tests van wat je verandert, de volledige suite één keer vóór de commit (Verbatim draait parallel, ~1 min). CI test alleen wat veranderde; een release herhaalt CI niet.
 
 Namen: Trivium is het geheel, Sequo en Velox zijn wat je ziet. Ook mappen, id's, opslag en adressen heten `sequo` en `velox` (hernoemd op 2026-11-02, verse start; de oude namen staan alleen nog in de geschiedenis). De hub heet `trivium-hub`.
 

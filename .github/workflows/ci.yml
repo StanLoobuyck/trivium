@@ -13,7 +13,60 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
+  # Only test what a push touches (owner, 2026-11-12: waiting on every job ate his time). A change to this file
+  # runs everything.
+  changes:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      sequo: ${{ steps.f.outputs.sequo }}
+      hub: ${{ steps.f.outputs.hub }}
+      velox: ${{ steps.f.outputs.velox }}
+      verbatim: ${{ steps.f.outputs.verbatim }}
+      installer: ${{ steps.f.outputs.installer }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: f
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            all: &all
+              - .github/workflows/ci.yml
+            sequo:
+              - *all
+              - apps/sequo/**
+              - packages/**
+              - site/**
+              - scripts/**
+              - fixtures/**
+              - package.json
+              - package-lock.json
+              - playwright.config.js
+              - vitest.config.js
+            hub:
+              - *all
+              - apps/hub/**
+              - packages/contract/**
+            velox:
+              - *all
+              - apps/velox/**
+              - packages/design/**
+            verbatim:
+              - *all
+              - apps/verbatim/**
+              - packages/design/**
+            installer:
+              - *all
+              - apps/verbatim/src/**
+              - apps/verbatim/packaging/**
+              - apps/verbatim/pyproject.toml
+              - apps/verbatim/uv.lock
+
   sequo:
+    needs: changes
+    if: needs.changes.outputs.sequo == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +87,8 @@ jobs:
           path: _site
 
   hub:
+    needs: changes
+    if: needs.changes.outputs.hub == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +96,8 @@ jobs:
       - run: uv run --project apps/hub pytest apps/hub/tests -q
 
   velox:
+    needs: changes
+    if: needs.changes.outputs.velox == 'true'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -64,6 +121,8 @@ jobs:
       - run: npm run test:e2e
 
   verbatim:
+    needs: changes
+    if: needs.changes.outputs.verbatim == 'true'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -78,6 +137,8 @@ jobs:
 
   # Verbatim draait ook op Windows (voor gebruikers zonder Linux).
   verbatim-windows:
+    needs: changes
+    if: needs.changes.outputs.verbatim == 'true'
     runs-on: windows-latest
     defaults:
       run:
@@ -89,8 +150,10 @@ jobs:
       - run: uv run pytest -q
 
   # The Windows installer: built, installed silently on a clean machine and tried (packaging/windows/).
+  # Runs next to the unit tests instead of after them (saves ~3 min).
   verbatim-installer:
-    needs: verbatim-windows
+    needs: changes
+    if: needs.changes.outputs.installer == 'true'
     runs-on: windows-latest
     defaults:
       run:
@@ -101,9 +164,8 @@ jobs:
       - run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
       - run: ./packaging/windows/build.ps1
       - run: ./packaging/windows/test-install.ps1
-      # Not blocking yet: starting Setup as another user from GitHub's service session doesn't work (2026-11-12).
-      - run: ./packaging/windows/test-standard-user.ps1
-        continue-on-error: true
+      # test-standard-user.ps1 is not run: Setup can't start as another user in GitHub's service session, so it
+      # proved nothing (2026-11-12). The real test is a laptop with an ordinary double-click.
       - name: Update over the published version
         env:
           GH_TOKEN: ${{ github.token }}
@@ -120,7 +182,8 @@ jobs:
           retention-days: 30
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only when the site was built (sequo ran); a skipped hub doesn't block it, a failed one does
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sequo.result == 'success' && needs.hub.result != 'failure'
     needs: [sequo, hub]
     runs-on: ubuntu-24.04
     permissions:

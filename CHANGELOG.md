@@ -7,6 +7,13 @@
 4. **Wacht op eigenaar:** G14-test; daarna de minder technische vriend; Mac-scherm terug (`~/velox-safari/resolution restore`), `latex-notes.zip` uploaden, Velox in de Mac App Store (wacht op de vader).
 5. **Later (W8, optioneel):** Sequo zonder hub. Open: notitiemodel (nu Gemini), ondertitels (grootte/positie), afspeelkopie EBS Les 6.
 
+## 2026-11-12 — Sneller testen
+- Gemeten vóór: CI op main ~7 min (installer wachtte op de Windows-unittests: 2,8 + 4,4 min; Sequo-e2e 4,5 min bij elke push), release ~9 min (alles opnieuw), Verbatim-suite lokaal 150 s.
+- Verbatim-tests parallel (`pytest-xdist`, `-n auto` in `pyproject.toml`): lokaal 150 s → 51 s (3× gemeten, stabiel). Twee tests robuuster: slot van een gestopt proces komt op Windows iets later vrij (tot 2 s wachten); de sysfs-test slaat over zonder symlinkrechten.
+- CI: job `changes` (dorny/paths-filter) draait alleen de jobs van wat veranderde (wijziging aan `ci.yml` = alles); installer-test naast de unittests i.p.v. erna; `test-standard-user.ps1` niet meer (bewees niets). Deploy van de site alleen als Sequo bouwde.
+- Release: geen herhaling van wat CI op dezelfde commit al deed (geen 0.2.1-test, geen standard-user): build, installatie, Bijwerken over de vorige release.
+- Werkwijze Claude: tijdens het werk alleen de tests van wat verandert; de volledige suite één keer vóór de commit.
+
 ## 2026-11-12 — Verbatim 0.2.4: semester van de dag van toevoegen, geen Mac in de Windows-versie, niet meer experimenteel
 - G14: de testles "DEP Les 13, part1 - April 12th 2023" (de lesgever hergebruikt een opname van 2023) kreeg datum 2023-04-12, dus semester 2022-23 S2, dus archief. Nu bepaalt de dag van toevoegen (`created` in het manifest) het semester, in de vakkenlijst, het archief, de bibliotheek en de inboxmappen; de opnamedatum blijft de datum van de les. Semestergrenzen ongewijzigd: S1 september–januari, S2 februari–augustus. Geldt voor elke versie (ook Linux).
 - Eenvoudige modus: geen knop "Video en audio naar de Mac" meer in het archief; batterijtekst zonder Mac; lokaal Whisper heet "deze laptop" i.p.v. "your GPU" (behalve met `device: cuda`). Tab Suggesties was al weg sinds 0.2.2 (die komen van Ollama op de Mac).

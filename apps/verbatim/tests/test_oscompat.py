@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+import time
 
 import pytest
 
@@ -40,8 +41,16 @@ def test_lock_held_by_another_process(tmp_path):
     finally:
         child.kill()
         child.wait()
-    with path.open("w") as fh:
-        oscompat.lock(fh, blocking=False)
+    # Windows frees a dead process's lock a moment after it exits (longer under load, e.g. pytest -n auto)
+    for attempt in range(40):
+        try:
+            with path.open("w") as fh:
+                oscompat.lock(fh, blocking=False)
+            break
+        except BlockingIOError:
+            if attempt == 39:
+                raise
+            time.sleep(0.05)
 
 
 def test_pid_alive():
