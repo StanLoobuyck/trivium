@@ -81,14 +81,14 @@ Source: "{#StageDir}\python\*"; DestDir: "{app}\python"; Flags: ignoreversion re
 Source: "{#StageDir}\verbatim\*"; DestDir: "{app}\verbatim"; Flags: ignoreversion recursesubdirs; Excludes: ".venv\*,__pycache__\*,*.pyc"
 
 [Icons]
-Name: "{userprograms}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; IconFilename: "{app}\verbatim.ico"
-Name: "{userstartup}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app --no-browser"; WorkingDir: "{app}\verbatim"; IconFilename: "{app}\verbatim.ico"; Tasks: autostart
+Name: "{userprograms}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-I -m lecture.cli app"; WorkingDir: "{app}\verbatim"; IconFilename: "{app}\verbatim.ico"
+Name: "{userstartup}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-I -m lecture.cli app --no-browser"; WorkingDir: "{app}\verbatim"; IconFilename: "{app}\verbatim.ico"; Tasks: autostart
 
 [Run]
 ; uv sync and setup-simple run in CurStepChanged (below): their output goes to {app}\install.log and a failure stops here.
-Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; Description: "{cm:OpenNow}"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-I -m lecture.cli app"; WorkingDir: "{app}\verbatim"; Description: "{cm:OpenNow}"; Flags: postinstall nowait skipifsilent
 ; An update from inside Verbatim (/RELAUNCH=1): open it again once the new version is in place
-Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-m lecture.cli app"; WorkingDir: "{app}\verbatim"; Flags: nowait; Check: IsRelaunch
+Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-I -m lecture.cli app"; WorkingDir: "{app}\verbatim"; Flags: nowait; Check: IsRelaunch
 
 [UninstallDelete]
 ; The environment uv made (not in [Files]). Lectures, keys and settings stay: they are the user's.
@@ -159,7 +159,10 @@ begin
   Log := ExpandConstant('{app}\install.log');
   WizardForm.StatusLabel.Caption := Status;
   SaveStringToFile(Log, #13#10 + '> ' + Exe + ' ' + Params + #13#10, True);
-  Result := Exec(ExpandConstant('{cmd}'), '/S /C ""' + Exe + '" ' + Params + ' >> "' + Log + '" 2>&1"', '',
+  { A Python of the user's own may have set PYTHONPATH/PYTHONHOME globally: our Python would load its library
+    and crash ("SRE module mismatch", 2026-11-12). Cleared for these steps; the shortcuts use python -I. }
+  Result := Exec(ExpandConstant('{cmd}'), '/S /C "set "PYTHONPATH=" & set "PYTHONHOME=" & "' + Exe + '" ' + Params
+    + ' >> "' + Log + '" 2>&1"', '',
     SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
   SaveStringToFile(Log, '< exit ' + IntToStr(Code) + #13#10, True);
 end;
@@ -191,7 +194,7 @@ begin
     Ok := Sync('whisper-cpu');
   if not Ok then
     Fail;
-  if not RunLogged(ExpandConstant('{app}\verbatim\.venv\Scripts\python.exe'), '-m lecture.cli setup-simple "'
+  if not RunLogged(ExpandConstant('{app}\verbatim\.venv\Scripts\python.exe'), '-I -m lecture.cli setup-simple "'
       + LecturesDir('') + '" --whisper ' + WhisperChoice(''), CustomMessage('Configuring')) then
     Fail;
 end;

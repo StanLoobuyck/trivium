@@ -9,6 +9,13 @@ $app = Join-Path $env:LOCALAPPDATA "Programs\Verbatim"
 $py = Join-Path $app "verbatim\.venv\Scripts\python.exe"
 $pyw = Join-Path $app "verbatim\.venv\Scripts\pythonw.exe"
 
+# Like a laptop with an older Python of its own that set PYTHONPATH/PYTHONHOME globally (2026-11-12): a broken
+# re.py there must not reach Verbatim's Python, neither during the install nor in the app.
+$foreign = Join-Path $env:RUNNER_TEMP "foreign-python-lib"
+New-Item -ItemType Directory -Force $foreign | Out-Null
+Set-Content (Join-Path $foreign "re.py") "raise SystemExit('foreign PYTHONPATH reached Verbatim')"
+$env:PYTHONPATH = $foreign
+
 Write-Host "== install $($setup.Name) ($([math]::Round($setup.Length / 1MB, 1)) MB)"
 $t = Get-Date
 $p = Start-Process $setup.FullName -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/LOG=$env:RUNNER_TEMP\setup.log", "/LECTURES=`"$lectures`"", "/WHISPER=fast", "/TASKS=" -Wait -PassThru
@@ -21,7 +28,7 @@ if (-not (Test-Path (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Progra
 Write-Host "venv size: $([math]::Round((Get-ChildItem (Join-Path $app 'verbatim\.venv') -Recurse | Measure-Object Length -Sum).Sum / 1MB)) MB"
 
 Write-Host "== settings written by the installer"
-& $py -c @"
+& $py -I -c @"
 from lecture import config, oscompat
 import shutil, sys
 c = config.load_config()
@@ -37,7 +44,7 @@ print('ok:', c.paths.jobs_dir, ff)
 if ($LASTEXITCODE -ne 0) { throw "settings check failed" }
 
 Write-Host "== local Whisper (small) on the processor"
-& $py -c @"
+& $py -I -c @"
 import subprocess, tempfile, pathlib
 from lecture import config, oscompat
 from lecture.providers.local_whisper import LocalWhisper
@@ -52,7 +59,7 @@ assert w.device == 'cpu'
 if ($LASTEXITCODE -ne 0) { throw "local Whisper failed" }
 
 Write-Host "== the app (no console), as the Start menu shortcut starts it"
-$proc = Start-Process $pyw -ArgumentList "-m", "lecture.cli", "app", "--no-browser", "--port", "7871" -WorkingDirectory (Join-Path $app "verbatim") -PassThru
+$proc = Start-Process $pyw -ArgumentList "-I", "-m", "lecture.cli", "app", "--no-browser", "--port", "7871" -WorkingDirectory (Join-Path $app "verbatim") -PassThru
 try {
   $ok = $false
   for ($i = 0; $i -lt 60 -and -not $ok; $i++) {
@@ -74,12 +81,13 @@ try {
   Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 }
 
+$env:PYTHONPATH = $null
 Write-Host "== install.log, and the NVIDIA build (the installer picks it when nvidia-smi exists)"
 if (-not (Select-String -Path (Join-Path $app "install.log") -Pattern "< exit 0" -Quiet)) { throw "no install.log with the steps" }
 $t = Get-Date
 & (Join-Path $app "uv.exe") sync --frozen --no-dev --no-managed-python --no-python-downloads --python (Join-Path $app "python\python.exe") --project (Join-Path $app "verbatim") --extra local
 if ($LASTEXITCODE -ne 0) { throw "the CUDA build doesn't install on Windows" }
-& $py -c "import ctranslate2, nvidia.cublas, nvidia.cudnn; from lecture.providers.local_whisper import preload_cuda_libraries; print('ok: CUDA build installed,', preload_cuda_libraries())"
+& $py -I -c "import ctranslate2, nvidia.cublas, nvidia.cudnn; from lecture.providers.local_whisper import preload_cuda_libraries; print('ok: CUDA build installed,', preload_cuda_libraries())"
 if ($LASTEXITCODE -ne 0) { throw "the CUDA build doesn't import" }
 Write-Host "in $([math]::Round(((Get-Date) - $t).TotalSeconds)) s"
 
