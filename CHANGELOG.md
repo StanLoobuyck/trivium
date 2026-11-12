@@ -1,7 +1,7 @@
 # Changelog
 
 ## ▶ Start here (volgende sessie)
-1. **Verbatim is af** (geen "experimenteel" meer op de site). 0.2.3 getagd: eigen API-sleutels, notitiemodellen naar keuze, start zonder slides, installer sluit Verbatim. 0.2.4 getagd: semester volgt de dag van toevoegen, geen Mac meer in de Windows-versie.
+1. **Verbatim is af** (geen "experimenteel" meer op de site). **0.2.5** is de release met alles: eigen API-sleutels, notitiemodellen naar keuze, start zonder slides, installer sluit Verbatim, semester volgt de dag van toevoegen, geen Mac meer in de Windows-versie. Tags 0.2.3 en 0.2.4 bestaan zonder release: hun release-workflow faalde in de updatetest (de oude 0.2.2 las instellingen die de nieuwe installtest had geschreven en crashte op een lege notitielijst; echte gebruikers treffen dat niet). De test begint nu met een schone gebruiker. Een tag verplaatsen werd geweigerd (destructief), dus een nieuw versienummer.
 2. **Volgende stap:** eigenaar test 0.2.4 op Windows (Bijwerken in de app), daarna op Arch, daarna de minder technische vriend. Checklist: Groq-sleutel, Velox, testles, Startmenu, herstart, Modellen/Verbindingen, Start zonder slides, archief.
 3. **Niet getest / onaf:** de 0.2.3-installer is niet lokaal gecompileerd (geen Inno op Linux; alleen CI). Installeren als gewone gebruiker in CI (stap blokkeert niet); tray en meldingen op echte Windows; een volledige les via Velox op Windows. Velox 5.5.0 nog niet in de Edge-winkel.
 4. **Wacht op eigenaar:** G14-test; daarna de minder technische vriend; Mac-scherm terug (`~/velox-safari/resolution restore`), `latex-notes.zip` uploaden, Velox in de Mac App Store (wacht op de vader).

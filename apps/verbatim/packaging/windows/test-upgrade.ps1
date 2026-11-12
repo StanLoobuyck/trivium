@@ -20,6 +20,14 @@ function Wait-Installed($proc, $what) {
   if ($proc.ExitCode -ne 0) { Get-Content "$tmp\setup.log" -Tail 40 -ErrorAction SilentlyContinue; throw "$what failed ($($proc.ExitCode))" }
 }
 
+# Start as a user of the old version: the install test before this one (and a first -From run) left settings written
+# by the new version, which an old version can't always read (0.2.2 crashed on an empty notes list, 2026-11-12).
+# Uninstalling keeps the user's settings on purpose, so clear them here; this is a throwaway CI machine.
+Get-Process pythonw -ErrorAction SilentlyContinue | Stop-Process -Force
+foreach ($d in @("$env:USERPROFILE\.config\lecture-transcriber", "$env:USERPROFILE\.cache\lecture-transcriber")) {
+  if ($env:CI -and (Test-Path $d)) { Remove-Item -Recurse -Force $d }
+}
+
 Write-Host "== install the published version"
 $releases = gh api "repos/StanLoobuyck/trivium/releases?per_page=30" | ConvertFrom-Json
 $old = $releases | Where-Object { $_.tag_name -like "verbatim-v*" -and -not $_.draft -and (-not $From -or $_.tag_name -eq $From) } | Select-Object -First 1
