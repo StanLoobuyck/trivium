@@ -8,6 +8,10 @@
 $ErrorActionPreference = "Stop"
 $UvVersion = "0.13.7"
 $FfmpegZip = "ffmpeg-n8.1-latest-win64-gpl-8.1.zip"
+# Python comes with the installer: uv-managed Python links its minor version with a junction, and Windows refuses
+# to traverse a junction an ordinary user made (os error 448, both test laptops on 2026-11-12).
+$PythonTag = "20261026"
+$PythonTgz = "cpython-3.12.16+$PythonTag-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $out = Join-Path $root "dist"
@@ -29,6 +33,11 @@ function Fetch($url, $name) {
 $uvZip = Fetch "https://github.com/astral-sh/uv/releases/download/$UvVersion/uv-x86_64-pc-windows-msvc.zip" "uv-$UvVersion.zip"
 Expand-Archive $uvZip -DestinationPath (Join-Path $cache "uv") -Force
 Copy-Item (Get-ChildItem (Join-Path $cache "uv") -Recurse -Filter uv.exe | Select-Object -First 1).FullName $stage
+
+# Python (python-build-standalone, the build uv itself would download): unpacked into stage\python
+$pyTgz = Fetch "https://github.com/astral-sh/python-build-standalone/releases/download/$PythonTag/$($PythonTgz -replace '\+', '%2B')" $PythonTgz
+tar -xzf $pyTgz -C $stage
+if (-not (Test-Path (Join-Path $stage "python\python.exe"))) { throw "no python\python.exe in $PythonTgz" }
 
 # ffmpeg + ffprobe, with the licence (GPL: the source is at https://github.com/BtbN/FFmpeg-Builds)
 $ffZip = Fetch "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$FfmpegZip" $FfmpegZip

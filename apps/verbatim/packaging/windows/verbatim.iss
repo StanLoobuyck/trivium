@@ -1,6 +1,6 @@
 ; Verbatim for Windows — Inno Setup script. Built by packaging/windows/build.ps1 (CI: job verbatim-installer).
 ;
-; Small installer: uv, ffmpeg and Verbatim's source. At the end uv downloads Python 3.12 and the libraries once
+; Small installer: uv, Python 3.12, ffmpeg and Verbatim's source. At the end uv downloads the libraries once
 ; (a few hundred MB). Two questions: where the lectures go, and which local Whisper model is the backup.
 ; Per user, no administrator rights (Program Files would need them).
 ;
@@ -77,6 +77,7 @@ Type: filesandordirs; Name: "{app}\verbatim\prompts"
 Source: "{#StageDir}\uv.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#StageDir}\verbatim.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#StageDir}\bin\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs
+Source: "{#StageDir}\python\*"; DestDir: "{app}\python"; Flags: ignoreversion recursesubdirs
 Source: "{#StageDir}\verbatim\*"; DestDir: "{app}\verbatim"; Flags: ignoreversion recursesubdirs; Excludes: ".venv\*,__pycache__\*,*.pyc"
 
 [Icons]
@@ -165,7 +166,9 @@ end;
 
 function Sync(const Extra: String): Boolean;
 begin
-  Result := RunLogged(ExpandConstant('{app}\uv.exe'), 'sync --frozen --no-dev --python-preference only-managed --project "'
+  { Our own Python (see build.ps1): uv makes the environment with it and downloads no Python of its own. }
+  Result := RunLogged(ExpandConstant('{app}\uv.exe'), 'sync --frozen --no-dev --no-managed-python --no-python-downloads'
+    + ' --python "' + ExpandConstant('{app}\python\python.exe') + '" --project "'
     + ExpandConstant('{app}\verbatim') + '" --extra ' + Extra, CustomMessage('Downloading'));
 end;
 

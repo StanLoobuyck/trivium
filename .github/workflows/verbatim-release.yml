@@ -30,6 +30,7 @@ jobs:
       - run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
       - run: ./packaging/windows/build.ps1
       - run: ./packaging/windows/test-install.ps1
+      - run: ./packaging/windows/test-standard-user.ps1
       - name: Update over the published version
         env:
           GH_TOKEN: ${{ github.token }}
