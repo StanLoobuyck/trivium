@@ -2,6 +2,10 @@
 # user has it), sets it up like a user (a key, the fast Whisper model, a leftover code file), then runs the newly
 # built installer with the arguments from updates.installer_args and checks what a user would notice.
 # Run from apps/verbatim after build.ps1 (needs GH_TOKEN for the GitHub API):  pwsh packaging/windows/test-upgrade.ps1
+# The old Verbatim is running during the update (tray / started with Windows). -From picks the old release;
+# -Manual runs the new installer like a double-click instead of the Update button (no reopen): the G14 case
+# (2026-11-12), 0.2.1 running while 0.2.2 replaced its environment, gave "Access is denied (os error 5)".
+param([string]$From = "", [switch]$Manual)
 
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
@@ -18,8 +22,8 @@ function Wait-Installed($proc, $what) {
 
 Write-Host "== install the published version"
 $releases = gh api "repos/StanLoobuyck/trivium/releases?per_page=30" | ConvertFrom-Json
-$old = $releases | Where-Object { $_.tag_name -like "verbatim-v*" -and -not $_.draft } | Select-Object -First 1
-if (-not $old) { Write-Host "no published release yet: nothing to update from"; exit 0 }
+$old = $releases | Where-Object { $_.tag_name -like "verbatim-v*" -and -not $_.draft -and (-not $From -or $_.tag_name -eq $From) } | Select-Object -First 1
+if (-not $old) { if ($From) { throw "release $From not found" }; Write-Host "no published release yet: nothing to update from"; exit 0 }
 $oldExe = Join-Path $tmp "old.exe"
 gh release download $old.tag_name --repo StanLoobuyck/trivium --pattern "Verbatim-Setup-*.exe" --output $oldExe
 $p = Start-Process $oldExe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/LOG=$tmp\setup.log", "/LECTURES=`"$lectures`"", "/WHISPER=fast", "/TASKS=" -Wait -PassThru
@@ -37,9 +41,27 @@ if ($LASTEXITCODE -ne 0) { throw "setting up the old version failed" }
 $stale = Join-Path $app "verbatim\src\lecture\removed_in_new_version.py"
 Set-Content $stale "raise SystemExit('stale code')"
 
-Write-Host "== update with $($new.Name), as the Update button starts it"
+function Wait-Api {
+  for ($i = 0; $i -lt 60; $i++) {
+    Start-Sleep 1
+    try { return Invoke-RestMethod "http://127.0.0.1:7861/api/setup" } catch {}
+  }
+  Get-Content (Join-Path $env:USERPROFILE ".cache\lecture-transcriber\app.log") -Tail 40 -ErrorAction SilentlyContinue | Out-Host
+  return $null
+}
+
+Write-Host "== start the old Verbatim, as the shortcut does (keeps .venv\Scripts\pythonw.exe open)"
+$running = Start-Process (Join-Path $app "verbatim\.venv\Scripts\pythonw.exe") -ArgumentList "-I", "-m", "lecture.cli", "app", "--no-browser" -WorkingDirectory (Join-Path $app "verbatim") -PassThru
+if (-not (Wait-Api)) { throw "the old Verbatim didn't start" }
+
 $updArgs = & $py -c "from lecture import updates, config; print('\n'.join(updates.installer_args(config.load_config())))"
 if ($LASTEXITCODE -ne 0) { throw "installer_args failed" }
+if ($Manual) {
+  Write-Host "== update with $($new.Name), as a double-click does"
+  $updArgs = @($updArgs | Where-Object { $_ -notlike "/RELAUNCH=*" })
+} else {
+  Write-Host "== update with $($new.Name), as the Update button starts it"
+}
 # Quoted like Python's subprocess does it (updates.start uses Popen with a list).
 $line = (@($updArgs) + "/LOG=$tmp\setup.log" | ForEach-Object { if ($_ -match " ") { "`"$_`"" } else { $_ } }) -join " "
 Write-Host "arguments: $line"
@@ -49,6 +71,8 @@ $p = Start-Process $new.FullName -ArgumentList $line -PassThru
 $p.WaitForExit()
 Wait-Installed $p "updating"
 Write-Host "updated in $([math]::Round(((Get-Date) - $t).TotalSeconds)) s"
+Get-Content (Join-Path $app "install.log") -Tail 60
+if (-not $running.HasExited) { throw "the old Verbatim still runs after the update" }
 
 Write-Host "== what the user would notice"
 if (Test-Path $stale) { throw "old code left behind" }
@@ -64,17 +88,14 @@ print('ok: settings kept, version', updates.current_version())
 if ($LASTEXITCODE -ne 0) { throw "settings after the update" }
 
 $want = $new.BaseName.Substring("Verbatim-Setup-".Length)
-$ok = $false
-for ($i = 0; $i -lt 60 -and -not $ok; $i++) {
-  Start-Sleep 1
-  try { $s = Invoke-RestMethod "http://127.0.0.1:7861/api/setup"; $ok = $true } catch {}
+if ($Manual) {
+  Write-Host "ok: no reopen expected (silent double-click install)"
+} else {
+  $s = Wait-Api
+  if (-not $s) { throw "Verbatim didn't reopen after the update" }
+  if ($s.version -ne $want) { throw "running $($s.version), expected $want" }
+  Write-Host "ok: Verbatim reopened by itself, version $($s.version)"
 }
-if (-not $ok) {
-  Get-Content (Join-Path $env:USERPROFILE ".cache\lecture-transcriber\app.log") -Tail 40 -ErrorAction SilentlyContinue
-  throw "Verbatim didn't reopen after the update"
-}
-if ($s.version -ne $want) { throw "running $($s.version), expected $want" }
-Write-Host "ok: Verbatim reopened by itself, version $($s.version)"
 
 Get-Process pythonw -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Process (Join-Path $app "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES" -Wait | Out-Null

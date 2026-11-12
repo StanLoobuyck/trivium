@@ -36,6 +36,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./packaging/windows/test-upgrade.ps1
+      # The G14 case (2026-11-12): 0.2.1 still running while a double-clicked Setup replaces its environment.
+      - name: Update from 0.2.1 while it runs, double-clicked
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./packaging/windows/test-upgrade.ps1 -From verbatim-v0.2.1 -Manual
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}

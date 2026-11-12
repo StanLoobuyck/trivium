@@ -54,6 +54,7 @@ nl.Configuring=Verbatim instellen…
 nl.StartWithWindows=Start Verbatim met Windows (in het systeemvak, rechtsonder)
 nl.OpenNow=Verbatim nu openen
 nl.Blocked=Windows blokkeerde een stap van de installatie (os error 448). Stuur dit bestand door, dan lossen we het op:%n%n%1
+nl.InUse=Een bestand van Verbatim is nog in gebruik. Sluit Verbatim (icoon rechtsonder → Quit) en start de installatie opnieuw. Lukt het niet, stuur dan dit bestand door:%n%n%1
 nl.Failed=Verbatim kon niet volledig geïnstalleerd worden. Kijk of je internet hebt en probeer opnieuw. Lukt het niet, stuur dan dit bestand door:%n%n%1
 en.LecturesTitle=Where should your lectures go?
 en.LecturesDesc=Transcripts, subtitles and notes are saved in this folder.
@@ -68,6 +69,7 @@ en.Configuring=Setting up Verbatim…
 en.StartWithWindows=Start Verbatim with Windows (in the notification area, bottom right)
 en.OpenNow=Open Verbatim now
 en.Blocked=Windows blocked a step of the installation (os error 448). Send this file and we'll fix it:%n%n%1
+en.InUse=A file of Verbatim is still in use. Close Verbatim (icon bottom right → Quit) and run Setup again. If it still fails, send this file:%n%n%1
 en.Failed=Verbatim couldn't be installed completely. Check your internet connection and try again. If it still fails, send this file:%n%n%1
 
 [Tasks]
@@ -103,6 +105,7 @@ Type: filesandordirs; Name: "{app}\verbatim\.venv"
 var
   LecturesPage: TInputDirWizardPage;
   WhisperPage: TInputOptionWizardPage;
+  LogStart: Integer;  { install.log keeps earlier runs: Fail only reads this run's part }
 
 function ParamOr(const Name, Default: String): String;
 begin
@@ -188,10 +191,38 @@ var
 begin
   Log := ExpandConstant('{app}\install.log');
   Msg := 'Failed';
-  if LoadStringFromFile(Log, Text) and (Pos('os error 448', String(Text)) > 0) then
-    Msg := 'Blocked';  { not the internet: Windows refused a path (see RedirectionGuard above) }
+  if LoadStringFromFile(Log, Text) then
+  begin
+    { Only this run: the G14 got "os error 448" from an earlier 0.2.1 run in the same log (2026-11-12). }
+    Text := Copy(Text, LogStart + 1, Length(Text));
+    if Pos('os error 448', String(Text)) > 0 then
+      Msg := 'Blocked'  { not the internet: Windows refused a path (see RedirectionGuard above) }
+    else if (Pos('(os error 5)', String(Text)) > 0) or (Pos('(os error 32)', String(Text)) > 0) then
+      Msg := 'InUse';  { a file in .venv is locked, e.g. by a Verbatim we couldn't stop }
+  end;
   SuppressibleMsgBox(FmtMessage(CustomMessage(Msg), [Log]), mbCriticalError, MB_OK, IDOK);
   ExitProcess(2);
+end;
+
+{ A running Verbatim (tray, or started with Windows) keeps .venv\Scripts\pythonw.exe open, and uv can't replace the
+  environment: "Access is denied (os error 5)" on the G14 (2026-11-12). Inno's CloseApplications only sees files it
+  copies itself, not .venv. So: stop every process started from the install folder before installing. Unfinished work resumes on
+  the next start (see lecture/app.py). }
+procedure StopRunningVerbatim;
+var
+  Dir, Cmd: String;
+  Code: Integer;
+begin
+  Dir := ExpandConstant('{app}') + '\';
+  StringChangeEx(Dir, '''', '''''', True);  { for PowerShell's single quotes }
+  Cmd := '$d = ''' + Dir + '''; $p = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and '
+    + '$_.Path.StartsWith($d, [StringComparison]::OrdinalIgnoreCase) }); $p | Stop-Process -Force '
+    + '-ErrorAction SilentlyContinue; $p | Wait-Process -Timeout 20 -ErrorAction SilentlyContinue; exit $p.Count';
+  if Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "' + Cmd + '"', '', SW_HIDE,
+      ewWaitUntilTerminated, Code) and (Code > 0) then
+    SaveStringToFile(ExpandConstant('{app}\install.log'), #13#10 + 'Stopped ' + IntToStr(Code)
+      + ' running Verbatim process(es) before installing' + #13#10, True);
 end;
 
 { After the files are copied: the environment (Python + libraries), then the settings. With an NVIDIA GPU the CUDA
@@ -200,9 +231,19 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   Ok: Boolean;
   Code: Integer;
+  Log: String;
+  Text: AnsiString;
 begin
+  if CurStep = ssInstall then
+    StopRunningVerbatim;
   if CurStep <> ssPostInstall then
     exit;
+  Log := ExpandConstant('{app}\install.log');
+  SaveStringToFile(Log, #13#10 + '=== Setup {#AppVersion}, ' + GetDateTimeString('yyyy-mm-dd hh:nn', '-', ':')
+    + #13#10, True);
+  LogStart := 0;
+  if LoadStringFromFile(Log, Text) then
+    LogStart := Length(Text);
   Ok := Sync(WhisperExtra(''));
   if (not Ok) and (WhisperExtra('') = 'local') then
     Ok := Sync('whisper-cpu');
