@@ -205,8 +205,9 @@ def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[
                             "why": "combining slides and webcam" if both_stable or pair.busy(video)
                             else "still being copied or downloaded"})
                 continue
-            # A moved or copied file keeps its old mtime; ctime tells when it landed here.
-            waited = now - max(st.st_mtime, st.st_ctime)
+            # A moved or copied file keeps its old mtime; ctime tells when it landed here. Never negative: on
+            # Windows a file's creation time can be a few ms after time.time() (flaky CI, 2026-11-12).
+            waited = max(0.0, now - max(st.st_mtime, st.st_ctime))
             slides, why = pick_slides(video, decks, waited)
             ready = slides is not None and st.st_size > 0 and now - st.st_mtime >= STABLE_S
             if ready and not slides and waited < EMPTY_SHELF_WAIT_S:

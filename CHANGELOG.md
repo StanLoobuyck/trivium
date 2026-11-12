@@ -11,6 +11,7 @@
 - G14 (gewone dubbelklik, 0.2.1 stond er al en draaide): 0.2.2 maakte de omgeving opnieuw met de eigen Python (andere interpreter dan uv's Python van 0.2.1), en het verwijderen van `.venv\Scripts` faalde: `pythonw.exe` was in gebruik. Inno's `CloseApplications` ziet alleen bestanden die het zelf kopieert, niet `.venv`. CI zag het nooit: daar draaide de oude versie niet tijdens de update.
 - Installer: stopt bij `ssInstall` elk proces uit de installatiemap (PowerShell, wacht tot 20 s, schrijft het in `install.log`); `install.log` krijgt per run een kop, en de foutmelding kijkt alleen naar die run; nieuwe melding bij os error 5/32 ("Sluit Verbatim … Quit").
 - CI: de update-test start eerst de oude Verbatim; nieuwe stap "0.2.1 draait, dubbelklik op de nieuwe installer" (`test-upgrade.ps1 -From verbatim-v0.2.1 -Manual`).
+- CI op Windows was twee keer rood op `test_tick_queues_velox_download_with_notes_when_gemini_is_set`: de aanmaaktijd van een bestand kan op Windows enkele ms ná `time.time()` liggen, dan werd de wachttijd negatief. Nu nooit onder 0.
 - Getest lokaal: root 144 + 1 overgeslagen; Verbatim 331 (3 archieftests falen ook zonder deze wijziging: geen ssh/rsync in deze cloudcontainer). Installer alleen via CI.
 
 ## 2026-11-12 — Verbatim 0.2.1 en 0.2.2: de installer op echte laptops
