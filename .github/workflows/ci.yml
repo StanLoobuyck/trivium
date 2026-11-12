@@ -101,15 +101,9 @@ jobs:
       - run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
       - run: ./packaging/windows/build.ps1
       - run: ./packaging/windows/test-install.ps1
-      # One-off (2026-11-12): the published 0.2.1 must FAIL here (os error 448), proving the test catches it.
-      - name: Reproduce with 0.2.1 (expected to fail)
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release download verbatim-v0.2.1 --repo StanLoobuyck/trivium --pattern "Verbatim-Setup-*.exe" --dir $env:RUNNER_TEMP\old
-          ./packaging/windows/test-standard-user.ps1 -Installer (Get-ChildItem $env:RUNNER_TEMP\old -Filter *.exe).FullName
+      # Not blocking yet: starting Setup as another user from GitHub's service session doesn't work (2026-11-12).
       - run: ./packaging/windows/test-standard-user.ps1
+        continue-on-error: true
       - name: Update over the published version
         env:
           GH_TOKEN: ${{ github.token }}

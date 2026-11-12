@@ -9,6 +9,7 @@ $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $setup = if ($Installer) { $Installer } else { (Get-ChildItem (Join-Path $root "dist") -Filter "Verbatim-Setup-*.exe" | Select-Object -First 1).FullName }
 
 $name = "verbatimuser"
+net user $name /delete 2>$null | Out-Null  # left over from an earlier attempt
 $password = "Vb-" + [guid]::NewGuid().ToString("N").Substring(0, 16) + "!"
 net user $name $password /add /y | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "could not create the test user" }
@@ -31,8 +32,9 @@ Write-Host "exit $($p.ExitCode) after $([math]::Round(((Get-Date) - $t).TotalSec
 
 $app = "C:\Users\$name\AppData\Local\Programs\Verbatim"
 $log = Join-Path $app "install.log"
-if (Test-Path $log) { Get-Content $log -Tail 25 } else { Write-Host "no install.log"; Get-Content "$share\setup.log" -Tail 30 -ErrorAction SilentlyContinue }
-if ($p.ExitCode -ne 0) { throw "installer failed for an ordinary user" }
+if (Test-Path $log) { Get-Content $log -Tail 25 } else { Write-Host "no install.log" }
+if (Test-Path "$share\setup.log") { Get-Content "$share\setup.log" -Tail 30 } else { Write-Host "no setup.log: Setup didn't start (no desktop for another user in a service session?)" }
+if ($p.ExitCode -ne 0) { net user $name /delete | Out-Null; throw "installer failed for an ordinary user" }
 foreach ($f in "python\python.exe", "verbatim\.venv\Scripts\pythonw.exe") {
   if (-not (Test-Path (Join-Path $app $f))) { throw "missing $f for an ordinary user" }
 }

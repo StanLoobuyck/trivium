@@ -31,6 +31,7 @@ jobs:
       - run: ./packaging/windows/build.ps1
       - run: ./packaging/windows/test-install.ps1
       - run: ./packaging/windows/test-standard-user.ps1
+        continue-on-error: true
       - name: Update over the published version
         env:
           GH_TOKEN: ${{ github.token }}
