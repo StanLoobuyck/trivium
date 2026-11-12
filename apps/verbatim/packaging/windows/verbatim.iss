@@ -87,8 +87,8 @@ Name: "{userstartup}\Verbatim"; Filename: "{app}\verbatim\.venv\Scripts\pythonw.
 [Run]
 ; uv sync and setup-simple run in CurStepChanged (below): their output goes to {app}\install.log and a failure stops here.
 Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-I -m lecture.cli app"; WorkingDir: "{app}\verbatim"; Description: "{cm:OpenNow}"; Flags: postinstall nowait skipifsilent
-; An update from inside Verbatim (/RELAUNCH=1): open it again once the new version is in place
-Filename: "{app}\verbatim\.venv\Scripts\pythonw.exe"; Parameters: "-I -m lecture.cli app"; WorkingDir: "{app}\verbatim"; Flags: nowait; Check: IsRelaunch
+; An update from inside Verbatim (/RELAUNCH=1) reopens it at the end of CurStepChanged, after uv: a [Run] entry runs
+; before ssPostInstall and started the app on the old environment while uv replaced it (CI, 2026-11-12).
 
 [UninstallDelete]
 ; The environment uv made (not in [Files]). Lectures, keys and settings stay: they are the user's.
@@ -186,6 +186,7 @@ end;
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   Ok: Boolean;
+  Code: Integer;
 begin
   if CurStep <> ssPostInstall then
     exit;
@@ -197,5 +198,8 @@ begin
   if not RunLogged(ExpandConstant('{app}\verbatim\.venv\Scripts\python.exe'), '-I -m lecture.cli setup-simple "'
       + LecturesDir('') + '" --whisper ' + WhisperChoice(''), CustomMessage('Configuring')) then
     Fail;
+  if IsRelaunch then
+    Exec(ExpandConstant('{app}\verbatim\.venv\Scripts\pythonw.exe'), '-I -m lecture.cli app',
+      ExpandConstant('{app}\verbatim'), SW_SHOWNORMAL, ewNoWait, Code);
 end;
 
