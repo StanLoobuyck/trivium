@@ -30,6 +30,9 @@ WizardStyle=modern
 Compression=lzma2/max
 SolidCompression=yes
 CloseApplications=force
+; Inno's RedirectionGuard (inherited by uv and Python) refuses junctions an ordinary user made: uv-managed Python
+; failed with os error 448 from Setup but worked from PowerShell (2026-11-12). We install per user, not elevated.
+RedirectionGuard=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
@@ -50,6 +53,7 @@ nl.Downloading=Python en de onderdelen van Verbatim downloaden (eenmalig, enkele
 nl.Configuring=Verbatim instellen…
 nl.StartWithWindows=Start Verbatim met Windows (in het systeemvak, rechtsonder)
 nl.OpenNow=Verbatim nu openen
+nl.Blocked=Windows blokkeerde een stap van de installatie (os error 448). Stuur dit bestand door, dan lossen we het op:%n%n%1
 nl.Failed=Verbatim kon niet volledig geïnstalleerd worden. Kijk of je internet hebt en probeer opnieuw. Lukt het niet, stuur dan dit bestand door:%n%n%1
 en.LecturesTitle=Where should your lectures go?
 en.LecturesDesc=Transcripts, subtitles and notes are saved in this folder.
@@ -63,6 +67,7 @@ en.Downloading=Downloading Python and Verbatim's parts (once, a few minutes)…
 en.Configuring=Setting up Verbatim…
 en.StartWithWindows=Start Verbatim with Windows (in the notification area, bottom right)
 en.OpenNow=Open Verbatim now
+en.Blocked=Windows blocked a step of the installation (os error 448). Send this file and we'll fix it:%n%n%1
 en.Failed=Verbatim couldn't be installed completely. Check your internet connection and try again. If it still fails, send this file:%n%n%1
 
 [Tasks]
@@ -176,8 +181,16 @@ begin
 end;
 
 procedure Fail;
+var
+  Log: String;
+  Text: AnsiString;
+  Msg: String;
 begin
-  SuppressibleMsgBox(FmtMessage(CustomMessage('Failed'), [ExpandConstant('{app}\install.log')]), mbCriticalError, MB_OK, IDOK);
+  Log := ExpandConstant('{app}\install.log');
+  Msg := 'Failed';
+  if LoadStringFromFile(Log, Text) and (Pos('os error 448', String(Text)) > 0) then
+    Msg := 'Blocked';  { not the internet: Windows refused a path (see RedirectionGuard above) }
+  SuppressibleMsgBox(FmtMessage(CustomMessage(Msg), [Log]), mbCriticalError, MB_OK, IDOK);
   ExitProcess(2);
 end;
 
