@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import tempfile
+import time
 import unicodedata
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,23 @@ def find_claude() -> str | None:
     return None
 
 
+# Windows: a file another process has open (the UI reading a manifest while the worker writes it, a virus scanner)
+# can't be replaced or read for a moment: WinError 5/32. A G14 lost Les 14 to it (2026-11-13). Elsewhere a
+# PermissionError is a real one, so no retry there.
+_WINDOWS = os.name == "nt"
+_RETRY_DELAYS_S = (0.05, 0.1, 0.2, 0.4, 0.8, 1.0, 1.0, 1.0)  # ~4.5 s at most
+
+
+def _retry_locked(action):
+    for delay in (*_RETRY_DELAYS_S, None) if _WINDOWS else (None,):
+        try:
+            return action()
+        except PermissionError:
+            if delay is None:
+                raise
+            time.sleep(delay)
+
+
 def write_json(path: Path, data: Any) -> None:
     """Write JSON atomically (temp file + rename), so a crash never leaves a half-written file."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -33,7 +51,7 @@ def write_json(path: Path, data: Any) -> None:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             json.dump(data, fh, ensure_ascii=False, indent=2)
             fh.write("\n")
-        os.replace(tmp, path)
+        _retry_locked(lambda: os.replace(tmp, path))
     except BaseException:
         Path(tmp).unlink(missing_ok=True)
         raise
@@ -45,14 +63,14 @@ def write_text(path: Path, text: str) -> None:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
             fh.write(text)
-        os.replace(tmp, path)
+        _retry_locked(lambda: os.replace(tmp, path))
     except BaseException:
         Path(tmp).unlink(missing_ok=True)
         raise
 
 
 def read_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(_retry_locked(lambda: path.read_text(encoding="utf-8")))
 
 
 def hash_data(data: Any) -> str:
