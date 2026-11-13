@@ -208,7 +208,8 @@ def test_delete_lecture_removes_job_and_folder_entry(env):
     assert client.delete(f"/api/lectures/{job.name}", headers=W).status_code == 409  # worker busy on it
     with queue._locked() as state:
         state["items"][0]["status"] = "done"
-    assert client.delete(f"/api/lectures/{job.name}", headers=W).status_code == 200
+    r = client.delete(f"/api/lectures/{job.name}", headers=W)
+    assert r.status_code == 200 and r.json()["waits_for_slides"] is None  # not in a course folder: doesn't come back
     assert not job.exists() and queue.snapshot()["items"] == []
     assert client.get("/api/folders").json()["assign"] == {}
     assert video.exists()  # the recording outside the app's upload folder stays

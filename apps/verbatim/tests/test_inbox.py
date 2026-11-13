@@ -217,3 +217,47 @@ def test_tick_queues_velox_download_with_notes_when_gemini_is_set(simple_box, mo
     settings.update_settings({"app": {"auto_notes": False}})
     put(dl / "C00A1A" / "Hoorcollege 3.mp4", 120)
     assert [i["notes"] for i in tick(queue, load_config())] == ["never"]
+
+
+def test_deleting_a_lecture_from_a_course_folder_starts_it_over(box, monkeypatch):
+    """A friend's laptop (2026-11-13): Velox recording run without slides, lecture deleted, and the next round queued it
+    straight back without slides. Now the wait for slides starts again from the delete."""
+    import json
+
+    from lecture.api import common
+
+    conf, root, queue, tick = box
+    monkeypatch.setattr(q, "Queue", lambda: queue)
+    monkeypatch.setattr(common, "Queue", lambda: queue)
+    dep = root / "digitale-elektronica"
+    video = put(dep / "les 2.mp4", 0)
+    later = time.time() + 2 * 3600                            # two hours after it landed: its wait is long over
+    monkeypatch.setattr(inbox.time, "time", lambda: later)
+    (added,) = tick(queue, conf)
+    assert added["slides"] == []                              # forgot the slides
+    queue.forget(added["id"])
+    job = conf.paths.jobs_dir / "2026-11-13_digitale-elektronica_les-2"
+    job.mkdir(parents=True)
+    (job / "manifest.json").write_text(json.dumps({"title": "Les 2", "input": {"media": str(video)}}))
+
+    client = TestClient(webapp.create_app(), base_url="http://127.0.0.1")
+    r = client.delete(f"/api/lectures/{job.name}", headers={"x-lecture-ui": "1"})
+    assert r.status_code == 200 and Path(r.json()["waits_for_slides"]) == dep
+    assert video.exists() and not job.exists()
+    assert tick(queue, conf) == []                            # doesn't come straight back
+    (f,) = inbox.scan(conf, load_courses())
+    assert not f["ready"] and f["slides_wait"] and "10 min" in f["why"]
+
+    put(dep / "les 2.pdf", 0)                                 # the slides arrive
+    (again,) = tick(queue, conf)
+    assert [Path(s).name for s in again["slides"]] == ["les 2.pdf"]
+    assert inbox.restarted(conf) == {}                        # forgotten once queued
+
+
+def test_restart_only_for_recordings_in_a_course_folder(box):
+    conf, root, queue, tick = box
+    elsewhere = put(root.parent / "Videos" / "les 2.mp4", 3600)
+    upload = put(root / "uploads" / "les 3.mp4", 3600)
+    assert inbox.restart(conf, elsewhere) is None and inbox.restart(conf, upload) is None
+    assert inbox.restart(conf, root / "digitale-elektronica" / "gone.mp4") is None
+    assert inbox.restarted(conf) == {}

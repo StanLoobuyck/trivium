@@ -152,7 +152,7 @@ def open_folder(name: str):
 
 @router.delete("/api/lectures/{name}")
 def delete_lecture(name: str):
-    from .. import settings
+    from .. import inbox, settings
 
     d = job_dir(name)
     try:
@@ -169,7 +169,9 @@ def delete_lecture(name: str):
     f = settings.folders()
     if f["assign"].pop(name, None):
         settings.save_folders(f)
-    return {"ok": True}
+    # from a course folder (Velox): it starts over and waits for slides again, instead of coming straight back
+    again = inbox.restart(cfgmod.load_config(), Path(media)) if media else None
+    return {"ok": True, "waits_for_slides": str(again) if again else None}
 
 
 @router.post("/api/lectures/{name}/rename")

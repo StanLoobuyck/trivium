@@ -439,11 +439,12 @@ kbd {
   align-items: center;
   gap: var(--space-4);
   width: max-content;
-  max-width: calc(100vw - var(--space-8));
+  max-width: min(calc(100vw - var(--space-8)), 36rem);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-card);
   background: var(--toast);
   color: var(--on-toast);
+  overflow-wrap: anywhere;
   font-size: var(--text-sub);
   box-shadow: var(--shadow-raised);
   transform: translate(-50%, calc(100% + var(--space-12) + var(--safe-bottom)));

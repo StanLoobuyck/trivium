@@ -20,9 +20,12 @@ export async function renameLecture(id, title) {
 export async function deleteLecture(id, title = null) {
   const l = S.lectures.find((x) => x.id === id) || { title: title || id };
   if (!confirm(t("delete_lecture_confirm", { title: l.title }))) return false;
-  try { await api(`/api/lectures/${encodeURIComponent(id)}`, { method: "DELETE" }); }
+  let r;
+  try { r = await api(`/api/lectures/${encodeURIComponent(id)}`, { method: "DELETE" }); }
   catch (e) { toast(e.message, true); return false; }
-  toast(t("lecture_deleted"));
+  // a recording from a course folder (Velox) starts over and waits for slides there
+  if (r.waits_for_slides) toast(t("lecture_deleted_restart", { folder: r.waits_for_slides }), false, 10000);
+  else toast(t("lecture_deleted"));
   return true;
 }
 

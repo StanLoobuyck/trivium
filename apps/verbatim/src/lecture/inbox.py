@@ -12,6 +12,8 @@ pick_slides():
      that wait: some lectures have no deck of their own and continue on an earlier one.
      An empty shelf waits EMPTY_SHELF_WAIT_S first, so slides moved in just after the video are still used.
 Recordings stay where they are (the job keeps their path); a recording already in a job or the queue is skipped.
+Deleting a lecture of a recording in a course folder starts it over (owner's choice 2026-11-13): its wait for
+slides begins again from the delete (restart()), so slides moved in afterwards are used.
 A recording with a webcam picture next to it ("<title>.webcam.mp4", from Velox) is first combined with it: pair.py.
 """
 
@@ -119,6 +121,40 @@ def _forget_no_slides(conf: Config, media: Path) -> None:
         write_json(_no_slides_file(conf), sorted(left))
 
 
+def _restart_file(conf: Config) -> Path:
+    return conf.paths.jobs_dir / "inbox_restart.json"
+
+
+def restarted(conf: Config) -> dict[str, float]:
+    """Recordings whose lecture was deleted (resolved path → time of the delete): their wait starts there."""
+    path = _restart_file(conf)
+    return dict(read_json(path) or {}) if path.exists() else {}
+
+
+def restart(conf: Config, media: Path, now: float | None = None) -> Path | None:
+    """A lecture was deleted: if its recording sits in a course folder, it waits for slides again from now
+    (before, the next round queued it straight back without slides: a friend's laptop, 2026-11-13).
+    Returns that folder, or None (an upload or a recording elsewhere: nothing comes back)."""
+    from .util import write_json
+
+    media = Path(media)
+    folders = {f.resolve() for f, _ in course_folders(conf, cfgmod.load_courses())}
+    if not media.is_file() or media.parent.resolve() not in folders:
+        return None
+    key = str(media.resolve())
+    write_json(_restart_file(conf), {**restarted(conf), key: time.time() if now is None else now})
+    _forget_no_slides(conf, media)
+    return media.parent
+
+
+def _forget_restart(conf: Config, media: Path) -> None:
+    from .util import write_json
+
+    left = restarted(conf)
+    if left.pop(str(Path(media).resolve()), None) is not None:
+        write_json(_restart_file(conf), left)
+
+
 def known_media(conf: Config) -> set[str]:
     """Recordings already in a job or in the queue, or stopped by the user (resolved paths)."""
     from .queue import Queue
@@ -224,6 +260,7 @@ def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[
     now = time.time() if now is None else now
     known = known_media(conf)
     without = no_slides(conf)
+    again = restarted(conf)
     out = []
     for folder, course_id in course_folders(conf, courses):
         files = [p for p in folder.iterdir() if p.is_file() and not p.name.startswith(".")]
@@ -243,7 +280,7 @@ def scan(conf: Config, courses: list[Course], now: float | None = None) -> list[
                 continue
             # A moved or copied file keeps its old mtime; ctime tells when it landed here. Never negative: on
             # Windows a file's creation time can be a few ms after time.time() (flaky CI, 2026-11-12).
-            waited = max(0.0, now - max(st.st_mtime, st.st_ctime))
+            waited = max(0.0, now - max(st.st_mtime, st.st_ctime, again.get(str(video.resolve()), 0.0)))
             if str(video.resolve()) in without:
                 slides, why = [], "started without slides"
             else:
@@ -281,6 +318,7 @@ def tick(queue, conf: Config, rep=None) -> list[dict]:
                 added.append(queue.add(Path(found["media"]), found["course"], [Path(s) for s in found["slides"]],
                                        found["title"], found["date"], notes=policy))
                 _forget_no_slides(conf, Path(found["media"]))
+                _forget_restart(conf, Path(found["media"]))
                 if rep:
                     rep(f"inbox: queued {found['title']} ({found['course']}, slides: {found['why']})")
         return added

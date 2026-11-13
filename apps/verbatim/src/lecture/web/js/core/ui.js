@@ -6,12 +6,12 @@ import { S } from "./state.js";
 import { drawLibrary } from "../screens/library.js";
 
 let toastTimer = null;
-export function toast(msg, bad = false) {
+export function toast(msg, bad = false, ms = bad ? 7000 : 3500) {
   const el = $("#toast");
   el.textContent = msg;
   el.classList.add("is-open");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("is-open"), bad ? 7000 : 3500);
+  toastTimer = setTimeout(() => el.classList.remove("is-open"), ms);
 }
 
 // Laptop: the page scrolls inside #scroller (as in Sequo). Narrow: the document itself scrolls.
