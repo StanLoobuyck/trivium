@@ -43,6 +43,18 @@ def clear_done():
     return {"removed": common.Queue().clear_done()}
 
 
+def _start_over(media: str | None) -> str | None:
+    """Removed before it had a lecture (still queued): a recording from a course folder (Velox) would be queued
+    straight back by the next round. Like deleting a lecture, it waits for slides again (a friend, 2026-11-13)."""
+    from .. import inbox
+
+    conf = cfgmod.load_config()
+    if not media or str(Path(media).resolve()) in inbox.known_media(conf):
+        return None
+    again = inbox.restart(conf, Path(media))
+    return str(again) if again else None
+
+
 @router.post("/api/queue/{item_id}/{action}")
 def queue_action(item_id: str, action: str):
     q = common.Queue()
@@ -50,7 +62,9 @@ def queue_action(item_id: str, action: str):
         if action == "retry":
             q.retry(item_id)
         elif action == "remove":
+            media = next((i["media"] for i in q.snapshot()["items"] if i["id"] == item_id), None)
             q.remove(item_id)
+            return {"ok": True, "waits_for_slides": _start_over(media)}
         elif action == "stop":  # the worker stops at its next step and removes what was done (queue.Stopped)
             q.request_stop(item_id)
         else:

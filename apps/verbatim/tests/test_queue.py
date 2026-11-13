@@ -23,6 +23,7 @@ class Clock:
 @pytest.fixture
 def env(xdg, tmp_path, monkeypatch):
     conf = load_config()
+    conf.transcribe.parallel_lectures = 1  # these tests check the order; config.yaml runs 2 loops (flaky)
     clock = Clock(datetime(2026, 10, 17, 14, 0))
     queue = q.Queue(tmp_path / "queue.json", clock=clock)
     media = []

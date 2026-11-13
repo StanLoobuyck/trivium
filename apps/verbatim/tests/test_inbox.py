@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import time
+import types
 from pathlib import Path
 
 import pytest
@@ -232,7 +233,7 @@ def test_deleting_a_lecture_from_a_course_folder_starts_it_over(box, monkeypatch
     dep = root / "digitale-elektronica"
     video = put(dep / "les 2.mp4", 0)
     later = time.time() + 2 * 3600                            # two hours after it landed: its wait is long over
-    monkeypatch.setattr(inbox.time, "time", lambda: later)
+    monkeypatch.setattr(inbox, "time", types.SimpleNamespace(time=lambda: later))
     (added,) = tick(queue, conf)
     assert added["slides"] == []                              # forgot the slides
     queue.forget(added["id"])
@@ -261,3 +262,27 @@ def test_restart_only_for_recordings_in_a_course_folder(box):
     assert inbox.restart(conf, elsewhere) is None and inbox.restart(conf, upload) is None
     assert inbox.restart(conf, root / "digitale-elektronica" / "gone.mp4") is None
     assert inbox.restarted(conf) == {}
+
+
+def test_removing_a_queued_recording_starts_it_over(box, monkeypatch):
+    """The friend's actual steps (2026-11-13): Bezig › Remove on a Velox lecture still in the queue; a bit later it
+    was back in Bezig, again without slides."""
+    from lecture.api import common
+
+    conf, root, queue, tick = box
+    monkeypatch.setattr(q, "Queue", lambda: queue)
+    monkeypatch.setattr(common, "Queue", lambda: queue)
+    dep = root / "digitale-elektronica"
+    put(dep / "les 2.mp4", 0)
+    later = time.time() + 2 * 3600
+    monkeypatch.setattr(inbox, "time", types.SimpleNamespace(time=lambda: later))
+    (added,) = tick(queue, conf)
+    assert added["slides"] == []
+
+    client = TestClient(webapp.create_app(), base_url="http://127.0.0.1")
+    r = client.post(f"/api/queue/{added['id']}/remove", headers={"x-lecture-ui": "1"})
+    assert r.status_code == 200 and Path(r.json()["waits_for_slides"]) == dep
+    assert queue.snapshot()["items"] == [] and tick(queue, conf) == []   # doesn't come back by itself
+    put(dep / "les 2.pdf", 0)
+    (again,) = tick(queue, conf)
+    assert [Path(s).name for s in again["slides"]] == ["les 2.pdf"]

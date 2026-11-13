@@ -122,7 +122,11 @@ function drawJobs() {
   if (!paint(wrap, items.length || waiting.length ? `<div class="card flat">${items.map(jobHtml).join("")}${waiting.map(inboxHtml).join("")}</div>`
     : `<div class="empty"><p>${t("progress_empty")}</p></div>`)) return;
   $$("[data-qa]", wrap).forEach((b) => b.addEventListener("click", async () => {
-    try { await post(`/api/queue/${b.dataset.id}/${b.dataset.qa}`); } catch (e) { toast(e.message, true); }
+    try {
+      const r = await post(`/api/queue/${b.dataset.id}/${b.dataset.qa}`);
+      // a recording from a course folder (Velox) starts over and waits for slides there
+      if (r.waits_for_slides) toast(t("queue_removed_restart", { folder: r.waits_for_slides }), false, 10000);
+    } catch (e) { toast(e.message, true); }
     refreshDashboard();
   }));
   $$("[data-stop]", wrap).forEach((b) => b.addEventListener("click", () =>
