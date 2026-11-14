@@ -9,14 +9,14 @@ the extension as a zip and Apple builds and signs the app. No Xcode, no certific
 
 1. **Account holder:** Users and Access → People → the developer → role **App Manager** (create apps, edit the
    listing, upload, submit; no finances, no users).
-2. App Store Connect → Apps → **+** → New App: platform **macOS**, name **Velox**, primary language **English (U.K.)**,
+2. App Store Connect → Apps → **+** → New App: platform **macOS**, name **Velox – Lecture Recordings** ("Velox" is taken), primary language **English (U.K.)**,
    bundle ID **be.trivium.velox**, SKU **velox-safari**, user access Full.
 
 ## Each version
 
 1. `node scripts/build.js safari --zip` → `web-ext-artifacts/velox-safari-<version>.zip` (manifest at the root,
    icons up to 1024 px for the app icon). The version in the store comes from `manifest.json`.
-2. Users and Access → **Xcode Cloud** tab → Safari Web Extension Packager → **Upload** → the zip. Use Chromium or
+2. **Account holder** (an App Manager gets "failed to create packaging job", 2026-11-14): Users and Access → **Xcode Cloud** tab → Safari Web Extension Packager → **Upload** → the zip. Use Chromium or
    Safari: uploads from Firefox on Linux fail with "NetworkError" (Apple forums, Aug 2026). Packaging uses the
    25 h/month of Xcode Cloud in the membership.
 3. When packaging is done, the build is in TestFlight. Version page → Build → pick it, fill in "What's New" (not for
@@ -24,7 +24,7 @@ the extension as a zip and Apple builds and signs the app. No Xcode, no certific
 
 ## App Information
 
-- **Name:** Velox
+- **Name:** Velox – Lecture Recordings (in Safari itself: Velox)
 - **Subtitle** (max 30): Shortcuts for lecture videos
 - **Category:** Productivity; secondary: Education
 - **Content rights:** "Does your app contain, show, or access third-party content?" → Yes; "Do you have all necessary
@@ -73,6 +73,7 @@ Toledo,KU Leuven,Kaltura,lecture,recordings,playback speed,shortcuts,video,downl
 
 **Support URL:** https://github.com/StanLoobuyck/trivium/issues
 **Marketing URL:** https://stanloobuyck.github.io/trivium/
+**Version:** the manifest version (e.g. 5.5.0), not the default 1.0
 **Copyright:** filled in by the account holder (year and name)
 
 ## Version page (Dutch), optional localisation
