@@ -26,6 +26,11 @@ test("safari manifest has no downloads permission (unsupported there)", () => {
   assert.ok(!m.permissions.includes("downloads"));
 });
 
+test("safari manifest has a 1024 px icon for the App Store app; others stop at 128", () => {
+  assert.equal(buildManifest("safari", opts).icons[1024], "icons/icon1024.png");
+  assert.equal(buildManifest("chrome", opts).icons[1024], undefined);
+});
+
 test("dev builds are labelled so they're distinguishable from the release", () => {
   assert.equal(buildManifest("chrome", { ...opts, dev: true }).name, "Velox (dev)");
   assert.equal(buildManifest("chrome", opts).version, "1.2.3");

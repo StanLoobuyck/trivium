@@ -92,6 +92,8 @@ export function buildManifest(target, { version, dev }) {
       return {
         manifest_version: 3,
         ...base,
+        // The App Store Connect packager makes the Mac app's icon from the extension; the store wants 1024 px.
+        icons: { ...ICONS, 512: "icons/icon512.png", 1024: "icons/icon1024.png" },
         permissions,
         host_permissions: hosts,
         optional_host_permissions: OPTIONAL_HOSTS,
