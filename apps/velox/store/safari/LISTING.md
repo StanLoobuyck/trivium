@@ -73,7 +73,7 @@ Toledo,KU Leuven,Kaltura,lecture,recordings,playback speed,shortcuts,video,downl
 
 **Support URL:** https://github.com/StanLoobuyck/trivium/issues
 **Marketing URL:** https://stanloobuyck.github.io/trivium/
-**Version:** the manifest version (e.g. 5.5.0), not the default 1.0
+**Version:** any; it follows the build once one is attached
 **Copyright:** filled in by the account holder (year and name)
 
 ## Version page (Dutch), optional localisation
